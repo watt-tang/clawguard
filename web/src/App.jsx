@@ -98,12 +98,14 @@ export default function App() {
   const endRecord = Math.min(safePage * pageSize, total);
 
   return (
-    <main className="min-h-screen bg-[radial-gradient(circle_at_top_left,rgba(126,12,110,0.12),transparent_28%),linear-gradient(180deg,#f8f4f8_0%,#f2f6fb_55%,#eff3f7_100%)] px-4 py-6 text-slate-900 sm:px-6 lg:px-8">
-      <div className="mx-auto grid w-full max-w-[1700px] gap-6 lg:grid-cols-[286px,minmax(0,1fr)] xl:grid-cols-[296px,minmax(0,1fr)]">
-        <div className="lg:sticky lg:top-6 lg:self-start">
+    <main className="app-shell text-slate-900">
+      <aside className="sidebar">
+        <div className="sidebar-inner">
           <SidebarNavigation />
         </div>
+      </aside>
 
+      <div className="content-shell">
         <section className="overflow-hidden rounded-[30px] border border-white/60 bg-white/80 shadow-[0_24px_80px_rgba(58,20,55,0.10)] backdrop-blur">
           <div className="relative overflow-hidden border-b border-[rgba(126,12,110,0.10)] px-8 py-8">
             <div className="absolute inset-0 bg-[linear-gradient(120deg,rgba(126,12,110,0.11),transparent_28%,rgba(12,76,126,0.07)_70%,transparent_100%)]" />

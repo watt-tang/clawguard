@@ -8,9 +8,7 @@ export default function SidebarHeader() {
           <Sparkles size={17} />
         </div>
         <div className="min-w-0">
-          <div className="truncate text-[11px] font-semibold tracking-[0.18em] text-[rgb(126,12,110)]">
-            CLAWGUARD
-          </div>
+          <div className="truncate text-[11px] font-semibold tracking-[0.18em] text-[rgb(126,12,110)]">CLAWGUARD</div>
           <div className="mt-1 flex items-center gap-2 text-lg font-black text-slate-900">
             <Shield size={16} className="text-[rgb(126,12,110)]" />
             安全导航
@@ -18,7 +16,7 @@ export default function SidebarHeader() {
         </div>
       </div>
       <p className="mt-3 text-xs leading-6 text-slate-500">
-        左侧聚合平台功能、标签入口与状态提示，形成更精致的安全平台侧边信息区。
+        左侧聚合平台功能、标签入口与状态提示，形成更精炼的安全平台侧边信息区。
       </p>
     </section>
   );

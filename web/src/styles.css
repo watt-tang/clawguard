@@ -25,3 +25,88 @@ input,
 select {
   font: inherit;
 }
+
+.app-shell {
+  display: flex;
+  min-height: 100vh;
+  width: 100%;
+  background: #f7f4f8;
+}
+
+.sidebar {
+  width: 348px;
+  min-width: 348px;
+  flex: 0 0 348px;
+  border-right: 1px solid rgba(126, 12, 110, 0.08);
+  background: linear-gradient(180deg, #fcf9fc 0%, #f7f3f8 100%);
+  padding: 20px 16px;
+}
+
+.sidebar-inner {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  position: sticky;
+  top: 0;
+}
+
+.content-shell {
+  flex: 1;
+  min-width: 0;
+  padding: 20px 24px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.sidebar-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.sidebar-section-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: rgba(126, 12, 110, 0.9);
+  letter-spacing: 0.04em;
+}
+
+.sidebar-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.sidebar-tag {
+  border: 1px solid rgba(126, 12, 110, 0.12);
+  background: #fff;
+  color: #5f4a5d;
+  border-radius: 999px;
+  padding: 8px 14px;
+  font-size: 12px;
+  line-height: 1;
+  transition: all 0.2s ease;
+}
+
+.sidebar-tag:hover {
+  border-color: rgba(126, 12, 110, 0.28);
+  color: rgb(126, 12, 110);
+  transform: translateY(-1px);
+}
+
+.sidebar-tag.is-active {
+  background: rgb(126, 12, 110);
+  color: #fff;
+  border-color: rgb(126, 12, 110);
+}
+
+.sidebar-note {
+  font-size: 12px;
+  line-height: 1.6;
+  color: #7d7280;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.7);
+  border: 1px solid rgba(126, 12, 110, 0.08);
+}
