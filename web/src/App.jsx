@@ -3,27 +3,25 @@ import {
   AlertTriangle,
   Globe,
   House,
+  ScanSearch,
   Shield,
   ShieldCheck,
-  ScanSearch,
 } from "lucide-react";
 import { PAGE_IDS } from "./config.js";
 import { useAuth } from "./hooks/useAuth.js";
 import HomePage from "./pages/HomePage.jsx";
 import OpenclawExposurePage from "./pages/OpenclawExposurePage.jsx";
 
-// ─── 导航配置 ──────────────────────────────────────────────────────────────────
-
 const navGroups = [
-  { icon: House,         label: "平台主页",               pageId: PAGE_IDS.HOME },
-  { icon: ShieldCheck,   label: "OpenClaw安全治理总览",    pageId: null },
-  { icon: AlertTriangle, label: "OpenClaw风险漏洞追踪",    pageId: null },
-  { icon: Globe,         label: "OpenClaw公网暴露监测",    pageId: PAGE_IDS.OPENCLAW_EXPOSURE },
-  { icon: Shield,        label: "Skill生态后门投毒治理",   pageId: null },
-  { icon: ScanSearch,    label: "OpenClaw部署安全检测",    pageId: null },
+  { icon: House, label: "平台主页", pageId: PAGE_IDS.HOME },
+  { icon: ShieldCheck, label: "OpenClaw 安全治理总览", pageId: null },
+  { icon: AlertTriangle, label: "OpenClaw 风险漏洞追踪", pageId: null },
+  { icon: Globe, label: "OpenClaw 公网暴露监测", pageId: PAGE_IDS.OPENCLAW_EXPOSURE },
+  { icon: Shield, label: "Skill 生态后门投毒治理", pageId: null },
+  { icon: ScanSearch, label: "OpenClaw 部署安全检测", pageId: null },
 ];
 
-// ─── 子组件 ────────────────────────────────────────────────────────────────────
+const sidebarTags = ["实时监测", "重点暴露", "最新发现", "校园节点", "公网资产", "边界服务"];
 
 function NavItem({ icon: Icon, label, active = false, disabled = false, onClick }) {
   return (
@@ -40,8 +38,6 @@ function NavItem({ icon: Icon, label, active = false, disabled = false, onClick 
   );
 }
 
-// ─── 应用根组件 ────────────────────────────────────────────────────────────────
-
 export default function App() {
   const [activePage, setActivePage] = useState(PAGE_IDS.OPENCLAW_EXPOSURE);
   const auth = useAuth();
@@ -55,8 +51,8 @@ export default function App() {
       default:
         return (
           <div className="oc-placeholder">
-            <div className="oc-placeholder-icon">🚧</div>
-            <div className="oc-placeholder-text">该模块建设中，敬请期待</div>
+            <div className="oc-placeholder-icon">!</div>
+            <div className="oc-placeholder-text">该模块建设中，敬请期待。</div>
           </div>
         );
     }
@@ -64,14 +60,13 @@ export default function App() {
 
   return (
     <div className="app-shell">
-      {/* 侧边栏 */}
       <aside className="sidebar">
         <div className="sidebar-inner">
           <div className="brand-block">
             <div className="brand-mark">CG</div>
             <div>
               <div className="brand-name">clawguard</div>
-              <div className="brand-subtitle">校园暴露面监测</div>
+              <div className="brand-subtitle">校园暴露面监测平台</div>
             </div>
           </div>
 
@@ -94,17 +89,11 @@ export default function App() {
           <div className="sidebar-section">
             <div className="sidebar-section-title">快捷标签</div>
             <div className="sidebar-tags">
-              {["实时监测", "重点暴露", "最新发现", "校园节点", "公网资产", "边界服务"].map(
-                (tag) => (
-                  <button
-                    key={tag}
-                    className={`sidebar-tag${tag === "实时监测" ? " is-active" : ""}`}
-                    type="button"
-                  >
-                    {tag}
-                  </button>
-                )
-              )}
+              {sidebarTags.map((tag) => (
+                <button key={tag} className={`sidebar-tag${tag === "实时监测" ? " is-active" : ""}`} type="button">
+                  {tag}
+                </button>
+              ))}
             </div>
           </div>
 
@@ -112,10 +101,7 @@ export default function App() {
         </div>
       </aside>
 
-      {/* 内容区 */}
-      <main className="content-shell">
-        {renderPage()}
-      </main>
+      <main className="content-shell">{renderPage()}</main>
     </div>
   );
 }
