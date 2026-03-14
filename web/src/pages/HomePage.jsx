@@ -12,7 +12,7 @@ export default function HomePage() {
     {
       icon: Shield,
       title: "OpenClaw 安全治理总览",
-      desc: "聚合安全事件、告警与处置状态，提供治理态势的全局视图。",
+      desc: "聚合安全事件、告警与处置状态，提供 OpenClaw 生态治理态势的全局视图。",
       status: "建设中",
       statusOk: false,
     },
@@ -42,10 +42,10 @@ export default function HomePage() {
   return (
     <div className="oc-home">
       <div className="oc-home-hero">
-        <div className="oc-home-badge">NKU 安全分析视图</div>
-        <h1 className="oc-home-title">ClawGuard 安全监测平台</h1>
+        <div className="oc-home-badge">NKU OpenClaw Security View</div>
+        <h1 className="oc-home-title">ClawGuard 生态安全监测平台</h1>
         <p className="oc-home-subtitle">
-          面向校园 AI 基础设施的公网暴露面监测与安全治理平台，聚焦 OpenClaw 节点的资产识别、风险量化与持续响应。
+          面向 OpenClaw 系列生态的公网暴露面监测与安全治理平台，聚焦节点资产识别、风险量化、版本演化与持续响应。
         </p>
         <div className="oc-home-meta">
           <Clock size={13} />

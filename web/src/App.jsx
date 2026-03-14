@@ -21,7 +21,7 @@ const navGroups = [
   { icon: ScanSearch, label: "OpenClaw 部署安全检测", pageId: null },
 ];
 
-const sidebarTags = ["实时监测", "重点暴露", "最新发现", "校园节点", "公网资产", "边界服务"];
+const sidebarTags = ["实时监测", "重点暴露", "最新发现", "核心节点", "公网资产", "边界服务"];
 
 function NavItem({ icon: Icon, label, active = false, disabled = false, onClick }) {
   return (
@@ -33,7 +33,7 @@ function NavItem({ icon: Icon, label, active = false, disabled = false, onClick 
     >
       <Icon size={17} strokeWidth={1.9} />
       <span>{label}</span>
-      {disabled && <span className="nav-item-wip">建设中</span>}
+      {disabled ? <span className="nav-item-wip">建设中</span> : null}
     </button>
   );
 }
@@ -66,7 +66,7 @@ export default function App() {
             <div className="brand-mark">CG</div>
             <div>
               <div className="brand-name">clawguard</div>
-              <div className="brand-subtitle">校园暴露面监测平台</div>
+              <div className="brand-subtitle">OpenClaw 生态安全检测平台</div>
             </div>
           </div>
 

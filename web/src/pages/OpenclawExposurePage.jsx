@@ -115,10 +115,10 @@ export default function OpenclawExposurePage({ auth }) {
           <div className="oc-page-tag">公网暴露监测</div>
           <h2 className="oc-page-title">OpenClaw 公网暴露检测</h2>
           <p className="oc-page-desc">
-            持续采集公网活跃 OpenClaw 节点，覆盖全球分布、境内覆盖、版本演化与暴露服务详情，服务于校园安全分析和资产梳理场景。
+            持续采集公网活跃 OpenClaw 节点，覆盖全球分布、境内覆盖、版本演化与暴露服务详情，服务于 OpenClaw 生态安全分析与资产梳理场景。
           </p>
         </div>
-        {stats && (
+        {stats ? (
           <div className="oc-page-header-kpi">
             <div className="oc-kpi">
               <span className="oc-kpi-val">{stats.currentExposed.toLocaleString("zh-CN")}</span>
@@ -133,7 +133,7 @@ export default function OpenclawExposurePage({ auth }) {
               <span className="oc-kpi-label">高风险实例</span>
             </div>
           </div>
-        )}
+        ) : null}
       </div>
 
       <CollapsePanel title="情况分析">
