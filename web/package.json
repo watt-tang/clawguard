@@ -5,11 +5,15 @@
   "type": "module",
   "scripts": {
     "generate:data": "node scripts/generate-exposure-data.mjs",
-    "dev": "npm run generate:data && vite",
-    "build": "npm run generate:data && vite build",
+    "generate:version-trend": "node scripts/generate-version-trend.mjs",
+    "download:geo": "node scripts/download-geo.mjs",
+    "setup": "npm run generate:data && npm run generate:version-trend && npm run download:geo",
+    "dev": "npm run setup && vite",
+    "build": "npm run setup && vite build",
     "preview": "vite preview"
   },
   "dependencies": {
+    "echarts": "^6.0.0",
     "lucide-react": "^0.542.0",
     "react": "^19.1.1",
     "react-dom": "^19.1.1"

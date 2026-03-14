@@ -1,0 +1,80 @@
+import { Shield, Activity, Globe, BarChart2, Clock } from 'lucide-react';
+
+/**
+ * 平台主页 — 简版占位首页
+ * 展示平台简介和功能模块入口，保持可正常进入
+ */
+export default function HomePage() {
+  const modules = [
+    {
+      icon: Globe,
+      title: 'OpenClaw 公网暴露检测',
+      desc: '实时监测 OpenClaw 节点的公网暴露状态，支持全球及境内分布可视化、趋势分析与详情查询。',
+      status: '已上线',
+      statusOk: true,
+    },
+    {
+      icon: Shield,
+      title: 'OpenClaw 安全治理总览',
+      desc: '聚合安全事件、告警与处置状态，提供治理态势的全局视图。',
+      status: '建设中',
+      statusOk: false,
+    },
+    {
+      icon: Activity,
+      title: 'OpenClaw 风险漏洞追踪',
+      desc: '跟踪与 OpenClaw 相关的已知漏洞、CVE 关联及修复进度。',
+      status: '建设中',
+      statusOk: false,
+    },
+    {
+      icon: Shield,
+      title: 'Skill 生态后门投毒治理',
+      desc: '针对 AI Skill 生态的供应链安全监测与后门检测能力。',
+      status: '建设中',
+      statusOk: false,
+    },
+    {
+      icon: BarChart2,
+      title: 'OpenClaw 部署安全检测',
+      desc: '对 OpenClaw 部署环境的安全配置合规性进行自动化检测。',
+      status: '建设中',
+      statusOk: false,
+    },
+  ];
+
+  return (
+    <div className="oc-home">
+      <div className="oc-home-hero">
+        <div className="oc-home-badge">NKU 科技安全视图</div>
+        <h1 className="oc-home-title">ClawGuard 安全监测平台</h1>
+        <p className="oc-home-subtitle">
+          面向校园 AI 基础设施的公网暴露面监测与安全治理平台，
+          聚焦 OpenClaw 节点的资产识别、风险量化与持续响应。
+        </p>
+        <div className="oc-home-meta">
+          <Clock size={13} />
+          <span>数据最后更新：2026-03-13 14:37</span>
+        </div>
+      </div>
+
+      <div className="oc-home-modules">
+        {modules.map((m) => {
+          const Icon = m.icon;
+          return (
+            <div key={m.title} className={`oc-home-module-card${m.statusOk ? ' is-active' : ''}`}>
+              <div className="oc-home-module-header">
+                <Icon size={20} strokeWidth={1.8} />
+                <span className={`oc-badge ${m.statusOk ? 'oc-badge-online' : 'oc-badge-review'}`}>
+                  {m.status}
+                </span>
+              </div>
+              <div className="oc-home-module-title">{m.title}</div>
+              <div className="oc-home-module-desc">{m.desc}</div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
