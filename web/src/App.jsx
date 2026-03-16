@@ -14,6 +14,7 @@ import {
 import { PAGE_IDS } from "./config.js";
 import { useAuth } from "./hooks/useAuth.js";
 import OpenclawExposurePage from "./pages/OpenclawExposurePage.jsx";
+import SkillGovernancePage from "./pages/SkillGovernancePage.jsx";
 
 const MODULES = [
   {
@@ -49,7 +50,7 @@ const MODULES = [
     label: "Skill 生态后门投毒治理",
     pageId: "skill-governance",
     description: "面向 Skill 生态的供应链监测、后门识别与投毒治理。",
-    status: "建设中",
+    status: "前端已就绪",
   },
   {
     icon: ScanSearch,
@@ -116,7 +117,9 @@ function ModuleTab({ module, active, onClick }) {
         <span className="module-tab-title">{module.label}</span>
         <span className="module-tab-desc">{module.description}</span>
       </div>
-      <span className={`module-tab-status${module.status === "已上线" ? " is-online" : ""}`}>{module.status}</span>
+      <span className={`module-tab-status${module.status === "已上线" || module.status === "前端已就绪" ? " is-online" : ""}`}>
+        {module.status}
+      </span>
     </button>
   );
 }
@@ -162,7 +165,7 @@ function DashboardHome({ modules, activePage, onNavigate }) {
           .map((module) => {
             const Icon = module.icon;
             const isActive = module.pageId === activePage;
-            const isOnline = module.status === "已上线";
+            const isOnline = module.status === "已上线" || module.status === "前端已就绪";
 
             return (
               <button
@@ -220,6 +223,10 @@ export default function App() {
 
     if (activePage === PAGE_IDS.OPENCLAW_EXPOSURE) {
       return <OpenclawExposurePage auth={auth} />;
+    }
+
+    if (activePage === "skill-governance") {
+      return <SkillGovernancePage />;
     }
 
     return <PlaceholderPage module={activeModule} />;
