@@ -1,107 +1,268 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import {
   AlertTriangle,
+  ChevronRight,
   Globe,
   House,
+  LogOut,
   ScanSearch,
   Shield,
   ShieldCheck,
+  Sparkles,
+  University,
 } from "lucide-react";
 import { PAGE_IDS } from "./config.js";
 import { useAuth } from "./hooks/useAuth.js";
-import HomePage from "./pages/HomePage.jsx";
 import OpenclawExposurePage from "./pages/OpenclawExposurePage.jsx";
 
-const navGroups = [
-  { icon: House, label: "平台主页", pageId: PAGE_IDS.HOME },
-  { icon: ShieldCheck, label: "OpenClaw 安全治理总览", pageId: null },
-  { icon: AlertTriangle, label: "OpenClaw 风险漏洞追踪", pageId: null },
-  { icon: Globe, label: "OpenClaw 公网暴露监测", pageId: PAGE_IDS.OPENCLAW_EXPOSURE },
-  { icon: Shield, label: "Skill 生态后门投毒治理", pageId: null },
-  { icon: ScanSearch, label: "OpenClaw 部署安全检测", pageId: null },
+const MODULES = [
+  {
+    icon: House,
+    label: "平台主页",
+    pageId: PAGE_IDS.HOME,
+    description: "查看平台总览、模块说明与建设进度。",
+    status: "默认入口",
+  },
+  {
+    icon: ShieldCheck,
+    label: "OpenClaw 安全治理总览",
+    pageId: "openclaw-governance",
+    description: "聚合安全事件、告警、处置进度与风险看板。",
+    status: "建设中",
+  },
+  {
+    icon: AlertTriangle,
+    label: "OpenClaw 风险漏洞追踪",
+    pageId: "openclaw-risk",
+    description: "持续跟踪 OpenClaw 漏洞、CVE 关联与修复进度。",
+    status: "建设中",
+  },
+  {
+    icon: Globe,
+    label: "OpenClaw 公网暴露监测",
+    pageId: PAGE_IDS.OPENCLAW_EXPOSURE,
+    description: "查看全球分布、趋势分析与暴露服务详情。",
+    status: "已上线",
+  },
+  {
+    icon: Shield,
+    label: "Skill 生态后门投毒治理",
+    pageId: "skill-governance",
+    description: "面向 Skill 生态的供应链监测、后门识别与投毒治理。",
+    status: "建设中",
+  },
+  {
+    icon: ScanSearch,
+    label: "OpenClaw 部署安全检测",
+    pageId: "openclaw-deploy",
+    description: "检测部署环境中的配置风险与合规问题。",
+    status: "建设中",
+  },
 ];
 
-const sidebarTags = ["实时监测", "重点暴露", "最新发现", "核心节点", "公网资产", "边界服务"];
+const QUICK_TAGS = ["实时监测", "重点暴露", "最新发现", "技能检测", "公网资产", "边界服务"];
 
-function NavItem({ icon: Icon, label, active = false, disabled = false, onClick }) {
+function TopUtilityBar({ userName, onGoHome }) {
+  return (
+    <header className="top-utility-bar">
+      <div className="top-utility-left">
+        <button className="utility-home-btn" type="button" onClick={onGoHome}>
+          <House size={14} strokeWidth={2} />
+          <span>主页</span>
+        </button>
+
+        <div className="utility-brand">
+          <div className="utility-brand-mark">
+            <University size={14} strokeWidth={2} />
+          </div>
+          <div className="utility-brand-text">
+            <strong>南开大学</strong>
+            <span>ClawGuard 平台</span>
+          </div>
+        </div>
+      </div>
+
+      <div className="top-utility-right">
+        <div className="utility-account">
+          <div className="utility-account-avatar">{userName.slice(0, 1).toUpperCase()}</div>
+          <div className="utility-account-meta">
+            <strong>{userName}</strong>
+            <span>平台管理员</span>
+          </div>
+        </div>
+        <button className="utility-ghost-btn" type="button">
+          <LogOut size={14} strokeWidth={2} />
+          <span>退出</span>
+        </button>
+      </div>
+    </header>
+  );
+}
+
+function ModuleTab({ module, active, onClick }) {
+  const Icon = module.icon;
+
   return (
     <button
-      className={`nav-item${active ? " is-active" : ""}${disabled ? " is-disabled" : ""}`}
+      className={`module-tab${active ? " is-active" : ""}`}
       type="button"
-      onClick={disabled ? undefined : onClick}
-      title={disabled ? "建设中" : label}
+      onClick={() => onClick(module.pageId)}
+      aria-pressed={active}
     >
-      <Icon size={17} strokeWidth={1.9} />
-      <span>{label}</span>
-      {disabled ? <span className="nav-item-wip">建设中</span> : null}
+      <div className="module-tab-icon">
+        <Icon size={16} strokeWidth={1.9} />
+      </div>
+      <div className="module-tab-copy">
+        <span className="module-tab-title">{module.label}</span>
+        <span className="module-tab-desc">{module.description}</span>
+      </div>
+      <span className={`module-tab-status${module.status === "已上线" ? " is-online" : ""}`}>{module.status}</span>
     </button>
   );
 }
 
+function ModuleIntro({ activeModule }) {
+  return (
+    <section className="module-intro-card">
+      <div>
+        <div className="module-intro-eyebrow">
+          <Sparkles size={13} strokeWidth={2} />
+          <span>OpenClaw Security Console</span>
+        </div>
+        <h1 className="module-intro-title">{activeModule.label}</h1>
+        <p className="module-intro-desc">{activeModule.description}</p>
+      </div>
+
+      <div className="module-intro-meta">
+        <span className="module-intro-path">控制台</span>
+        <ChevronRight size={14} strokeWidth={2} />
+        <span className="module-intro-path is-current">{activeModule.label}</span>
+      </div>
+    </section>
+  );
+}
+
+function DashboardHome({ modules, activePage, onNavigate }) {
+  return (
+    <div className="oc-home">
+      <div className="oc-home-hero">
+        <div className="oc-home-badge">NKU OpenClaw Security View</div>
+        <h1 className="oc-home-title">ClawGuard 生态安全监测平台</h1>
+        <p className="oc-home-subtitle">
+          面向 OpenClaw 系列生态的公网暴露面监测与安全治理平台，聚焦资产识别、风险量化、版本演化与持续响应。
+        </p>
+        <div className="oc-home-meta">
+          <span>顶部入口已承接原左侧功能卡片，可直接切换至对应模块。</span>
+        </div>
+      </div>
+
+      <div className="oc-home-modules">
+        {modules
+          .filter((module) => module.pageId !== PAGE_IDS.HOME)
+          .map((module) => {
+            const Icon = module.icon;
+            const isActive = module.pageId === activePage;
+            const isOnline = module.status === "已上线";
+
+            return (
+              <button
+                key={module.pageId}
+                type="button"
+                className={`oc-home-module-card oc-home-module-button${isActive ? " is-active" : ""}`}
+                onClick={() => onNavigate(module.pageId)}
+              >
+                <div className="oc-home-module-header">
+                  <Icon size={20} strokeWidth={1.8} />
+                  <span className={`oc-badge ${isOnline ? "oc-badge-online" : "oc-badge-review"}`}>{module.status}</span>
+                </div>
+                <div className="oc-home-module-title">{module.label}</div>
+                <div className="oc-home-module-desc">{module.description}</div>
+              </button>
+            );
+          })}
+      </div>
+    </div>
+  );
+}
+
+function PlaceholderPage({ module }) {
+  return (
+    <div className="oc-placeholder-page">
+      <section className="oc-page-header">
+        <div className="oc-page-header-main">
+          <div className="oc-page-tag">模块建设中</div>
+          <h2 className="oc-page-title">{module.label}</h2>
+          <p className="oc-page-desc">{module.description} 当前模块信息架构已映射至顶部入口，后续可在此区域继续扩展真实业务内容。</p>
+        </div>
+      </section>
+
+      <div className="oc-placeholder">
+        <div className="oc-placeholder-icon">···</div>
+        <div className="oc-placeholder-text">该模块暂未开放详细内容，现阶段仅保留结构入口与内容承接位。</div>
+      </div>
+    </div>
+  );
+}
+
 export default function App() {
-  const [activePage, setActivePage] = useState(PAGE_IDS.OPENCLAW_EXPOSURE);
+  const [activePage, setActivePage] = useState(PAGE_IDS.HOME);
   const auth = useAuth();
 
+  const activeModule = useMemo(
+    () => MODULES.find((module) => module.pageId === activePage) ?? MODULES[0],
+    [activePage],
+  );
+
   function renderPage() {
-    switch (activePage) {
-      case PAGE_IDS.HOME:
-        return <HomePage />;
-      case PAGE_IDS.OPENCLAW_EXPOSURE:
-        return <OpenclawExposurePage auth={auth} />;
-      default:
-        return (
-          <div className="oc-placeholder">
-            <div className="oc-placeholder-icon">!</div>
-            <div className="oc-placeholder-text">该模块建设中，敬请期待。</div>
-          </div>
-        );
+    if (activePage === PAGE_IDS.HOME) {
+      return <DashboardHome modules={MODULES} activePage={activePage} onNavigate={setActivePage} />;
     }
+
+    if (activePage === PAGE_IDS.OPENCLAW_EXPOSURE) {
+      return <OpenclawExposurePage auth={auth} />;
+    }
+
+    return <PlaceholderPage module={activeModule} />;
   }
 
   return (
-    <div className="app-shell">
-      <aside className="sidebar">
-        <div className="sidebar-inner">
-          <div className="brand-block">
-            <div className="brand-mark">CG</div>
+    <div className="console-shell">
+      <TopUtilityBar userName="tan" onGoHome={() => setActivePage(PAGE_IDS.HOME)} />
+
+      <div className="console-body">
+        <section className="module-nav-shell">
+          <div className="module-nav-topline">
             <div>
-              <div className="brand-name">clawguard</div>
-              <div className="brand-subtitle">OpenClaw 生态安全检测平台</div>
+              <div className="module-nav-label">模块导航</div>
+              <p className="module-nav-caption">聚合平台一级功能入口，可在不同安全模块之间快速切换并查看对应内容。</p>
             </div>
-          </div>
 
-          <div className="sidebar-section">
-            <div className="sidebar-section-title">主导航</div>
-            <nav className="nav-list" aria-label="主导航">
-              {navGroups.map((item) => (
-                <NavItem
-                  key={item.label}
-                  icon={item.icon}
-                  label={item.label}
-                  active={activePage === item.pageId}
-                  disabled={item.pageId === null}
-                  onClick={() => item.pageId && setActivePage(item.pageId)}
-                />
-              ))}
-            </nav>
-          </div>
-
-          <div className="sidebar-section">
-            <div className="sidebar-section-title">快捷标签</div>
-            <div className="sidebar-tags">
-              {sidebarTags.map((tag) => (
-                <button key={tag} className={`sidebar-tag${tag === "实时监测" ? " is-active" : ""}`} type="button">
+            <div className="module-quick-tags" aria-label="快捷标签">
+              {QUICK_TAGS.map((tag, index) => (
+                <span key={tag} className={`module-quick-tag${index === 0 ? " is-active" : ""}`}>
                   {tag}
-                </button>
+                </span>
               ))}
             </div>
           </div>
 
-          <div className="sidebar-pattern" />
-        </div>
-      </aside>
+          <div className="module-tab-grid" role="tablist" aria-label="平台模块导航">
+            {MODULES.map((module) => (
+              <ModuleTab
+                key={module.pageId}
+                module={module}
+                active={module.pageId === activePage}
+                onClick={setActivePage}
+              />
+            ))}
+          </div>
+        </section>
 
-      <main className="content-shell">{renderPage()}</main>
+        <main className="content-shell">
+          <ModuleIntro activeModule={activeModule} />
+          {renderPage()}
+        </main>
+      </div>
     </div>
   );
 }
