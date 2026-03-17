@@ -107,24 +107,56 @@ function TablePager({ page, pageSize, total, onPage, onPageSize }) {
   );
 }
 
-function LoginModal({ onLogin, onClose }) {
+function LoginModal({ onLogin, onRegister, onClose }) {
+  const [mode, setMode] = useState("login");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [phone, setPhone] = useState("");
   const [error, setError] = useState("");
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    const result = onLogin(username, password);
+    if (mode === "register" && password !== confirmPassword) {
+      setError("两次输入的密码不一致");
+      return;
+    }
+
+    const result = mode === "login" ? onLogin(username, password) : onRegister(username, password, phone);
     if (!result.ok) setError(result.message);
   };
 
   return (
     <div className="oc-modal-overlay" onClick={onClose}>
       <div className="oc-modal" onClick={(event) => event.stopPropagation()}>
-        <div className="oc-modal-title">登录查看完整数据</div>
+        <div className="oc-modal-title">{mode === "login" ? "登录查看完整数据" : "注册账号"}</div>
         <p className="oc-modal-desc">
-          登录后可查看真实 IP、城市与运营商信息，并启用搜索与导出能力。
+          {mode === "login"
+            ? "登录后可查看真实 IP、城市与运营商信息，并启用搜索与导出能力。"
+            : "注册后自动登录并解锁完整数据视图。"}
         </p>
+        <div className="oc-modal-switch">
+          <button
+            type="button"
+            className={`oc-modal-switch-btn${mode === "login" ? " is-active" : ""}`}
+            onClick={() => {
+              setMode("login");
+              setError("");
+            }}
+          >
+            登录
+          </button>
+          <button
+            type="button"
+            className={`oc-modal-switch-btn${mode === "register" ? " is-active" : ""}`}
+            onClick={() => {
+              setMode("register");
+              setError("");
+            }}
+          >
+            注册
+          </button>
+        </div>
         <form onSubmit={handleSubmit} className="oc-modal-form">
           <input
             className="oc-input"
@@ -140,9 +172,27 @@ function LoginModal({ onLogin, onClose }) {
             value={password}
             onChange={(event) => setPassword(event.target.value)}
           />
+          {mode === "register" ? (
+            <input
+              className="oc-input"
+              placeholder="手机号"
+              value={phone}
+              onChange={(event) => setPhone(event.target.value)}
+            />
+          ) : null}
+          {mode === "register" ? (
+            <input
+              type="password"
+              className="oc-input"
+              placeholder="确认密码"
+              value={confirmPassword}
+              onChange={(event) => setConfirmPassword(event.target.value)}
+            />
+          ) : null}
+          {mode === "register" ? <div className="oc-modal-tip">注册需填写手机号；密码至少 6 位。</div> : null}
           {error ? <div className="oc-modal-error">{error}</div> : null}
           <button type="submit" className="oc-primary-btn">
-            登录
+            {mode === "login" ? "登录" : "注册并登录"}
           </button>
         </form>
       </div>
@@ -167,7 +217,7 @@ const COLS = [
 ];
 
 export default function ExposureDetailTable({ rows, loading, auth }) {
-  const { isLoggedIn, login, logout } = auth;
+  const { isLoggedIn, login, register, logout } = auth;
   const [showLogin, setShowLogin] = useState(false);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(PAGE_SIZE_OPTIONS[0]);
@@ -211,6 +261,15 @@ export default function ExposureDetailTable({ rows, loading, auth }) {
       return result;
     },
     [login]
+  );
+
+  const handleRegister = useCallback(
+    (username, password, phone) => {
+      const result = register(username, password, phone);
+      if (result.ok) setShowLogin(false);
+      return result;
+    },
+    [register]
   );
 
   return (
@@ -343,7 +402,9 @@ export default function ExposureDetailTable({ rows, loading, auth }) {
         />
       ) : null}
 
-      {showLogin ? <LoginModal onLogin={handleLogin} onClose={() => setShowLogin(false)} /> : null}
+      {showLogin ? (
+        <LoginModal onLogin={handleLogin} onRegister={handleRegister} onClose={() => setShowLogin(false)} />
+      ) : null}
     </div>
   );
 }

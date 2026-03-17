@@ -1604,6 +1604,37 @@ select {
   line-height: 1.7;
 }
 
+.oc-modal-switch {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.oc-modal-switch-btn {
+  min-height: 34px;
+  border: 1px solid rgba(126, 12, 110, 0.12);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.9);
+  color: var(--cg-text-secondary);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.18s ease;
+}
+
+.oc-modal-switch-btn:hover {
+  border-color: rgba(126, 12, 110, 0.22);
+  color: var(--cg-primary);
+}
+
+.oc-modal-switch-btn.is-active {
+  border-color: rgba(126, 12, 110, 0.22);
+  background: linear-gradient(180deg, rgba(126, 12, 110, 0.1), rgba(255, 255, 255, 0.95));
+  color: var(--cg-primary);
+  box-shadow: 0 8px 20px rgba(126, 12, 110, 0.14);
+}
+
 .oc-modal-form {
   display: flex;
   flex-direction: column;
@@ -1621,6 +1652,16 @@ select {
   background: rgba(209, 68, 120, 0.08);
   color: #aa3157;
   font-size: 12px;
+}
+
+.oc-modal-tip {
+  padding: 10px 12px;
+  border: 1px solid rgba(126, 12, 110, 0.1);
+  border-radius: 12px;
+  background: rgba(126, 12, 110, 0.05);
+  color: var(--cg-text-secondary);
+  font-size: 12px;
+  line-height: 1.6;
 }
 
 .oc-modal-form .oc-primary-btn {

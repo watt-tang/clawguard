@@ -4,6 +4,7 @@ import {
   ChevronRight,
   Globe,
   House,
+  LogIn,
   LogOut,
   ScanSearch,
   Shield,
@@ -64,7 +65,10 @@ const MODULES = [
 
 const QUICK_TAGS = ["实时监测", "重点暴露", "最新发现", "技能检测", "公网资产", "边界服务"];
 
-function TopUtilityBar({ userName, onGoHome }) {
+function TopUtilityBar({ userName, role, isLoggedIn, onGoHome, onAuthAction }) {
+  const safeUserName = userName || "guest";
+  const roleLabel = role === "admin" ? "平台管理员" : role === "user" ? "普通用户" : "未登录";
+
   return (
     <header className="top-utility-bar">
       <div className="top-utility-left">
@@ -86,18 +90,113 @@ function TopUtilityBar({ userName, onGoHome }) {
 
       <div className="top-utility-right">
         <div className="utility-account">
-          <div className="utility-account-avatar">{userName.slice(0, 1).toUpperCase()}</div>
+          <div className="utility-account-avatar">{safeUserName.slice(0, 1).toUpperCase()}</div>
           <div className="utility-account-meta">
-            <strong>{userName}</strong>
-            <span>平台管理员</span>
+            <strong>{safeUserName}</strong>
+            <span>{roleLabel}</span>
           </div>
         </div>
-        <button className="utility-ghost-btn" type="button">
-          <LogOut size={14} strokeWidth={2} />
-          <span>退出</span>
+        <button className="utility-ghost-btn" type="button" onClick={onAuthAction}>
+          {isLoggedIn ? <LogOut size={14} strokeWidth={2} /> : <LogIn size={14} strokeWidth={2} />}
+          <span>{isLoggedIn ? "退出" : "登录"}</span>
         </button>
       </div>
     </header>
+  );
+}
+
+function AppLoginModal({ onLogin, onRegister, onClose }) {
+  const [mode, setMode] = useState("login");
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [phone, setPhone] = useState("");
+  const [error, setError] = useState("");
+
+  function handleSubmit(event) {
+    event.preventDefault();
+    if (mode === "register" && password !== confirmPassword) {
+      setError("两次输入的密码不一致");
+      return;
+    }
+
+    const result = mode === "login" ? onLogin(username, password) : onRegister(username, password, phone);
+    if (!result.ok) {
+      setError(result.message);
+      return;
+    }
+    setError("");
+  }
+
+  return (
+    <div className="oc-modal-overlay" onClick={onClose}>
+      <div className="oc-modal" onClick={(event) => event.stopPropagation()}>
+        <div className="oc-modal-title">{mode === "login" ? "账号登录" : "用户注册"}</div>
+        <p className="oc-modal-desc">
+          {mode === "login" ? "请输入账号与密码登录平台。" : "创建新账号后将自动登录。管理员账号为 tan。"}
+        </p>
+        <div className="oc-modal-switch">
+          <button
+            type="button"
+            className={`oc-modal-switch-btn${mode === "login" ? " is-active" : ""}`}
+            onClick={() => {
+              setMode("login");
+              setError("");
+            }}
+          >
+            登录
+          </button>
+          <button
+            type="button"
+            className={`oc-modal-switch-btn${mode === "register" ? " is-active" : ""}`}
+            onClick={() => {
+              setMode("register");
+              setError("");
+            }}
+          >
+            注册
+          </button>
+        </div>
+        <form onSubmit={handleSubmit} className="oc-modal-form">
+          <input
+            className="oc-input"
+            placeholder="用户名"
+            value={username}
+            onChange={(event) => setUsername(event.target.value)}
+            autoFocus
+          />
+          <input
+            type="password"
+            className="oc-input"
+            placeholder="密码"
+            value={password}
+            onChange={(event) => setPassword(event.target.value)}
+          />
+          {mode === "register" ? (
+            <input
+              className="oc-input"
+              placeholder="手机号"
+              value={phone}
+              onChange={(event) => setPhone(event.target.value)}
+            />
+          ) : null}
+          {mode === "register" ? (
+            <input
+              type="password"
+              className="oc-input"
+              placeholder="确认密码"
+              value={confirmPassword}
+              onChange={(event) => setConfirmPassword(event.target.value)}
+            />
+          ) : null}
+          {mode === "register" ? <div className="oc-modal-tip">注册需填写手机号；密码至少 6 位。</div> : null}
+          {error ? <div className="oc-modal-error">{error}</div> : null}
+          <button type="submit" className="oc-primary-btn">
+            {mode === "login" ? "登录" : "注册并登录"}
+          </button>
+        </form>
+      </div>
+    </div>
   );
 }
 
@@ -242,6 +341,7 @@ function PlaceholderPage({ module }) {
 
 export default function App() {
   const [activePage, setActivePage] = useState(PAGE_IDS.HOME);
+  const [showLoginModal, setShowLoginModal] = useState(false);
   const auth = useAuth();
 
   const activeModule = useMemo(
@@ -265,9 +365,39 @@ export default function App() {
     return <PlaceholderPage module={activeModule} />;
   }
 
+  function handleAuthAction() {
+    if (auth.isLoggedIn) {
+      auth.logout();
+      return;
+    }
+    setShowLoginModal(true);
+  }
+
+  function handleAppLogin(username, password) {
+    const result = auth.login(username, password);
+    if (result.ok) {
+      setShowLoginModal(false);
+    }
+    return result;
+  }
+
+  function handleAppRegister(username, password, phone) {
+    const result = auth.register(username, password, phone);
+    if (result.ok) {
+      setShowLoginModal(false);
+    }
+    return result;
+  }
+
   return (
     <div className="console-shell">
-      <TopUtilityBar userName="tan" onGoHome={() => setActivePage(PAGE_IDS.HOME)} />
+      <TopUtilityBar
+        userName={auth.user?.username ?? "guest"}
+        role={auth.user?.role}
+        isLoggedIn={auth.isLoggedIn}
+        onGoHome={() => setActivePage(PAGE_IDS.HOME)}
+        onAuthAction={handleAuthAction}
+      />
 
       <div className="console-body">
         {activePage !== PAGE_IDS.HOME ? (
@@ -305,6 +435,14 @@ export default function App() {
           {renderPage()}
         </main>
       </div>
+
+      {showLoginModal ? (
+        <AppLoginModal
+          onLogin={handleAppLogin}
+          onRegister={handleAppRegister}
+          onClose={() => setShowLoginModal(false)}
+        />
+      ) : null}
     </div>
   );
 }
