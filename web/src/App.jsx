@@ -15,6 +15,7 @@ import { PAGE_IDS } from "./config.js";
 import { useAuth } from "./hooks/useAuth.js";
 import OpenclawExposurePage from "./pages/OpenclawExposurePage.jsx";
 import SkillGovernancePage from "./pages/SkillGovernancePage.jsx";
+import nkuLogo from "./pic/南开logo.png";
 
 const MODULES = [
   {
@@ -146,23 +147,55 @@ function ModuleIntro({ activeModule }) {
 }
 
 function DashboardHome({ modules, activePage, onNavigate }) {
+  const homeModules = modules.filter((module) => module.pageId !== PAGE_IDS.HOME);
+  const homeModuleCards = [...homeModules, ...Array(Math.max(0, 8 - homeModules.length)).fill(null)];
+
   return (
     <div className="oc-home">
       <div className="oc-home-hero">
-        <div className="oc-home-badge">NKU OpenClaw Security View</div>
-        <h1 className="oc-home-title">ClawGuard 生态安全监测平台</h1>
-        <p className="oc-home-subtitle">
-          面向 OpenClaw 系列生态的公网暴露面监测与安全治理平台，聚焦资产识别、风险量化、版本演化与持续响应。
-        </p>
-        <div className="oc-home-meta">
-          <span>顶部入口已承接原左侧功能卡片，可直接切换至对应模块。</span>
+        <div className="oc-home-hero-layout">
+          <div className="oc-home-hero-main">
+            <div className="oc-home-badge">NKU OpenClaw Security View</div>
+            <h1 className="oc-home-title">ClawGuard 生态安全监测平台</h1>
+            <p className="oc-home-subtitle">
+              面向 OpenClaw 系列生态的公网暴露面监测与安全治理平台，聚焦资产识别、风险量化、版本演化与持续响应。
+            </p>
+            <div className="oc-home-meta">
+              <span>统一资产视图、实时风险态势与治理协同一体化呈现。</span>
+            </div>
+            <div className="oc-home-highlights">
+              <div className="oc-home-highlight">
+                <strong>7x24</strong>
+                <span>连续监测</span>
+              </div>
+              <div className="oc-home-highlight">
+                <strong>Global</strong>
+                <span>全球暴露视角</span>
+              </div>
+              <div className="oc-home-highlight">
+                <strong>OpenClaw</strong>
+                <span>生态治理闭环</span>
+              </div>
+            </div>
+          </div>
+          <aside className="oc-home-hero-brand" aria-label="南开大学品牌标识">
+            <div className="oc-home-hero-brand-inner">
+              <img className="oc-home-logo" src={nkuLogo} alt="南开大学 Logo" />
+            </div>
+            <div className="oc-home-brand-text">
+              <strong>Nankai University</strong>
+              <span>OpenClaw Security Console</span>
+            </div>
+          </aside>
         </div>
       </div>
 
       <div className="oc-home-modules">
-        {modules
-          .filter((module) => module.pageId !== PAGE_IDS.HOME)
-          .map((module) => {
+        {homeModuleCards.map((module, index) => {
+          if (!module) {
+            return <div key={`placeholder-${index}`} className="oc-home-module-card oc-home-module-placeholder" aria-hidden="true" />;
+          }
+
             const Icon = module.icon;
             const isActive = module.pageId === activePage;
             const isOnline = module.status === "已上线" || module.status === "前端已就绪";
@@ -237,33 +270,35 @@ export default function App() {
       <TopUtilityBar userName="tan" onGoHome={() => setActivePage(PAGE_IDS.HOME)} />
 
       <div className="console-body">
-        <section className="module-nav-shell">
-          <div className="module-nav-topline">
-            <div>
-              <div className="module-nav-label">模块导航</div>
-              <p className="module-nav-caption">聚合平台一级功能入口，可在不同安全模块之间快速切换并查看对应内容。</p>
+        {activePage !== PAGE_IDS.HOME ? (
+          <section className="module-nav-shell">
+            <div className="module-nav-topline">
+              <div>
+                <div className="module-nav-label">模块导航</div>
+                <p className="module-nav-caption">聚合平台功能入口，可在不同安全模块之间快速切换并查看对应内容。</p>
+              </div>
+
+              <div className="module-quick-tags" aria-label="快捷标签">
+                {QUICK_TAGS.map((tag, index) => (
+                  <span key={tag} className={`module-quick-tag${index === 0 ? " is-active" : ""}`}>
+                    {tag}
+                  </span>
+                ))}
+              </div>
             </div>
 
-            <div className="module-quick-tags" aria-label="快捷标签">
-              {QUICK_TAGS.map((tag, index) => (
-                <span key={tag} className={`module-quick-tag${index === 0 ? " is-active" : ""}`}>
-                  {tag}
-                </span>
+            <div className="module-tab-grid" role="tablist" aria-label="平台模块导航">
+              {MODULES.map((module) => (
+                <ModuleTab
+                  key={module.pageId}
+                  module={module}
+                  active={module.pageId === activePage}
+                  onClick={setActivePage}
+                />
               ))}
             </div>
-          </div>
-
-          <div className="module-tab-grid" role="tablist" aria-label="平台模块导航">
-            {MODULES.map((module) => (
-              <ModuleTab
-                key={module.pageId}
-                module={module}
-                active={module.pageId === activePage}
-                onClick={setActivePage}
-              />
-            ))}
-          </div>
-        </section>
+          </section>
+        ) : null}
 
         <main className="content-shell">
           <ModuleIntro activeModule={activeModule} />
