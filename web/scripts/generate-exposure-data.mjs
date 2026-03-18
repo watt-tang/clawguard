@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import maxmind from "maxmind";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const projectRoot = path.resolve(__dirname, "..");
@@ -24,9 +25,7 @@ function formatDate(dateKey) {
 
 function inferScope(ip) {
   const firstOctet = Number(ip.split(".")[0]);
-  if (Number.isNaN(firstOctet)) {
-    return "待确认";
-  }
+  if (Number.isNaN(firstOctet)) return "待确认";
 
   const domesticPrefixes = [
     10, 36, 39, 42, 43, 47, 49, 58, 59, 60, 61, 101, 106, 111, 112, 113, 114,
@@ -39,54 +38,21 @@ function inferScope(ip) {
 }
 
 function inferStatus(daysAgo) {
-  if (daysAgo <= 1) {
-    return "在线监测";
-  }
-  if (daysAgo <= 3) {
-    return "近期发现";
-  }
+  if (daysAgo <= 1) return "在线监测";
+  if (daysAgo <= 3) return "近期发现";
   return "待复核";
 }
 
-function inferLocation(ip, scope) {
-  if (scope === "境内暴露") {
-    const provinces = ["天津", "北京", "上海", "南京", "杭州", "广州", "成都"];
-    const cities = ["南开园区", "科研节点", "教学区", "校外机房", "实验平台"];
-    const firstOctet = Number(ip.split(".")[0]) || 0;
-    return `${provinces[firstOctet % provinces.length]} / ${cities[firstOctet % cities.length]}`;
-  }
-
-  const abroad = ["新加坡", "法兰克福", "弗吉尼亚", "东京", "斯德哥尔摩"];
-  const firstOctet = Number(ip.split(".")[0]) || 0;
-  return abroad[firstOctet % abroad.length];
-}
-
-function inferAsn(ip) {
-  const firstOctet = Number(ip.split(".")[0]) || 0;
-  const asns = ["AS45102", "AS4134", "AS9808", "AS13335", "AS16509", "AS4837"];
-  return asns[firstOctet % asns.length];
-}
-
 function inferRisk(daysAgo) {
-  if (daysAgo <= 1) {
-    return "未关联历史漏洞";
-  }
-  if (daysAgo <= 3) {
-    return "需持续观察";
-  }
+  if (daysAgo <= 1) return "未关联历史漏洞";
+  if (daysAgo <= 3) return "需持续观察";
   return "待补充指纹";
 }
 
 function inferHost(index) {
-  if (index % 4 === 0) {
-    return "核心节点";
-  }
-  if (index % 4 === 1) {
-    return "边界代理";
-  }
-  if (index % 4 === 2) {
-    return "实验实例";
-  }
+  if (index % 4 === 0) return "核心节点";
+  if (index % 4 === 1) return "边界代理";
+  if (index % 4 === 2) return "实验实例";
   return "-";
 }
 
@@ -105,89 +71,222 @@ function inferServiceDesc(index) {
   return descriptions[index % descriptions.length];
 }
 
-const files = fs
-  .readdirSync(snapshotsDir, { withFileTypes: true })
-  .filter((entry) => entry.isFile() && snapshotPattern.test(entry.name))
-  .map((entry) => {
-    const match = entry.name.match(snapshotPattern);
-    const filePath = path.join(snapshotsDir, entry.name);
-    const stat = fs.statSync(filePath);
-    return {
-      filePath,
-      dateKey: match[1],
-      modifiedAt: stat.mtime,
-    };
-  })
-  .sort((a, b) => a.dateKey.localeCompare(b.dateKey));
+function inferAsnFallback(ip) {
+  const firstOctet = Number(ip.split(".")[0]) || 0;
+  const asns = ["AS45102", "AS4134", "AS9808", "AS13335", "AS16509", "AS4837"];
+  return asns[firstOctet % asns.length];
+}
 
-const latestSnapshot = files.at(-1)?.dateKey ?? "";
-const latestDate = latestSnapshot ? new Date(`${formatDate(latestSnapshot)}T00:00:00`) : null;
-const ipMap = new Map();
+function inferRegionFallback(ip, scope) {
+  const firstOctet = Number(ip.split(".")[0]) || 0;
 
-for (const file of files) {
-  const ips = fs
-    .readFileSync(file.filePath, "utf8")
-    .split(/\r?\n/)
-    .map((line) => line.trim())
-    .filter(Boolean);
+  if (scope === "境内暴露") {
+    const regions = [
+      "中国 / 天津",
+      "中国 / 北京",
+      "中国 / 上海",
+      "中国 / 江苏",
+      "中国 / 浙江",
+      "中国 / 广东",
+      "中国 / 四川",
+    ];
+    return regions[firstOctet % regions.length];
+  }
 
-  for (const ip of ips) {
-    const previous = ipMap.get(ip);
-    if (!previous || file.dateKey >= previous.dateKey) {
-      ipMap.set(ip, {
-        ip,
-        dateKey: file.dateKey,
-        lastSeen: formatDateTime(file.modifiedAt),
-      });
+  const regions = [
+    "美国 / California",
+    "新加坡 / Singapore",
+    "德国 / Hessen",
+    "日本 / Tokyo",
+    "瑞典 / Stockholm",
+  ];
+  return regions[firstOctet % regions.length];
+}
+
+function inferCityFallback(ip, scope) {
+  const firstOctet = Number(ip.split(".")[0]) || 0;
+
+  if (scope === "境内暴露") {
+    const cities = ["天津", "北京", "上海", "南京", "杭州", "广州", "成都"];
+    return cities[firstOctet % cities.length];
+  }
+
+  const cities = ["San Francisco", "Singapore", "Frankfurt", "Tokyo", "Stockholm"];
+  return cities[firstOctet % cities.length];
+}
+
+function readFirstExistingPath(candidates) {
+  for (const candidate of candidates) {
+    if (!candidate) continue;
+    if (fs.existsSync(candidate) && fs.statSync(candidate).isFile()) {
+      return candidate;
     }
+  }
+  return null;
+}
+
+function pickLocalizedName(node) {
+  if (!node?.names) return "";
+  return node.names["zh-CN"] || node.names.en || Object.values(node.names)[0] || "";
+}
+
+async function openReader(name, candidates) {
+  const dbPath = readFirstExistingPath(candidates);
+  if (!dbPath) {
+    console.warn(`[geo] ${name} mmdb not found, fallback mode enabled.`);
+    return { reader: null, dbPath: null };
+  }
+
+  try {
+    const reader = await maxmind.open(dbPath);
+    console.log(`[geo] Loaded ${name}: ${path.relative(projectRoot, dbPath)}`);
+    return { reader, dbPath };
+  } catch (error) {
+    console.warn(`[geo] Failed to load ${name}: ${error.message}`);
+    return { reader: null, dbPath: null };
   }
 }
 
-const rows = Array.from(ipMap.values())
-  .map((record, index) => {
-    const recordDate = new Date(`${formatDate(record.dateKey)}T00:00:00`);
-    const daysAgo = latestDate ? Math.max(0, Math.round((latestDate - recordDate) / 86400000)) : 0;
-    const scope = inferScope(record.ip);
+function resolveRegionAndCity(ip, scope, cityReader) {
+  const geo = cityReader?.get(ip);
 
-    return {
-      id: `${record.ip}-${record.dateKey}`,
-      ip: record.ip,
-      lastSeen: record.lastSeen,
-      lastSnapshot: formatDate(record.dateKey),
-      host: inferHost(index),
-      service: inferService(index),
-      serviceDesc: inferServiceDesc(index),
-      scope,
-      location: inferLocation(record.ip, scope),
-      asn: inferAsn(record.ip),
-      status: inferStatus(daysAgo),
-      risk: inferRisk(daysAgo),
-      version: "v1.x 占位",
-      daysAgo,
-    };
-  })
-  .sort((left, right) => {
-    if (left.daysAgo !== right.daysAgo) {
-      return left.daysAgo - right.daysAgo;
+  const country = pickLocalizedName(geo?.country) || geo?.country?.iso_code || "";
+  const subdivision = pickLocalizedName(geo?.subdivisions?.[0]) || geo?.subdivisions?.[0]?.iso_code || "";
+  const city = pickLocalizedName(geo?.city);
+
+  const region = [country, subdivision].filter(Boolean).join(" / ");
+
+  return {
+    region: region || inferRegionFallback(ip, scope),
+    city: city || inferCityFallback(ip, scope),
+  };
+}
+
+function resolveAsn(ip, asnReader) {
+  const asnGeo = asnReader?.get(ip);
+  const asnNumber = asnGeo?.autonomous_system_number;
+
+  if (typeof asnNumber === "number" && Number.isFinite(asnNumber)) {
+    return `AS${asnNumber}`;
+  }
+
+  return inferAsnFallback(ip);
+}
+
+async function main() {
+  const cityDbCandidates = [
+    process.env.GEOLITE2_CITY_DB,
+    path.join(projectRoot, "data", "GeoLite2-City.mmdb"),
+    path.join(projectRoot, "GeoLite2-City.mmdb"),
+    path.join(projectRoot, "scripts", "GeoLite2-City.mmdb"),
+  ];
+
+  const asnDbCandidates = [
+    process.env.GEOLITE2_ASN_DB,
+    path.join(projectRoot, "data", "GeoLite2-ASN.mmdb"),
+    path.join(projectRoot, "GeoLite2-ASN.mmdb"),
+    path.join(projectRoot, "scripts", "GeoLite2-ASN.mmdb"),
+  ];
+
+  const { reader: cityReader, dbPath: cityDbPath } = await openReader("GeoLite2-City", cityDbCandidates);
+  const { reader: asnReader, dbPath: asnDbPath } = await openReader("GeoLite2-ASN", asnDbCandidates);
+
+  const files = fs
+    .readdirSync(snapshotsDir, { withFileTypes: true })
+    .filter((entry) => entry.isFile() && snapshotPattern.test(entry.name))
+    .map((entry) => {
+      const match = entry.name.match(snapshotPattern);
+      const filePath = path.join(snapshotsDir, entry.name);
+      const stat = fs.statSync(filePath);
+      return {
+        filePath,
+        dateKey: match[1],
+        modifiedAt: stat.mtime,
+      };
+    })
+    .sort((a, b) => a.dateKey.localeCompare(b.dateKey));
+
+  const latestSnapshot = files.at(-1)?.dateKey ?? "";
+  const latestDate = latestSnapshot ? new Date(`${formatDate(latestSnapshot)}T00:00:00`) : null;
+  const ipMap = new Map();
+
+  for (const file of files) {
+    const ips = fs
+      .readFileSync(file.filePath, "utf8")
+      .split(/\r?\n/)
+      .map((line) => line.trim())
+      .filter(Boolean);
+
+    for (const ip of ips) {
+      const previous = ipMap.get(ip);
+      if (!previous || file.dateKey >= previous.dateKey) {
+        ipMap.set(ip, {
+          ip,
+          dateKey: file.dateKey,
+          lastSeen: formatDateTime(file.modifiedAt),
+        });
+      }
     }
+  }
 
-    return left.ip.localeCompare(right.ip);
-  });
+  const rows = Array.from(ipMap.values())
+    .map((record, index) => {
+      const recordDate = new Date(`${formatDate(record.dateKey)}T00:00:00`);
+      const daysAgo = latestDate ? Math.max(0, Math.round((latestDate - recordDate) / 86400000)) : 0;
+      const scope = inferScope(record.ip);
+      const geo = resolveRegionAndCity(record.ip, scope, cityReader);
 
-fs.mkdirSync(outputDir, { recursive: true });
-fs.writeFileSync(
-  outputFile,
-  JSON.stringify(
-    {
-      generatedAt: new Date().toISOString(),
-      sourceDir: "web/clawdbot_alive",
-      latestSnapshot,
-      total: rows.length,
-      rows,
-    },
-    null,
-    2
-  )
-);
+      return {
+        id: `${record.ip}-${record.dateKey}`,
+        ip: record.ip,
+        lastSeen: record.lastSeen,
+        lastSnapshot: formatDate(record.dateKey),
+        host: inferHost(index),
+        service: inferService(index),
+        serviceDesc: inferServiceDesc(index),
+        scope,
+        region: geo.region,
+        location: geo.region,
+        city: geo.city,
+        asn: resolveAsn(record.ip, asnReader),
+        status: inferStatus(daysAgo),
+        risk: inferRisk(daysAgo),
+        version: "v1.x 占位",
+        daysAgo,
+      };
+    })
+    .sort((left, right) => {
+      if (left.daysAgo !== right.daysAgo) {
+        return left.daysAgo - right.daysAgo;
+      }
 
-console.log(`Generated ${rows.length} exposure rows -> ${path.relative(projectRoot, outputFile)}`);
+      return left.ip.localeCompare(right.ip);
+    });
+
+  fs.mkdirSync(outputDir, { recursive: true });
+  fs.writeFileSync(
+    outputFile,
+    JSON.stringify(
+      {
+        generatedAt: new Date().toISOString(),
+        sourceDir: "web/clawdbot_alive",
+        latestSnapshot,
+        total: rows.length,
+        geoLite: {
+          cityDb: cityDbPath ? path.relative(projectRoot, cityDbPath) : null,
+          asnDb: asnDbPath ? path.relative(projectRoot, asnDbPath) : null,
+        },
+        rows,
+      },
+      null,
+      2
+    )
+  );
+
+  cityReader?.close?.();
+  asnReader?.close?.();
+
+  console.log(`Generated ${rows.length} exposure rows -> ${path.relative(projectRoot, outputFile)}`);
+}
+
+await main();

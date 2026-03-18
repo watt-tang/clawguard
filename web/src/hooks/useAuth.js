@@ -1,4 +1,5 @@
 import { useCallback, useState } from "react";
+import { AUTH_CONFIG } from "../config.js";
 
 const SESSION_KEY = "cg_auth";
 const USERS_KEY = "cg_users";
@@ -96,16 +97,27 @@ export function useAuth() {
     return { ok: true, user };
   }, [users]);
 
-  const register = useCallback((username, password, phone) => {
+  const register = useCallback((username, password, phone, inviteCode) => {
     const normalizedUsername = normalizeUsername(username);
     const normalizedPassword = String(password ?? "").trim();
     const normalizedPhone = normalizePhone(phone).replace(/^\+?86/, "");
+    const normalizedInviteCode = String(inviteCode ?? "").trim();
+    const expectedInviteCode = String(AUTH_CONFIG.REGISTER_INVITE_CODE ?? "").trim();
 
     if (!normalizedUsername || !normalizedPassword) {
       return { ok: false, message: "用户名和密码不能为空" };
     }
     if (!normalizedPhone) {
       return { ok: false, message: "手机号不能为空" };
+    }
+    if (!normalizedInviteCode) {
+      return { ok: false, message: "邀请码不能为空" };
+    }
+    if (!expectedInviteCode) {
+      return { ok: false, message: "系统未配置邀请码，暂不可注册" };
+    }
+    if (normalizedInviteCode !== expectedInviteCode) {
+      return { ok: false, message: "邀请码错误" };
     }
     if (!/^[a-z0-9_]{3,20}$/.test(normalizedUsername)) {
       return { ok: false, message: "用户名需为 3-20 位小写字母、数字或下划线" };

@@ -14,8 +14,8 @@ import {
 } from "lucide-react";
 import { PAGE_IDS } from "./config.js";
 import { useAuth } from "./hooks/useAuth.js";
-import OpenclawExposurePage from "./pages/OpenclawExposurePage.jsx";
-import SkillGovernancePage from "./pages/SkillGovernancePage.jsx";
+import OpenclawExposurePage from "./features/openclaw-exposure/pages/OpenclawExposurePage.jsx";
+import SkillGovernancePage from "./features/skill-governance/pages/SkillGovernancePage.jsx";
 import nkuLogo from "./pic/南开logo.png";
 
 const MODULES = [
@@ -111,6 +111,7 @@ function AppLoginModal({ onLogin, onRegister, onClose }) {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [phone, setPhone] = useState("");
+  const [inviteCode, setInviteCode] = useState("");
   const [error, setError] = useState("");
 
   function handleSubmit(event) {
@@ -120,7 +121,9 @@ function AppLoginModal({ onLogin, onRegister, onClose }) {
       return;
     }
 
-    const result = mode === "login" ? onLogin(username, password) : onRegister(username, password, phone);
+    const result = mode === "login"
+      ? onLogin(username, password)
+      : onRegister(username, password, phone, inviteCode);
     if (!result.ok) {
       setError(result.message);
       return;
@@ -182,6 +185,14 @@ function AppLoginModal({ onLogin, onRegister, onClose }) {
           ) : null}
           {mode === "register" ? (
             <input
+              className="oc-input"
+              placeholder="邀请码"
+              value={inviteCode}
+              onChange={(event) => setInviteCode(event.target.value)}
+            />
+          ) : null}
+          {mode === "register" ? (
+            <input
               type="password"
               className="oc-input"
               placeholder="确认密码"
@@ -189,7 +200,7 @@ function AppLoginModal({ onLogin, onRegister, onClose }) {
               onChange={(event) => setConfirmPassword(event.target.value)}
             />
           ) : null}
-          {mode === "register" ? <div className="oc-modal-tip">注册需填写手机号；密码至少 6 位。</div> : null}
+          {mode === "register" ? <div className="oc-modal-tip">注册需填写手机号和邀请码；密码至少 6 位。</div> : null}
           {error ? <div className="oc-modal-error">{error}</div> : null}
           <button type="submit" className="oc-primary-btn">
             {mode === "login" ? "登录" : "注册并登录"}
@@ -381,8 +392,8 @@ export default function App() {
     return result;
   }
 
-  function handleAppRegister(username, password, phone) {
-    const result = auth.register(username, password, phone);
+  function handleAppRegister(username, password, phone, inviteCode) {
+    const result = auth.register(username, password, phone, inviteCode);
     if (result.ok) {
       setShowLoginModal(false);
     }

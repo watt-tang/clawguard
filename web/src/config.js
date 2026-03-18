@@ -34,6 +34,9 @@ export const PAGE_IDS = {
 
 /** 表格每页可选数量 */
 export const PAGE_SIZE_OPTIONS = [20, 50, 100];
+export const AUTH_CONFIG = {
+  REGISTER_INVITE_CODE: "CLAWGUARD2026",
+};
 
 /** 版本趋势图可选展示数量 */
 export const VERSION_TOP_OPTIONS = [5, 10, 15, 20];
