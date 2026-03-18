@@ -1,7 +1,7 @@
-import { useCallback, useMemo, useState } from "react";
+﻿import { useCallback, useEffect, useMemo, useState } from "react";
 import { ChevronLeft, ChevronRight, Download, LogIn, LogOut, Search } from "lucide-react";
 import { PAGE_SIZE_OPTIONS } from "../../../config.js";
-import { buildCsvContent, downloadCsv } from "../services/dataService.js";
+import { buildCsvContent, downloadCsv, fetchExposureList } from "../services/dataService.js";
 import { maskField, maskIp } from "../utils/ipMask.js";
 
 function formatRow(row, isLoggedIn) {
@@ -27,7 +27,7 @@ function formatRow(row, isLoggedIn) {
 }
 
 function TablePager({ page, pageSize, total, onPage, onPageSize }) {
-  const totalPages = Math.max(1, Math.ceil(total / pageSize));
+  const totalPages = Math.max(1, Math.ceil(Math.max(total, 1) / pageSize));
   const canPrev = page > 1;
   const canNext = page < totalPages;
 
@@ -90,10 +90,7 @@ function TablePager({ page, pageSize, total, onPage, onPageSize }) {
         <select
           className="oc-select"
           value={pageSize}
-          onChange={(event) => {
-            onPageSize(Number(event.target.value));
-            onPage(1);
-          }}
+          onChange={(event) => onPageSize(Number(event.target.value))}
           aria-label="每页条数"
         >
           {PAGE_SIZE_OPTIONS.map((size) => (
@@ -123,9 +120,7 @@ function LoginModal({ onLogin, onRegister, onClose }) {
       return;
     }
 
-    const result = mode === "login"
-      ? onLogin(username, password)
-      : onRegister(username, password, phone, inviteCode);
+    const result = mode === "login" ? onLogin(username, password) : onRegister(username, password, phone, inviteCode);
 
     if (!result.ok) {
       setError(result.message);
@@ -169,13 +164,7 @@ function LoginModal({ onLogin, onRegister, onClose }) {
         </div>
 
         <form onSubmit={handleSubmit} className="oc-modal-form">
-          <input
-            className="oc-input"
-            placeholder="用户名"
-            value={username}
-            onChange={(event) => setUsername(event.target.value)}
-            autoFocus
-          />
+          <input className="oc-input" placeholder="用户名" value={username} onChange={(event) => setUsername(event.target.value)} autoFocus />
           <input
             type="password"
             className="oc-input"
@@ -184,12 +173,7 @@ function LoginModal({ onLogin, onRegister, onClose }) {
             onChange={(event) => setPassword(event.target.value)}
           />
           {mode === "register" ? (
-            <input
-              className="oc-input"
-              placeholder="手机号"
-              value={phone}
-              onChange={(event) => setPhone(event.target.value)}
-            />
+            <input className="oc-input" placeholder="手机号" value={phone} onChange={(event) => setPhone(event.target.value)} />
           ) : null}
           {mode === "register" ? (
             <input
@@ -208,9 +192,7 @@ function LoginModal({ onLogin, onRegister, onClose }) {
               onChange={(event) => setConfirmPassword(event.target.value)}
             />
           ) : null}
-          {mode === "register" ? (
-            <div className="oc-modal-tip">注册需填写手机号和邀请码；密码至少 6 位。</div>
-          ) : null}
+          {mode === "register" ? <div className="oc-modal-tip">注册需填写手机号和邀请码；密码至少 6 位。</div> : null}
           {error ? <div className="oc-modal-error">{error}</div> : null}
           <button type="submit" className="oc-primary-btn">
             {mode === "login" ? "登录" : "注册并登录"}
@@ -236,43 +218,89 @@ const COLS = [
   { key: "lastSeen", label: "最后发现时间", width: "140px", mono: true },
 ];
 
-export default function ExposureDetailTable({ rows, loading, auth }) {
+export default function ExposureDetailTable({
+  rows,
+  total,
+  page,
+  pageSize,
+  filters,
+  loading,
+  auth,
+  onPageChange,
+  onPageSizeChange,
+  onFilterChange,
+}) {
   const { isLoggedIn, login, register, logout } = auth;
   const [showLogin, setShowLogin] = useState(false);
-  const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(PAGE_SIZE_OPTIONS[0]);
-  const [searchIp, setSearchIp] = useState("");
-  const [searchGeo, setSearchGeo] = useState("");
-  const [searchVendor, setSearchVendor] = useState("");
+  const [exportingAll, setExportingAll] = useState(false);
 
-  const filteredRows = useMemo(() => {
-    if (!rows) return [];
-    if (!isLoggedIn) return rows;
+  const [searchIp, setSearchIp] = useState(filters?.ip ?? "");
+  const [searchGeo, setSearchGeo] = useState(filters?.location ?? "");
+  const [searchVendor, setSearchVendor] = useState(filters?.vendor ?? "");
 
-    return rows.filter((row) => {
-      const ipMatch = !searchIp || (row.ip ?? "").includes(searchIp.trim());
-      const geoMatch = !searchGeo || String(row.region ?? row.location ?? "").includes(searchGeo.trim());
-      const vendorMatch = !searchVendor || (row.vendor ?? "-").includes(searchVendor.trim());
-      return ipMatch && geoMatch && vendorMatch;
-    });
-  }, [rows, isLoggedIn, searchIp, searchGeo, searchVendor]);
+  useEffect(() => {
+    setSearchIp(filters?.ip ?? "");
+    setSearchGeo(filters?.location ?? "");
+    setSearchVendor(filters?.vendor ?? "");
+  }, [filters?.ip, filters?.location, filters?.vendor]);
 
-  const pageRows = useMemo(() => {
-    const start = (page - 1) * pageSize;
-    return filteredRows.slice(start, start + pageSize);
-  }, [filteredRows, page, pageSize]);
+  useEffect(() => {
+    if (!isLoggedIn) {
+      if (searchIp || searchGeo || searchVendor) {
+        setSearchIp("");
+        setSearchGeo("");
+        setSearchVendor("");
+      }
+      if ((filters?.ip ?? "") || (filters?.location ?? "") || (filters?.vendor ?? "")) {
+        onFilterChange({ ip: "", location: "", vendor: "" });
+      }
+      return;
+    }
 
-  const handleSearch = useCallback(() => setPage(1), []);
+    const timer = setTimeout(() => {
+      if (
+        searchIp !== (filters?.ip ?? "") ||
+        searchGeo !== (filters?.location ?? "") ||
+        searchVendor !== (filters?.vendor ?? "")
+      ) {
+        onFilterChange({ ip: searchIp, location: searchGeo, vendor: searchVendor });
+      }
+    }, 350);
 
-  const handleDownloadAll = useCallback(() => {
-    const content = buildCsvContent(filteredRows, isLoggedIn);
-    downloadCsv(content, `openclaw-exposure-${new Date().toISOString().slice(0, 10)}.csv`);
-  }, [filteredRows, isLoggedIn]);
+    return () => clearTimeout(timer);
+  }, [
+    isLoggedIn,
+    searchIp,
+    searchGeo,
+    searchVendor,
+    filters?.ip,
+    filters?.location,
+    filters?.vendor,
+    onFilterChange,
+  ]);
+
+  const handleDownloadAll = useCallback(async () => {
+    setExportingAll(true);
+    try {
+      const data = await fetchExposureList({
+        isLoggedIn,
+        page: 1,
+        page_size: 0,
+        ip: isLoggedIn ? searchIp : "",
+        location: isLoggedIn ? searchGeo : "",
+        vendor: isLoggedIn ? searchVendor : "",
+      });
+      const content = buildCsvContent(data?.rows ?? [], isLoggedIn);
+      downloadCsv(content, `openclaw-exposure-${new Date().toISOString().slice(0, 10)}.csv`);
+    } finally {
+      setExportingAll(false);
+    }
+  }, [isLoggedIn, searchIp, searchGeo, searchVendor]);
 
   const handleDownloadPage = useCallback(() => {
-    const content = buildCsvContent(pageRows, isLoggedIn);
+    const content = buildCsvContent(rows ?? [], isLoggedIn);
     downloadCsv(content, `openclaw-exposure-page${page}-${new Date().toISOString().slice(0, 10)}.csv`);
-  }, [pageRows, isLoggedIn, page]);
+  }, [rows, isLoggedIn, page]);
 
   const handleLogin = useCallback(
     (username, password) => {
@@ -299,15 +327,7 @@ export default function ExposureDetailTable({ rows, loading, auth }) {
           <div className="oc-search-bar">
             <div className="oc-search-group">
               <Search size={13} className="oc-search-icon" />
-              <input
-                className="oc-input oc-search-input"
-                placeholder="搜索 IP"
-                value={searchIp}
-                onChange={(event) => {
-                  setSearchIp(event.target.value);
-                  handleSearch();
-                }}
-              />
+              <input className="oc-input oc-search-input" placeholder="搜索 IP" value={searchIp} onChange={(event) => setSearchIp(event.target.value)} />
             </div>
             <div className="oc-search-group">
               <Search size={13} className="oc-search-icon" />
@@ -315,10 +335,7 @@ export default function ExposureDetailTable({ rows, loading, auth }) {
                 className="oc-input oc-search-input"
                 placeholder="搜索地区"
                 value={searchGeo}
-                onChange={(event) => {
-                  setSearchGeo(event.target.value);
-                  handleSearch();
-                }}
+                onChange={(event) => setSearchGeo(event.target.value)}
               />
             </div>
             <div className="oc-search-group">
@@ -327,10 +344,7 @@ export default function ExposureDetailTable({ rows, loading, auth }) {
                 className="oc-input oc-search-input"
                 placeholder="搜索厂商"
                 value={searchVendor}
-                onChange={(event) => {
-                  setSearchVendor(event.target.value);
-                  handleSearch();
-                }}
+                onChange={(event) => setSearchVendor(event.target.value)}
               />
             </div>
           </div>
@@ -351,9 +365,9 @@ export default function ExposureDetailTable({ rows, loading, auth }) {
                 <Download size={13} />
                 下载当前页
               </button>
-              <button type="button" className="oc-ghost-btn" onClick={handleDownloadAll}>
+              <button type="button" className="oc-ghost-btn" onClick={handleDownloadAll} disabled={exportingAll}>
                 <Download size={13} />
-                下载全部
+                {exportingAll ? "正在生成..." : "下载全部"}
               </button>
               <button type="button" className="oc-ghost-btn" onClick={logout}>
                 <LogOut size={13} />
@@ -379,23 +393,15 @@ export default function ExposureDetailTable({ rows, loading, auth }) {
 
       <div className="oc-dt-body">
         {loading ? <div className="oc-dt-state">正在加载数据...</div> : null}
-        {!loading && pageRows.length === 0 ? (
-          <div className="oc-dt-state">
-            {filteredRows.length === 0 && (searchIp || searchGeo || searchVendor)
-              ? "未找到匹配结果，请调整搜索条件。"
-              : "暂无数据"}
-          </div>
+        {!loading && (rows?.length ?? 0) === 0 ? (
+          <div className="oc-dt-state">{isLoggedIn && (searchIp || searchGeo || searchVendor) ? "未找到匹配结果" : "暂无数据"}</div>
         ) : null}
 
         {!loading &&
-          pageRows.map((row) => {
+          (rows ?? []).map((row) => {
             const formatted = formatRow(row, isLoggedIn);
             return (
-              <div
-                key={row.id ?? row.ip}
-                className="oc-dt-row"
-                style={{ gridTemplateColumns: COLS.map((col) => col.width).join(" ") }}
-              >
+              <div key={row.id ?? row.ip} className="oc-dt-row" style={{ gridTemplateColumns: COLS.map((col) => col.width).join(" ") }}>
                 {COLS.map((col) => (
                   <div
                     key={col.key}
@@ -415,19 +421,11 @@ export default function ExposureDetailTable({ rows, loading, auth }) {
           })}
       </div>
 
-      {!loading && filteredRows.length > 0 ? (
-        <TablePager
-          page={page}
-          pageSize={pageSize}
-          total={filteredRows.length}
-          onPage={setPage}
-          onPageSize={setPageSize}
-        />
+      {!loading && total > 0 ? (
+        <TablePager page={page} pageSize={pageSize} total={total} onPage={onPageChange} onPageSize={onPageSizeChange} />
       ) : null}
 
-      {showLogin ? (
-        <LoginModal onLogin={handleLogin} onRegister={handleRegister} onClose={() => setShowLogin(false)} />
-      ) : null}
+      {showLogin ? <LoginModal onLogin={handleLogin} onRegister={handleRegister} onClose={() => setShowLogin(false)} /> : null}
     </div>
   );
 }

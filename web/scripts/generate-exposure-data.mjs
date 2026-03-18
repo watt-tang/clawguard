@@ -176,6 +176,7 @@ function resolveAsn(ip, asnReader) {
 async function main() {
   const cityDbCandidates = [
     process.env.GEOLITE2_CITY_DB,
+    path.join(projectRoot, "geoip", "GeoLite2-City.mmdb"),
     path.join(projectRoot, "data", "GeoLite2-City.mmdb"),
     path.join(projectRoot, "GeoLite2-City.mmdb"),
     path.join(projectRoot, "scripts", "GeoLite2-City.mmdb"),
@@ -183,6 +184,7 @@ async function main() {
 
   const asnDbCandidates = [
     process.env.GEOLITE2_ASN_DB,
+    path.join(projectRoot, "geoip", "GeoLite2-ASN.mmdb"),
     path.join(projectRoot, "data", "GeoLite2-ASN.mmdb"),
     path.join(projectRoot, "GeoLite2-ASN.mmdb"),
     path.join(projectRoot, "scripts", "GeoLite2-ASN.mmdb"),

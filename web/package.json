@@ -8,12 +8,24 @@
     "generate:version-trend": "node scripts/generate-version-trend.mjs",
     "download:geo": "node scripts/download-geo.mjs",
     "setup": "npm run generate:data && npm run generate:version-trend && npm run download:geo",
-    "dev": "npm run setup && vite",
+    "dev:web": "npm run setup && vite",
+    "dev:api": "node server/index.mjs",
+    "dev": "concurrently -n WEB,API -c magenta,cyan \"npm:dev:web\" \"npm:dev:api\"",
+    "db:generate": "prisma generate",
+    "db:push": "prisma db push",
+    "db:import:exposure": "node server/scripts/import-exposure-data.mjs",
+    "db:rebuild:agg": "node server/scripts/rebuild-exposure-aggregates.mjs",
+    "db:setup": "npm run db:generate && npm run db:push && npm run db:import:exposure",
     "build": "npm run setup && vite build",
     "preview": "vite preview"
   },
   "dependencies": {
+    "@prisma/client": "^6.16.2",
+    "cors": "^2.8.6",
+    "dotenv": "^17.3.1",
     "echarts": "^6.0.0",
+    "express": "^5.2.1",
+    "geolite2-redist": "^3.1.2",
     "lucide-react": "^0.542.0",
     "maxmind": "^4.3.29",
     "react": "^19.1.1",
@@ -22,6 +34,8 @@
   "devDependencies": {
     "@tailwindcss/vite": "^4.1.13",
     "@vitejs/plugin-react": "^5.0.2",
+    "concurrently": "^9.2.1",
+    "prisma": "^6.16.2",
     "tailwindcss": "^4.1.13",
     "vite": "^7.1.5"
   }

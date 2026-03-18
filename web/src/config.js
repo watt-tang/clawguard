@@ -1,42 +1,43 @@
-/**
- * 全局路径与接口配置
- * 所有接口路径、静态数据路径、地图资源路径统一在此维护，
- * 组件内不允许硬编码任何 URL 或路径。
- */
+﻿/** Global data and route configuration */
 
-/** 数据接口路径 */
+/** API endpoints */
 export const DATA_PATHS = {
-  /** 暴露服务列表（主数据源，由 generate-exposure-data.mjs 生成） */
-  EXPOSURE_DATA: '/data/exposure-data.json',
-  /** 情况分析统计卡片 */
-  STATS: '/data/mock/stats.json',
-  /** 全球暴露实例分布 */
-  WORLD_DIST: '/data/mock/world-dist.json',
-  /** 中国境内实例分布 */
-  CHINA_DIST: '/data/mock/china-dist.json',
-  /** 暴露实例演化趋势 */
-  EXPOSURE_TREND: '/data/mock/exposure-trend.json',
-  /** 版本实例演化趋势 */
-  VERSION_TREND: '/data/mock/version-trend.json',
+  STATS: "/api/exposure/stats",
+  WORLD_DIST: "/api/exposure/world-distribution",
+  CHINA_DIST: "/api/exposure/china-distribution",
+  EXPOSURE_TREND: "/api/exposure/trend",
+  VERSION_TREND: "/api/exposure/version-trend",
+  EXPOSURE_LIST: "/api/exposure/list",
 };
 
-/** 地图 GeoJSON 资源路径（由 scripts/download-geo.mjs 下载到 public/data/geo/） */
+/** Static fallback paths when API is unavailable */
+export const FALLBACK_DATA_PATHS = {
+  EXPOSURE_DATA: "/data/exposure-data.json",
+  STATS: "/data/mock/stats.json",
+  WORLD_DIST: "/data/mock/world-dist.json",
+  CHINA_DIST: "/data/mock/china-dist.json",
+  EXPOSURE_TREND: "/data/mock/exposure-trend.json",
+  VERSION_TREND: "/data/mock/version-trend.json",
+};
+
+/** Map GeoJSON resources */
 export const GEO_PATHS = {
-  WORLD: '/data/geo/world.json',
-  CHINA: '/data/geo/china.json',
+  WORLD: "/data/geo/world.json",
+  CHINA: "/data/geo/china.json",
 };
 
-/** 页面标识常量 */
+/** Page identifiers */
 export const PAGE_IDS = {
-  HOME: 'home',
-  OPENCLAW_EXPOSURE: 'openclaw-exposure',
+  HOME: "home",
+  OPENCLAW_EXPOSURE: "openclaw-exposure",
 };
 
-/** 表格每页可选数量 */
+/** Table page-size options */
 export const PAGE_SIZE_OPTIONS = [20, 50, 100];
+
 export const AUTH_CONFIG = {
   REGISTER_INVITE_CODE: "CLAWGUARD2026",
 };
 
-/** 版本趋势图可选展示数量 */
+/** Version trend selectable lines */
 export const VERSION_TOP_OPTIONS = [5, 10, 15, 20];

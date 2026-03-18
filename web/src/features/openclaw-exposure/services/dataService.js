@@ -1,49 +1,120 @@
-import { DATA_PATHS } from "../../../config.js";
+﻿import { DATA_PATHS, FALLBACK_DATA_PATHS } from "../../../config.js";
 
 async function fetchJson(url) {
   const res = await fetch(url);
   if (!res.ok) throw new Error(`HTTP ${res.status}: ${url}`);
-  return res.json();
+  const payload = await res.json();
+  if (payload && typeof payload === "object" && "data" in payload && "code" in payload) {
+    return payload.data;
+  }
+  return payload;
+}
+
+async function fetchWithFallback(primaryUrl, fallbackUrl) {
+  try {
+    return await fetchJson(primaryUrl);
+  } catch {
+    if (!fallbackUrl) throw new Error(`Primary endpoint failed: ${primaryUrl}`);
+    return fetchJson(fallbackUrl);
+  }
+}
+
+function withQuery(baseUrl, query = {}) {
+  const entries = Object.entries(query).filter(([, value]) => value !== undefined && value !== null && value !== "");
+  if (!entries.length) return baseUrl;
+  const qs = new URLSearchParams(entries.map(([key, value]) => [key, String(value)])).toString();
+  return `${baseUrl}?${qs}`;
 }
 
 export function fetchStats() {
-  return fetchJson(DATA_PATHS.STATS);
+  return fetchWithFallback(DATA_PATHS.STATS, FALLBACK_DATA_PATHS.STATS);
 }
 
 export function fetchWorldDist() {
-  return fetchJson(DATA_PATHS.WORLD_DIST);
+  return fetchWithFallback(DATA_PATHS.WORLD_DIST, FALLBACK_DATA_PATHS.WORLD_DIST);
 }
 
 export function fetchChinaDist() {
-  return fetchJson(DATA_PATHS.CHINA_DIST);
+  return fetchWithFallback(DATA_PATHS.CHINA_DIST, FALLBACK_DATA_PATHS.CHINA_DIST);
 }
 
 export function fetchExposureTrend() {
-  return fetchJson(DATA_PATHS.EXPOSURE_TREND);
+  return fetchWithFallback(DATA_PATHS.EXPOSURE_TREND, FALLBACK_DATA_PATHS.EXPOSURE_TREND);
 }
 
 export function fetchVersionTrend() {
-  return fetchJson(DATA_PATHS.VERSION_TREND);
+  return fetchWithFallback(DATA_PATHS.VERSION_TREND, FALLBACK_DATA_PATHS.VERSION_TREND);
 }
 
-export function fetchExposureList() {
-  return fetchJson(DATA_PATHS.EXPOSURE_DATA);
+function applyLocalFilterAndPage(payload, query = {}) {
+  const allRows = Array.isArray(payload?.rows) ? payload.rows : [];
+  const ip = String(query.ip ?? "").trim();
+  const location = String(query.location ?? "").trim();
+  const vendor = String(query.vendor ?? "").trim();
+  const page = Math.max(1, Number(query.page ?? 1));
+  const pageSize = Math.max(0, Number(query.page_size ?? 20));
+
+  const filtered = allRows.filter((row) => {
+    const ipMatch = !ip || String(row.ip ?? "").includes(ip);
+    const locationField = String(row.region ?? row.location ?? "");
+    const locationMatch = !location || locationField.includes(location);
+    const vendorMatch = !vendor || String(row.vendor ?? "").includes(vendor);
+    return ipMatch && locationMatch && vendorMatch;
+  });
+
+  const pagedRows =
+    pageSize > 0 ? filtered.slice((page - 1) * pageSize, (page - 1) * pageSize + pageSize) : filtered;
+
+  return {
+    total: filtered.length,
+    page,
+    page_size: pageSize > 0 ? pageSize : pagedRows.length,
+    latestSnapshot: payload?.latestSnapshot ?? "",
+    sourceDir: payload?.sourceDir ?? "web/clawdbot_alive",
+    rows: pagedRows,
+  };
+}
+
+export async function fetchExposureList({
+  isLoggedIn = false,
+  page = 1,
+  page_size = 20,
+  ip = "",
+  location = "",
+  vendor = "",
+} = {}) {
+  const query = {
+    is_logged_in: isLoggedIn ? 1 : 0,
+    page,
+    page_size,
+    ip,
+    location,
+    vendor,
+  };
+  const url = withQuery(DATA_PATHS.EXPOSURE_LIST, query);
+
+  try {
+    return await fetchJson(url);
+  } catch {
+    const fallback = await fetchJson(FALLBACK_DATA_PATHS.EXPOSURE_DATA);
+    return applyLocalFilterAndPage(fallback, query);
+  }
 }
 
 export function buildCsvContent(rows, isLoggedIn) {
   const headers = [
-    "\u0049\u0050\u5730\u5740", // IP地址
-    "\u4e3b\u673a\u540d", // 主机名
-    "\u7aef\u53e3/\u670d\u52a1", // 端口/服务
-    "\u5730\u533a", // 地区
-    "\u57ce\u5e02", // 城市
+    "IP地址",
+    "主机名",
+    "端口/服务",
+    "地区",
+    "城市",
     "AS",
-    "\u5382\u5546", // 厂商
-    "\u8fd0\u884c\u72b6\u6001", // 运行状态
-    "\u5883\u5185\u5b9e\u4f8b", // 境内实例
-    "\u7248\u672c\u53f7", // 版本号
-    "\u5386\u53f2\u6f0f\u6d1e\u5173\u8054", // 历史漏洞关联
-    "\u6700\u540e\u53d1\u73b0\u65f6\u95f4", // 最后发现时间
+    "厂商",
+    "运行状态",
+    "境内实例",
+    "版本号",
+    "历史漏洞关联",
+    "最后发现时间",
   ];
 
   const maskIpFn = isLoggedIn

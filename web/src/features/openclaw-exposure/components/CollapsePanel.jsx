@@ -1,8 +1,12 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ChevronDown } from "lucide-react";
 
-export default function CollapsePanel({ title, children, defaultOpen = true, extra }) {
+export default function CollapsePanel({ title, children, defaultOpen = true, extra, onOpenChange }) {
   const [open, setOpen] = useState(defaultOpen);
+
+  useEffect(() => {
+    onOpenChange?.(open);
+  }, [open]);
 
   return (
     <div className="oc-panel">
