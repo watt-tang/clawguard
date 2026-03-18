@@ -61,7 +61,8 @@ function toResponseRow(row, latestDateKey, isLoggedIn) {
     city: row.city,
     isp: row.isp,
     asn: row.asn,
-    vendor: row.vendor,
+    operator: row.operator,
+    vendor: row.operator,
     status: row.status,
     scope: row.scope,
     version: row.version,
@@ -97,6 +98,7 @@ export async function getExposureStats() {
       overseasTotal: 0,
       countryCoverage: 0,
       cityCount: 0,
+      operatorCount: 0,
       vendorCount: 0,
       highRiskCount: 0,
       updatedAt: "",
@@ -139,7 +141,7 @@ export async function getExposureStats() {
       SELECT
         COUNT(DISTINCT CASE WHEN country <> 'Unknown' THEN country END) AS countryCount,
         COUNT(DISTINCT CASE WHEN city <> 'Unknown' THEN city END) AS cityCount,
-        COUNT(DISTINCT vendor) AS vendorCount
+        COUNT(DISTINCT operator) AS operatorCount
       FROM ExposureRecord
       WHERE snapshotId = ${latest.id}
     `,
@@ -158,7 +160,8 @@ export async function getExposureStats() {
     overseasTotal: toInt(overseasTotal),
     countryCoverage: toInt(coverageRows?.[0]?.countryCount),
     cityCount: toInt(coverageRows?.[0]?.cityCount),
-    vendorCount: toInt(coverageRows?.[0]?.vendorCount),
+    operatorCount: toInt(coverageRows?.[0]?.operatorCount),
+    vendorCount: toInt(coverageRows?.[0]?.operatorCount),
     highRiskCount,
     updatedAt: formatDateTime(latestAgg?.updatedAt || latest.updatedAt),
   });
@@ -403,7 +406,7 @@ export async function getExposureList(query = {}) {
 
   const ip = String(query.ip || "").trim();
   const location = String(query.location || "").trim();
-  const vendor = String(query.vendor || "").trim();
+  const operator = String(query.operator || query.vendor || "").trim();
 
   const where = { snapshotId: latest.id };
 
@@ -411,8 +414,8 @@ export async function getExposureList(query = {}) {
     where.ip = { contains: ip };
   }
 
-  if (vendor) {
-    where.vendor = { contains: vendor };
+  if (operator) {
+    where.operator = { contains: operator };
   }
 
   if (location) {
@@ -433,7 +436,7 @@ export async function getExposureList(query = {}) {
       city: true,
       isp: true,
       asn: true,
-      vendor: true,
+      operator: true,
       status: true,
       scope: true,
       version: true,

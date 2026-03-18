@@ -16,7 +16,7 @@ function formatRow(row, isLoggedIn) {
     location: region,
     city: isLoggedIn ? (row.city ?? "-") : maskField(row.city),
     asn: isLoggedIn ? (row.asn ?? "-") : maskField(row.asn),
-    vendor: row.vendor ?? "-",
+    operator: row.operator ?? row.vendor ?? "-",
     status: row.status ?? "-",
     scopeLabel: scope || "-",
     isDomestic,
@@ -210,7 +210,7 @@ const COLS = [
   { key: "location", label: "地区", width: "120px" },
   { key: "city", label: "城市", width: "100px" },
   { key: "asn", label: "AS", width: "100px", mono: true },
-  { key: "vendor", label: "厂商", width: "90px" },
+  { key: "operator", label: "运营商", width: "110px" },
   { key: "status", label: "运行状态", width: "100px" },
   { key: "scopeLabel", label: "境内实例", width: "90px" },
   { key: "version", label: "版本号", width: "110px", mono: true },
@@ -236,23 +236,23 @@ export default function ExposureDetailTable({
 
   const [searchIp, setSearchIp] = useState(filters?.ip ?? "");
   const [searchGeo, setSearchGeo] = useState(filters?.location ?? "");
-  const [searchVendor, setSearchVendor] = useState(filters?.vendor ?? "");
+  const [searchOperator, setSearchOperator] = useState(filters?.operator ?? "");
 
   useEffect(() => {
     setSearchIp(filters?.ip ?? "");
     setSearchGeo(filters?.location ?? "");
-    setSearchVendor(filters?.vendor ?? "");
-  }, [filters?.ip, filters?.location, filters?.vendor]);
+    setSearchOperator(filters?.operator ?? "");
+  }, [filters?.ip, filters?.location, filters?.operator]);
 
   useEffect(() => {
     if (!isLoggedIn) {
-      if (searchIp || searchGeo || searchVendor) {
+      if (searchIp || searchGeo || searchOperator) {
         setSearchIp("");
         setSearchGeo("");
-        setSearchVendor("");
+        setSearchOperator("");
       }
-      if ((filters?.ip ?? "") || (filters?.location ?? "") || (filters?.vendor ?? "")) {
-        onFilterChange({ ip: "", location: "", vendor: "" });
+      if ((filters?.ip ?? "") || (filters?.location ?? "") || (filters?.operator ?? "")) {
+        onFilterChange({ ip: "", location: "", operator: "" });
       }
       return;
     }
@@ -261,9 +261,9 @@ export default function ExposureDetailTable({
       if (
         searchIp !== (filters?.ip ?? "") ||
         searchGeo !== (filters?.location ?? "") ||
-        searchVendor !== (filters?.vendor ?? "")
+        searchOperator !== (filters?.operator ?? "")
       ) {
-        onFilterChange({ ip: searchIp, location: searchGeo, vendor: searchVendor });
+        onFilterChange({ ip: searchIp, location: searchGeo, operator: searchOperator });
       }
     }, 350);
 
@@ -272,10 +272,10 @@ export default function ExposureDetailTable({
     isLoggedIn,
     searchIp,
     searchGeo,
-    searchVendor,
+    searchOperator,
     filters?.ip,
     filters?.location,
-    filters?.vendor,
+    filters?.operator,
     onFilterChange,
   ]);
 
@@ -288,14 +288,14 @@ export default function ExposureDetailTable({
         page_size: 0,
         ip: isLoggedIn ? searchIp : "",
         location: isLoggedIn ? searchGeo : "",
-        vendor: isLoggedIn ? searchVendor : "",
+        operator: isLoggedIn ? searchOperator : "",
       });
       const content = buildCsvContent(data?.rows ?? [], isLoggedIn);
       downloadCsv(content, `openclaw-exposure-${new Date().toISOString().slice(0, 10)}.csv`);
     } finally {
       setExportingAll(false);
     }
-  }, [isLoggedIn, searchIp, searchGeo, searchVendor]);
+  }, [isLoggedIn, searchIp, searchGeo, searchOperator]);
 
   const handleDownloadPage = useCallback(() => {
     const content = buildCsvContent(rows ?? [], isLoggedIn);
@@ -342,9 +342,9 @@ export default function ExposureDetailTable({
               <Search size={13} className="oc-search-icon" />
               <input
                 className="oc-input oc-search-input"
-                placeholder="搜索厂商"
-                value={searchVendor}
-                onChange={(event) => setSearchVendor(event.target.value)}
+                placeholder="搜索运营商"
+                value={searchOperator}
+                onChange={(event) => setSearchOperator(event.target.value)}
               />
             </div>
           </div>
@@ -394,7 +394,7 @@ export default function ExposureDetailTable({
       <div className="oc-dt-body">
         {loading ? <div className="oc-dt-state">正在加载数据...</div> : null}
         {!loading && (rows?.length ?? 0) === 0 ? (
-          <div className="oc-dt-state">{isLoggedIn && (searchIp || searchGeo || searchVendor) ? "未找到匹配结果" : "暂无数据"}</div>
+          <div className="oc-dt-state">{isLoggedIn && (searchIp || searchGeo || searchOperator) ? "未找到匹配结果" : "暂无数据"}</div>
         ) : null}
 
         {!loading &&

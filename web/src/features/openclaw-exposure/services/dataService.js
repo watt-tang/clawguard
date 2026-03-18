@@ -50,7 +50,7 @@ function applyLocalFilterAndPage(payload, query = {}) {
   const allRows = Array.isArray(payload?.rows) ? payload.rows : [];
   const ip = String(query.ip ?? "").trim();
   const location = String(query.location ?? "").trim();
-  const vendor = String(query.vendor ?? "").trim();
+  const operator = String(query.operator ?? query.vendor ?? "").trim();
   const page = Math.max(1, Number(query.page ?? 1));
   const pageSize = Math.max(0, Number(query.page_size ?? 20));
 
@@ -58,8 +58,9 @@ function applyLocalFilterAndPage(payload, query = {}) {
     const ipMatch = !ip || String(row.ip ?? "").includes(ip);
     const locationField = String(row.region ?? row.location ?? "");
     const locationMatch = !location || locationField.includes(location);
-    const vendorMatch = !vendor || String(row.vendor ?? "").includes(vendor);
-    return ipMatch && locationMatch && vendorMatch;
+    const operatorField = String(row.operator ?? row.vendor ?? "");
+    const operatorMatch = !operator || operatorField.includes(operator);
+    return ipMatch && locationMatch && operatorMatch;
   });
 
   const pagedRows =
@@ -81,7 +82,7 @@ export async function fetchExposureList({
   page_size = 20,
   ip = "",
   location = "",
-  vendor = "",
+  operator = "",
 } = {}) {
   const query = {
     is_logged_in: isLoggedIn ? 1 : 0,
@@ -89,7 +90,7 @@ export async function fetchExposureList({
     page_size,
     ip,
     location,
-    vendor,
+    operator,
   };
   const url = withQuery(DATA_PATHS.EXPOSURE_LIST, query);
 
@@ -109,7 +110,7 @@ export function buildCsvContent(rows, isLoggedIn) {
     "地区",
     "城市",
     "AS",
-    "厂商",
+    "运营商",
     "运行状态",
     "境内实例",
     "版本号",
@@ -137,7 +138,7 @@ export function buildCsvContent(rows, isLoggedIn) {
         r.region ?? r.location ?? "-",
         maskFn(r.city),
         maskFn(r.asn ?? r.isp),
-        r.vendor ?? "-",
+        r.operator ?? r.vendor ?? "-",
         r.status ?? "-",
         r.scope ?? "-",
         r.version ?? "-",

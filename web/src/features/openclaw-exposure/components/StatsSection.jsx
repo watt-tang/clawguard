@@ -6,7 +6,7 @@ export default function StatsSection({ stats, loading }) {
     { label: "境外暴露总数", key: "overseasTotal", unit: "条" },
     { label: "覆盖国家 / 地区数", key: "countryCoverage", unit: "个" },
     { label: "涉及城市数", key: "cityCount", unit: "个" },
-    { label: "厂商 / 版本数", key: "vendorCount", unit: "个" },
+    { label: "运营商 / 版本数", key: "operatorCount", unit: "个" },
     { label: "高风险实例数", key: "highRiskCount", unit: "条" },
   ];
 
@@ -20,7 +20,7 @@ export default function StatsSection({ stats, loading }) {
               <span className="oc-stat-skeleton" />
             ) : stats ? (
               <>
-                <strong>{(stats[key] ?? 0).toLocaleString("zh-CN")}</strong>
+                <strong>{(stats[key] ?? stats.vendorCount ?? 0).toLocaleString("zh-CN")}</strong>
                 <span className="oc-stat-unit">{unit}</span>
               </>
             ) : (

@@ -13,6 +13,7 @@
     "dev": "concurrently -n WEB,API -c magenta,cyan \"npm:dev:web\" \"npm:dev:api\"",
     "db:generate": "prisma generate",
     "db:push": "prisma db push",
+    "db:migrate:operator": "node server/scripts/migrate-vendor-to-operator.mjs",
     "db:import:exposure": "node server/scripts/import-exposure-data.mjs",
     "db:rebuild:agg": "node server/scripts/rebuild-exposure-aggregates.mjs",
     "db:setup": "npm run db:generate && npm run db:push && npm run db:import:exposure",

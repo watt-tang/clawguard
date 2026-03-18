@@ -39,7 +39,7 @@ export default function OpenclawExposurePage({ auth }) {
     pageSize: PAGE_SIZE_OPTIONS[0],
     ip: "",
     location: "",
-    vendor: "",
+    operator: "",
   });
 
   const [readyForSecondaryRequests, setReadyForSecondaryRequests] = useState(false);
@@ -190,7 +190,7 @@ export default function OpenclawExposurePage({ auth }) {
       page_size: listQuery.pageSize,
       ip: auth?.isLoggedIn ? listQuery.ip : "",
       location: auth?.isLoggedIn ? listQuery.location : "",
-      vendor: auth?.isLoggedIn ? listQuery.vendor : "",
+      operator: auth?.isLoggedIn ? listQuery.operator : "",
     })
       .then((data) => {
         if (alive) {
@@ -213,7 +213,7 @@ export default function OpenclawExposurePage({ auth }) {
     listQuery.pageSize,
     listQuery.ip,
     listQuery.location,
-    listQuery.vendor,
+    listQuery.operator,
   ]);
 
   const markPanelDemand = (panelKey, open) => {
@@ -293,7 +293,7 @@ export default function OpenclawExposurePage({ auth }) {
           filters={{
             ip: listQuery.ip,
             location: listQuery.location,
-            vendor: listQuery.vendor,
+            operator: listQuery.operator,
           }}
           loading={listLoading}
           auth={auth}

@@ -1,5 +1,5 @@
 import "dotenv/config";
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient } from "../../generated/prisma/index.js";
 import { formatDate } from "../lib/date.mjs";
 
 const prisma = new PrismaClient();
@@ -127,3 +127,4 @@ main()
   .finally(async () => {
     await prisma.$disconnect();
   });
+

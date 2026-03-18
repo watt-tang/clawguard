@@ -1,0 +1,84 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model ExposureSnapshot {
+  id           Int               @id @default(autoincrement())
+  dateKey      String            @unique @db.VarChar(8)
+  snapshotDate DateTime          @unique @db.Date
+  sourceFile   String            @db.VarChar(255)
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
+  records      ExposureRecord[]
+  dailyAgg     ExposureDailyAgg?
+
+  @@index([snapshotDate])
+}
+
+model ExposureRecord {
+  id           BigInt           @id @default(autoincrement()) @db.UnsignedBigInt
+  snapshotId   Int
+  snapshot     ExposureSnapshot @relation(fields: [snapshotId], references: [id], onDelete: Cascade)
+  snapshotDate DateTime         @db.Date
+  ip           String           @db.VarChar(45)
+  country      String           @default("Unknown") @db.VarChar(128)
+  countryZh    String           @default("未知") @db.VarChar(128)
+  province     String           @default("未知") @db.VarChar(128)
+  region       String           @default("Unknown") @db.VarChar(191)
+  city         String           @default("Unknown") @db.VarChar(128)
+  asn          String           @default("AS0") @db.VarChar(32)
+  isp          String           @default("Unknown ISP") @db.VarChar(191)
+  host         String           @default("-") @db.VarChar(128)
+  service      String           @default("18789 / OpenClaw") @db.VarChar(128)
+  serviceDesc  String           @default("OpenClaw service") @db.VarChar(191)
+  operator     String           @default("Unknown Operator") @db.VarChar(64)
+  status       String           @default("在线监测") @db.VarChar(64)
+  scope        String           @default("境外暴露") @db.VarChar(64)
+  version      String           @default("unknown") @db.VarChar(64)
+  risk         String           @default("待补充") @db.VarChar(64)
+  lastSeen     DateTime         @db.Date
+  createdAt    DateTime         @default(now())
+
+  @@unique([snapshotId, ip])
+  @@index([snapshotId])
+  @@index([snapshotDate])
+  @@index([ip])
+  @@index([ip, snapshotDate])
+  @@index([country])
+  @@index([scope])
+  @@index([version])
+  @@index([operator])
+}
+
+model ExposureDailyAgg {
+  snapshotDate              DateTime          @id @db.Date
+  snapshotId                Int?              @unique
+  snapshot                  ExposureSnapshot? @relation(fields: [snapshotId], references: [id], onDelete: SetNull)
+  exposedCount              Int
+  domesticCount             Int               @default(0)
+  overseasCount             Int               @default(0)
+  newDistinctIpCount        Int               @default(0)
+  cumulativeDistinctIpCount Int               @default(0)
+  createdAt                 DateTime          @default(now())
+  updatedAt                 DateTime          @updatedAt
+
+  @@index([snapshotDate])
+}
+
+model ExposureVersionDailyAgg {
+  id           BigInt   @id @default(autoincrement()) @db.UnsignedBigInt
+  snapshotDate DateTime @db.Date
+  version      String   @db.VarChar(64)
+  count        Int
+  createdAt    DateTime @default(now())
+
+  @@unique([snapshotDate, version])
+  @@index([snapshotDate])
+  @@index([version])
+}

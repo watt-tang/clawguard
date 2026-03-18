@@ -2,6 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import maxmind from "maxmind";
+import { buildAsnProfile, resolveOperator } from "../server/lib/operator.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const projectRoot = path.resolve(__dirname, "..");
@@ -164,13 +165,16 @@ function resolveRegionAndCity(ip, scope, cityReader) {
 
 function resolveAsn(ip, asnReader) {
   const asnGeo = asnReader?.get(ip);
-  const asnNumber = asnGeo?.autonomous_system_number;
-
-  if (typeof asnNumber === "number" && Number.isFinite(asnNumber)) {
-    return `AS${asnNumber}`;
+  if (asnGeo) {
+    return buildAsnProfile(asnGeo.autonomous_system_number, asnGeo.autonomous_system_organization);
   }
 
-  return inferAsnFallback(ip);
+  const asn = inferAsnFallback(ip);
+  return {
+    asn,
+    isp: "Unknown ISP",
+    operator: resolveOperator(asn, "Unknown ISP"),
+  };
 }
 
 async function main() {
@@ -237,6 +241,7 @@ async function main() {
       const daysAgo = latestDate ? Math.max(0, Math.round((latestDate - recordDate) / 86400000)) : 0;
       const scope = inferScope(record.ip);
       const geo = resolveRegionAndCity(record.ip, scope, cityReader);
+      const asnProfile = resolveAsn(record.ip, asnReader);
 
       return {
         id: `${record.ip}-${record.dateKey}`,
@@ -250,7 +255,9 @@ async function main() {
         region: geo.region,
         location: geo.region,
         city: geo.city,
-        asn: resolveAsn(record.ip, asnReader),
+        asn: asnProfile.asn,
+        isp: asnProfile.isp,
+        operator: asnProfile.operator,
         status: inferStatus(daysAgo),
         risk: inferRisk(daysAgo),
         version: "v1.x 占位",

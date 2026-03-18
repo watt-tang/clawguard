@@ -1,4 +1,4 @@
-﻿import { PrismaClient } from "@prisma/client";
+import { PrismaClient } from "../../generated/prisma/index.js";
 
 const globalForPrisma = globalThis;
 
@@ -11,3 +11,4 @@ export const prisma =
 if (process.env.NODE_ENV !== "production") {
   globalForPrisma.__prisma__ = prisma;
 }
+
