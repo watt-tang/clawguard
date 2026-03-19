@@ -8,6 +8,37 @@ const DOMESTIC_SCOPE_KEYWORD = "\u5883\u5185";
 const DOMESTIC_SCOPE_LIKE = `%${DOMESTIC_SCOPE_KEYWORD}%`;
 const HIGH_RISK_CN = "\u9AD8\u5371";
 const UNKNOWN_PROVINCE_ZH = "\u672A\u77E5";
+const INVALID_CHINA_DIVISION_NAMES = new Set(["", "-", "Unknown", "unknown", UNKNOWN_PROVINCE_ZH, "δ֪"]);
+
+function normalizeChinaDivisionName(name) {
+  const raw = String(name || "").trim();
+  if (!raw || INVALID_CHINA_DIVISION_NAMES.has(raw)) return "";
+
+  const specialCases = {
+    "\u5185\u8499\u53e4\u81ea\u6cbb\u533a": "\u5185\u8499\u53e4",
+    "\u5e7f\u897f\u58ee\u65cf\u81ea\u6cbb\u533a": "\u5e7f\u897f",
+    "\u5b81\u590f\u56de\u65cf\u81ea\u6cbb\u533a": "\u5b81\u590f",
+    "\u65b0\u7586\u7ef4\u543e\u5c14\u81ea\u6cbb\u533a": "\u65b0\u7586",
+    "\u897f\u85cf\u81ea\u6cbb\u533a": "\u897f\u85cf",
+    "\u9999\u6e2f\u7279\u522b\u884c\u653f\u533a": "\u9999\u6e2f",
+    "\u6fb3\u95e8\u7279\u522b\u884c\u653f\u533a": "\u6fb3\u95e8",
+  };
+
+  if (specialCases[raw]) return specialCases[raw];
+
+  const cleaned = raw
+    .replace(/特别行政区$/u, "")
+    .replace(/壮族自治区$/u, "")
+    .replace(/回族自治区$/u, "")
+    .replace(/维吾尔自治区$/u, "")
+    .replace(/自治区$/u, "")
+    .replace(/省$/u, "")
+    .replace(/市$/u, "")
+    .trim();
+
+  if (!cleaned || INVALID_CHINA_DIVISION_NAMES.has(cleaned)) return "";
+  return cleaned;
+}
 
 function toInt(value) {
   if (typeof value === "bigint") return Number(value);
@@ -209,8 +240,16 @@ export async function getChinaDistribution() {
     _count: { _all: true },
   });
 
-  const provinces = grouped
-    .map((item) => ({ name: item.province, value: toInt(item._count._all) }))
+  const provinceMap = new Map();
+
+  for (const item of grouped) {
+    const normalizedName = normalizeChinaDivisionName(item.province);
+    if (!normalizedName) continue;
+    provinceMap.set(normalizedName, (provinceMap.get(normalizedName) ?? 0) + toInt(item._count._all));
+  }
+
+  const provinces = Array.from(provinceMap.entries())
+    .map(([name, value]) => ({ name, value }))
     .sort((a, b) => b.value - a.value);
 
   return writeCache(cacheKey, { provinces });

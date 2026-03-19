@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import * as echarts from "echarts";
 import { GEO_PATHS } from "../../../config.js";
 
@@ -11,13 +11,60 @@ const CHART_COLORS = {
 };
 
 const TOP_N = 10;
+const INVALID_CHINA_NAMES = new Set(["", "-", "Unknown", "unknown", "未知", "δ֪"]);
+
+function normalizeChinaDivisionName(name) {
+  const raw = String(name || "").trim();
+  if (!raw || INVALID_CHINA_NAMES.has(raw)) return "";
+
+  const specialCases = {
+    内蒙古自治区: "内蒙古",
+    广西壮族自治区: "广西",
+    宁夏回族自治区: "宁夏",
+    新疆维吾尔自治区: "新疆",
+    西藏自治区: "西藏",
+    香港特别行政区: "香港",
+    澳门特别行政区: "澳门",
+  };
+
+  if (specialCases[raw]) return specialCases[raw];
+
+  const cleaned = raw
+    .replace(/特别行政区$/u, "")
+    .replace(/壮族自治区$/u, "")
+    .replace(/回族自治区$/u, "")
+    .replace(/维吾尔自治区$/u, "")
+    .replace(/自治区$/u, "")
+    .replace(/省$/u, "")
+    .replace(/市$/u, "")
+    .trim();
+
+  if (!cleaned || INVALID_CHINA_NAMES.has(cleaned)) return "";
+  return cleaned;
+}
+
+function normalizeProvinceData(provinces = []) {
+  const provinceMap = new Map();
+
+  provinces.forEach((item) => {
+    const normalizedName = normalizeChinaDivisionName(item?.name);
+    const value = Number(item?.value || 0);
+    if (!normalizedName || value <= 0) return;
+    provinceMap.set(normalizedName, (provinceMap.get(normalizedName) ?? 0) + value);
+  });
+
+  return Array.from(provinceMap.entries())
+    .map(([name, value]) => ({ name, value }))
+    .sort((left, right) => right.value - left.value);
+}
 
 export default function ChinaMapChart({ data, loading }) {
   const containerRef = useRef(null);
   const chartRef = useRef(null);
+  const normalizedProvinces = useMemo(() => normalizeProvinceData(data?.provinces), [data]);
 
   useEffect(() => {
-    if (!data || loading) return undefined;
+    if (!normalizedProvinces.length || loading) return undefined;
 
     let active = true;
 
@@ -36,7 +83,7 @@ export default function ChinaMapChart({ data, loading }) {
           echarts.init(containerRef.current, null, { renderer: "canvas", locale: "ZH" });
         chartRef.current = chart;
 
-        const maxVal = Math.max(...data.provinces.map((item) => item.value), 1);
+        const maxVal = Math.max(...normalizedProvinces.map((item) => item.value), 1);
 
         chart.setOption(
           {
@@ -77,7 +124,7 @@ export default function ChinaMapChart({ data, loading }) {
                   borderColor: CHART_COLORS.border,
                   borderWidth: 0.8,
                 },
-                data: data.provinces,
+                data: normalizedProvinces,
               },
             ],
           },
@@ -104,16 +151,16 @@ export default function ChinaMapChart({ data, loading }) {
         chartRef.current = null;
       }
     };
-  }, [data, loading]);
+  }, [normalizedProvinces, loading]);
 
-  const top = data?.provinces?.slice(0, TOP_N) ?? [];
+  const top = normalizedProvinces.slice(0, TOP_N);
   const maxVal = top[0]?.value || 1;
 
   return (
     <div className="oc-map-layout">
       <div className="oc-map-container" ref={containerRef}>
         {loading ? <div className="oc-chart-loading">加载中...</div> : null}
-        {!loading && !data ? <div className="oc-chart-empty">暂无数据</div> : null}
+        {!loading && !normalizedProvinces.length ? <div className="oc-chart-empty">暂无数据</div> : null}
       </div>
       {top.length > 0 ? (
         <div className="oc-map-sidebar">
