@@ -56,12 +56,72 @@ const SEVERITY_LABELS = {
   MEDIUM: "中危",
   LOW: "低危",
 };
+const SEVERITY_RANK = {
+  CRITICAL: 0,
+  HIGH: 1,
+  MEDIUM: 2,
+  LOW: 3,
+};
+const RESULT_TONES = {
+  CRITICAL: {
+    tone: "critical",
+    badge: "立即处置",
+    title: "检测到严重风险信号",
+    desc: "建议先隔离样本，再优先复核命中文件、命中规则与命中内容，避免继续传播或安装。",
+    Icon: ShieldAlert,
+  },
+  HIGH: {
+    tone: "high",
+    badge: "优先复核",
+    title: "存在高危可疑行为",
+    desc: "已发现高风险模式，适合先聚焦命中次数最多的文件和类别，缩短人工排查路径。",
+    Icon: AlertCircle,
+  },
+  MEDIUM: {
+    tone: "medium",
+    badge: "建议核验",
+    title: "发现需确认的中风险项",
+    desc: "当前更像是可疑指令或外部依赖提示，建议结合上下文继续确认是否真实构成威胁。",
+    Icon: FileSearch,
+  },
+  LOW: {
+    tone: "low",
+    badge: "留意观察",
+    title: "存在低风险提示项",
+    desc: "当前以信息提示为主，建议继续人工抽查说明文档、安装脚本和外链来源。",
+    Icon: FileSearch,
+  },
+  CLEAN: {
+    tone: "clean",
+    badge: "通过初筛",
+    title: "未发现命中规则",
+    desc: "本轮扫描未命中风险规则，但仍建议对关键脚本、外链和依赖来源做人工复核。",
+    Icon: Sparkles,
+  },
+};
 
 function formatBytes(value) {
   if (!value && value !== 0) return "--";
   if (value < 1024) return `${value} B`;
   if (value < 1024 * 1024) return `${(value / 1024).toFixed(1)} KB`;
   return `${(value / (1024 * 1024)).toFixed(2)} MB`;
+}
+
+function formatScanTime(value) {
+  if (!value) return "--";
+
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
+
+  return new Intl.DateTimeFormat("zh-CN", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: false,
+  }).format(date);
 }
 
 function inferType(file) {
@@ -83,6 +143,72 @@ function makeUploadRecords(fileList, sourceId) {
     file,
     updatedAt: new Date().toLocaleString("zh-CN", { hour12: false }),
   }));
+}
+
+function getTopSeverity(summary = {}) {
+  return SEVERITY_ORDER.find((severity) => (summary[severity] ?? 0) > 0) || null;
+}
+
+function getResultTone(findingsCount, severitySummary) {
+  if (!findingsCount) return RESULT_TONES.CLEAN;
+  const topSeverity = getTopSeverity(severitySummary);
+  return RESULT_TONES[topSeverity] || RESULT_TONES.LOW;
+}
+
+function getCategoryHighlights(findings) {
+  const grouped = new Map();
+
+  findings.forEach((item) => {
+    const key = item.category || "未分类";
+    const current = grouped.get(key);
+    const severity = SEVERITY_ORDER.includes(item.severity) ? item.severity : "LOW";
+
+    if (current) {
+      current.count += 1;
+      if (SEVERITY_RANK[severity] < SEVERITY_RANK[current.severity]) {
+        current.severity = severity;
+      }
+      return;
+    }
+
+    grouped.set(key, {
+      category: key,
+      count: 1,
+      severity,
+    });
+  });
+
+  return Array.from(grouped.values())
+    .sort((left, right) => {
+      const severityDiff = SEVERITY_RANK[left.severity] - SEVERITY_RANK[right.severity];
+      if (severityDiff !== 0) return severityDiff;
+      return right.count - left.count;
+    })
+    .slice(0, 4);
+}
+
+function buildRecommendations({ findingsCount, topSeverity, affectedFileCount, scanSource }) {
+  if (!findingsCount) {
+    return [
+      "当前没有命中规则，但仍建议抽查关键脚本与外部链接。",
+      "可优先检查安装命令、依赖下载和权限申请说明是否合理。",
+      scanSource === "slug" ? "如来自远程 slug，建议补充一次本地解压复核。" : "如样本后续更新，建议重新扫描最新版本。",
+    ];
+  }
+
+  if (topSeverity === "CRITICAL" || topSeverity === "HIGH") {
+    return [
+      `优先隔离涉及的 ${affectedFileCount || 0} 个文件路径，避免继续分发或执行。`,
+      "先人工复核命中说明与命中文本，确认是否属于真实执行链或敏感资源访问。",
+      scanSource === "slug" ? "若为远程拉取样本，建议同步确认来源仓库和下载链路是否可信。" : "若为上传样本，建议保留原始包与扫描报告作为追溯依据。",
+    ];
+  }
+
+  return [
+    "先聚焦中低风险类别中命中次数最多的几项，确认是否只是正常说明文案。",
+    "复核外链、安装命令和权限相关描述，判断是否存在误报或上下文依赖。",
+    "如需继续收敛范围，可结合文件路径和行号做人工快速抽查。",
+  ];
 }
 
 function SeverityBadge({ severity }) {
@@ -110,6 +236,41 @@ function SkillDetectWorkspace() {
   const findings = Array.isArray(scanReport?.findings) ? scanReport.findings : [];
   const visibleFindings = findings.slice(0, 200);
   const hasFindingOverflow = findings.length > visibleFindings.length;
+  const findingsCount = scanReport?.summary?.total_findings ?? 0;
+  const scannedFilesCount = scanReport?.summary?.total_files_scanned ?? 0;
+  const topSeverity = getTopSeverity(severitySummary);
+  const resultTone = getResultTone(findingsCount, severitySummary);
+  const affectedFileCount = useMemo(
+    () => new Set(findings.map((item) => item.file).filter(Boolean)).size,
+    [findings],
+  );
+  const categoryHighlights = useMemo(() => getCategoryHighlights(findings), [findings]);
+  const categoryCount = categoryHighlights.length
+    ? new Set(findings.map((item) => item.category || "未分类")).size
+    : 0;
+  const recommendations = buildRecommendations({
+    findingsCount,
+    topSeverity,
+    affectedFileCount,
+    scanSource,
+  });
+  const sourceBadgeText = scanReport ? (scanSource === "slug" ? "来源：slug 扫描" : "来源：上传样本") : "";
+  const reportMetaItems = scanReport
+    ? [
+        { label: "Skill 名称", value: scanReport?.scan_metadata?.skill_name || "--" },
+        { label: "扫描时间", value: formatScanTime(scanReport?.scan_metadata?.scanned_at) },
+        { label: "结果来源", value: scanReport?.scan_metadata?.source || "--" },
+      ]
+    : [];
+  const primaryMetrics = scanReport
+    ? [
+        { label: "总发现", value: findingsCount, hint: "命中规则" },
+        { label: "影响文件", value: affectedFileCount, hint: "涉及路径" },
+        { label: "风险类别", value: categoryCount, hint: "聚合维度" },
+        { label: "扫描文件", value: scannedFilesCount, hint: "已分析文件" },
+      ]
+    : [];
+  const ToneIcon = resultTone.Icon;
 
   function appendUploads(fileList, sourceId) {
     if (!fileList?.length) return;
@@ -276,7 +437,9 @@ function SkillDetectWorkspace() {
           <div className="skill-card-head">
             <div>
               <div className="skill-card-title">Skill 库扫描入口</div>
-              <div className="skill-card-desc">输入 Skill slug，调用 `scanner` 扫描脚本完成远程拉取与安全检查。</div>
+              <div className="skill-card-desc">
+                输入 Skill slug，调用 `scanner` 扫描脚本完成远程拉取与安全检查。
+              </div>
             </div>
             <span className="oc-badge oc-badge-online">已接后端</span>
           </div>
@@ -372,13 +535,13 @@ function SkillDetectWorkspace() {
         )}
       </div>
 
-      <div className="skill-upload-list">
-        <div className="skill-card-head">
+      <div className="skill-upload-list skill-result-panel">
+        <div className="skill-card-head skill-card-head--result">
           <div>
             <div className="skill-card-title">扫描结果</div>
             <div className="skill-card-desc">展示 `scanner/scripts/scan_skill.py` 返回的结构化结果。</div>
           </div>
-          {scanReport ? <span className="oc-badge oc-badge-review">{scanSource === "slug" ? "来源：slug" : "来源：上传样本"}</span> : null}
+          {scanReport ? <span className="oc-badge oc-badge-review">{sourceBadgeText}</span> : null}
         </div>
 
         {isScanning ? (
@@ -404,67 +567,157 @@ function SkillDetectWorkspace() {
 
         {scanReport ? (
           <>
+            <section className={`skill-result-hero is-${resultTone.tone}`}>
+              <div className="skill-result-hero-main">
+                <div className={`skill-result-hero-icon is-${resultTone.tone}`}>
+                  <ToneIcon size={22} strokeWidth={1.9} />
+                </div>
+                <div className="skill-result-hero-copy">
+                  <span className={`skill-result-hero-badge is-${resultTone.tone}`}>{resultTone.badge}</span>
+                  <h3 className="skill-result-hero-title">{resultTone.title}</h3>
+                  <p className="skill-result-hero-desc">{resultTone.desc}</p>
+                  <div className="skill-result-meta">
+                    {reportMetaItems.map((item) => (
+                      <span key={item.label}>
+                        {item.label}：{item.value}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              <div className="skill-result-hero-side">
+                <div className="skill-result-hero-stat">
+                  <span className="skill-result-hero-stat-label">首要级别</span>
+                  <strong>{topSeverity ? SEVERITY_LABELS[topSeverity] : "无命中"}</strong>
+                </div>
+                <div className="skill-result-hero-stat">
+                  <span className="skill-result-hero-stat-label">优先核查</span>
+                  <strong>{categoryHighlights[0]?.category || "人工复核"}</strong>
+                </div>
+              </div>
+            </section>
+
             <div className="skill-result-summary-grid">
-              <div className="skill-summary-card">
-                <span className="skill-summary-label">总发现</span>
-                <strong>{scanReport?.summary?.total_findings ?? 0}</strong>
-              </div>
-              <div className="skill-summary-card">
-                <span className="skill-summary-label">扫描文件数</span>
-                <strong>{scanReport?.summary?.total_files_scanned ?? 0}</strong>
-              </div>
-              {SEVERITY_ORDER.map((severity) => (
-                <div key={severity} className="skill-summary-card">
-                  <span className="skill-summary-label">{SEVERITY_LABELS[severity]}</span>
-                  <strong>{severitySummary[severity] ?? 0}</strong>
+              {primaryMetrics.map((metric) => (
+                <div key={metric.label} className="skill-metric-card">
+                  <span className="skill-summary-label">{metric.label}</span>
+                  <strong>{metric.value}</strong>
+                  <span className="skill-metric-hint">{metric.hint}</span>
                 </div>
               ))}
             </div>
 
-            <div className="skill-result-meta">
-              <span>Skill 名称：{scanReport?.scan_metadata?.skill_name || "--"}</span>
-              <span>扫描时间：{scanReport?.scan_metadata?.scanned_at || "--"}</span>
-              <span>来源：{scanReport?.scan_metadata?.source || "--"}</span>
+            <div className="skill-severity-strip">
+              {SEVERITY_ORDER.map((severity) => (
+                <div key={severity} className={`skill-severity-card is-${severity.toLowerCase()}`}>
+                  <div className="skill-severity-card-top">
+                    <SeverityBadge severity={severity} />
+                    <span className="skill-severity-count">{severitySummary[severity] ?? 0}</span>
+                  </div>
+                  <div className="skill-severity-card-foot">规则命中</div>
+                </div>
+              ))}
+            </div>
+
+            <div className="skill-result-insight-grid">
+              <div className="skill-insight-card">
+                <div className="skill-insight-head">
+                  <div className="skill-insight-icon">
+                    <ShieldAlert size={18} strokeWidth={1.8} />
+                  </div>
+                  <div>
+                    <div className="skill-card-title">风险聚焦</div>
+                    <div className="skill-card-desc">按类别聚合命中结果，帮助先看最值得排查的区域。</div>
+                  </div>
+                </div>
+
+                {categoryHighlights.length ? (
+                  <div className="skill-insight-list">
+                    {categoryHighlights.map((item) => (
+                      <div key={item.category} className="skill-insight-row">
+                        <div className="skill-insight-main">
+                          <span className="skill-insight-name">{item.category}</span>
+                          <span className="skill-insight-meta">{item.count} 条命中</span>
+                        </div>
+                        <SeverityBadge severity={item.severity} />
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="skill-inline-empty">本次扫描没有命中类别，可继续做人工抽查。</div>
+                )}
+              </div>
+
+              <div className="skill-insight-card">
+                <div className="skill-insight-head">
+                  <div className="skill-insight-icon">
+                    <FileSearch size={18} strokeWidth={1.8} />
+                  </div>
+                  <div>
+                    <div className="skill-card-title">处置建议</div>
+                    <div className="skill-card-desc">根据本次风险分布给出下一步建议，方便快速继续排查。</div>
+                  </div>
+                </div>
+
+                <div className="skill-recommend-list">
+                  {recommendations.map((item) => (
+                    <div key={item} className="skill-recommend-item">
+                      {item}
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
 
             {visibleFindings.length ? (
-              <div className="skill-finding-table-wrap">
-                <table className="skill-finding-table">
-                  <thead>
-                    <tr>
-                      <th>级别</th>
-                      <th>类别</th>
-                      <th>说明</th>
-                      <th>文件</th>
-                      <th>行号</th>
-                      <th>命中文本</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {visibleFindings.map((item, index) => (
-                      <tr key={`${item.file || "unknown"}-${item.line || 0}-${index}`}>
-                        <td>
-                          <SeverityBadge severity={item.severity} />
-                        </td>
-                        <td>{item.category || "--"}</td>
-                        <td>{item.message || "--"}</td>
-                        <td className="is-mono">{item.file || "--"}</td>
-                        <td>{item.line ?? "--"}</td>
-                        <td className="is-mono">{item.matched_text || "--"}</td>
+              <div className="skill-table-shell">
+                <div className="skill-table-toolbar">
+                  <div>
+                    <div className="skill-card-title">命中明细</div>
+                    <div className="skill-card-desc">保留结构化表格，便于继续按文件、行号和命中文本做人工判断。</div>
+                  </div>
+                  <div className="skill-table-toolbar-note">当前展示 {visibleFindings.length} 条结果</div>
+                </div>
+
+                <div className="skill-finding-table-wrap">
+                  <table className="skill-finding-table">
+                    <thead>
+                      <tr>
+                        <th>级别</th>
+                        <th>类别</th>
+                        <th>说明</th>
+                        <th>文件</th>
+                        <th>行号</th>
+                        <th>命中文本</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody>
+                      {visibleFindings.map((item, index) => (
+                        <tr key={`${item.file || "unknown"}-${item.line || 0}-${index}`}>
+                          <td>
+                            <SeverityBadge severity={item.severity} />
+                          </td>
+                          <td>{item.category || "--"}</td>
+                          <td>{item.message || "--"}</td>
+                          <td className="is-mono">{item.file || "--"}</td>
+                          <td>{item.line ?? "--"}</td>
+                          <td className="is-mono">{item.matched_text || "--"}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               </div>
             ) : (
-              <div className="skill-empty-state">
-                <ShieldAlert size={20} strokeWidth={1.8} />
+              <div className="skill-empty-state skill-clean-state">
+                <Sparkles size={20} strokeWidth={1.8} />
                 <span>本次扫描未发现命中的风险规则。</span>
               </div>
             )}
 
             {hasFindingOverflow ? (
-              <div className="skill-result-footnote">发现项较多，仅展示前 200 条，请在后端日志中查看完整结果。</div>
+              <div className="skill-result-footnote">发现项较多，当前仅展示前 200 条，请结合后端日志查看完整结果。</div>
             ) : null}
           </>
         ) : null}
