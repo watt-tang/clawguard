@@ -14,7 +14,7 @@ import SidebarStatus from "./SidebarStatus";
 
 const NAV_ITEMS = [
   { id: "home", label: "平台主页", icon: House },
-  { id: "governance", label: "OpenClaw安全治理总览", icon: ShieldCheck },
+  { id: "governance", label: "claw系列产品安全总览", icon: ShieldCheck },
   { id: "risk", label: "OpenClaw风险漏洞追踪", icon: AlertTriangle, expandable: true },
   { id: "exposure", label: "OpenClaw公网暴露监测", icon: Globe },
   { id: "skill", label: "Skill生态后门投毒治理", icon: ShieldEllipsis },

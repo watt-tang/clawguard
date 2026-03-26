@@ -28,7 +28,7 @@ const MODULES = [
   },
   {
     icon: ShieldCheck,
-    label: "OpenClaw 安全治理总览",
+    label: "claw系列产品安全总览",
     pageId: "openclaw-governance",
     description: "聚合安全事件、告警、处置进度与风险看板。",
     status: "建设中",
@@ -370,7 +370,7 @@ export default function App() {
     }
 
     if (activePage === "skill-governance") {
-      return <SkillGovernancePage />;
+      return <SkillGovernancePage auth={auth} />;
     }
 
     return <PlaceholderPage module={activeModule} />;

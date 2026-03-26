@@ -11,7 +11,7 @@ export default function HomePage() {
     },
     {
       icon: Shield,
-      title: "OpenClaw 安全治理总览",
+      title: "claw系列产品安全总览",
       desc: "聚合安全事件、告警与处置状态，提供 OpenClaw 生态治理态势的全局视图。",
       status: "建设中",
       statusOk: false,

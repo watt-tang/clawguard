@@ -9,10 +9,14 @@ import tailwindcss from "@tailwindcss/vite";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const SCANNER_SCRIPT_PATH = path.resolve(__dirname, "../scanner/scripts/scan_skill.py");
+const UNIFIED_SCANNER_SCRIPT_PATH = path.resolve(__dirname, "../scanners/scanner2/unified_cli.py");
+const REPO_VENV_PYTHON_WINDOWS = path.resolve(__dirname, "../.venv-skill-scan/Scripts/python.exe");
+const REPO_VENV_PYTHON_POSIX = path.resolve(__dirname, "../.venv-skill-scan/bin/python");
 const TEMP_PREFIX = "clawguard-skill-scan-";
 const MAX_REQUEST_SIZE_BYTES = 50 * 1024 * 1024;
 const PYTHON_CANDIDATES = [
+  [REPO_VENV_PYTHON_WINDOWS, []],
+  [REPO_VENV_PYTHON_POSIX, []],
   ["py", ["-3"]],
   ["python3", []],
   ["python", []],
@@ -43,6 +47,58 @@ for zip_path in zip_files:
                     f"Zip Slip detected: '{member.filename}' escapes extraction target '{target_resolved}'."
                 )
         zf.extractall(target)
+`;
+const CLAWHUB_DOWNLOAD_INLINE_PY = `
+import os
+import pathlib
+import sys
+import urllib.request
+import zipfile
+
+CLAWHUB_API_BASE = "https://clawhub.ai/api/v1"
+tmp_dir = pathlib.Path(sys.argv[1]).resolve()
+slug = sys.argv[2].strip()
+version = sys.argv[3].strip() or None
+
+if not slug:
+    raise SystemExit("Skill slug is required.")
+
+safe_slug = slug.replace("/", "_").replace("\\\\", "_")
+download_url = f"{CLAWHUB_API_BASE}/download?slug={slug}"
+if version:
+    download_url += f"&version={version}"
+
+zip_path = tmp_dir / f"{safe_slug}.zip"
+request = urllib.request.Request(download_url, headers={"User-Agent": "clawguard-unified-scan/1.0"})
+with urllib.request.urlopen(request, timeout=120) as response:
+    zip_path.write_bytes(response.read())
+
+extract_dir = tmp_dir / "downloaded_skill"
+extract_dir.mkdir(parents=True, exist_ok=True)
+
+with zipfile.ZipFile(zip_path, "r") as zf:
+    extract_root = extract_dir.resolve()
+    for member in zf.infolist():
+        member_path = (extract_dir / pathlib.Path(member.filename)).resolve()
+        if not str(member_path).startswith(str(extract_root) + os.sep) and member_path != extract_root:
+            raise RuntimeError(
+                f"Zip Slip detected: '{member.filename}' escapes extraction target '{extract_root}'."
+            )
+    zf.extractall(extract_dir)
+
+matches = [path.parent for path in extract_dir.rglob("SKILL.md")]
+if len(matches) == 1:
+    print(matches[0])
+    raise SystemExit(0)
+
+entries = list(extract_dir.iterdir()) if extract_dir.exists() else []
+directories = [entry for entry in entries if entry.is_dir()]
+files = [entry for entry in entries if entry.is_file()]
+
+if not files and len(directories) == 1:
+    print(directories[0])
+else:
+    print(extract_dir)
 `;
 
 function sendJson(res, statusCode, payload) {
@@ -154,10 +210,10 @@ function findSkillRoot(tempDir) {
   return tempDir;
 }
 
-function spawnAndCapture(command, args) {
+function spawnAndCapture(command, args, cwd = __dirname) {
   return new Promise((resolve, reject) => {
     const child = spawn(command, args, {
-      cwd: path.dirname(SCANNER_SCRIPT_PATH),
+      cwd,
       stdio: ["ignore", "pipe", "pipe"],
     });
 
@@ -187,12 +243,13 @@ function spawnAndCapture(command, args) {
   });
 }
 
-async function runPythonCommand(args) {
+async function runPythonCommand(args, options = {}) {
   let lastError = null;
+  const { cwd = __dirname } = options;
 
   for (const [python, prefixArgs] of PYTHON_CANDIDATES) {
     try {
-      return await spawnAndCapture(python, [...prefixArgs, ...args]);
+      return await spawnAndCapture(python, [...prefixArgs, ...args], cwd);
     } catch (error) {
       lastError = error;
     }
@@ -205,9 +262,69 @@ async function extractZipFiles(tempDir) {
   await runPythonCommand(["-c", ZIP_EXTRACT_INLINE_PY, tempDir]);
 }
 
-async function runScanner(scanArgs) {
+async function prepareSlugSkillRoot(slug, version = "") {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), TEMP_PREFIX));
   try {
-    return await runPythonCommand([SCANNER_SCRIPT_PATH, ...scanArgs]);
+    const result = await runPythonCommand(["-c", CLAWHUB_DOWNLOAD_INLINE_PY, tempDir, slug, version || ""]);
+    const skillRoot = String(result.stdout || "").trim();
+
+    if (!skillRoot || !fs.existsSync(skillRoot)) {
+      throw new Error("Failed to locate downloaded skill directory.");
+    }
+
+    return { tempDir, skillRoot };
+  } catch (error) {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+    if (error instanceof Error) {
+      throw new Error(`Failed to download skill by slug: ${error.message}`);
+    }
+    throw error;
+  }
+}
+
+function buildUnifiedScannerArgs(targetPath, options = {}) {
+  const authState = options.authState === "authenticated" ? "authenticated" : "guest";
+  const args = [UNIFIED_SCANNER_SCRIPT_PATH, targetPath, "--auth-state", authState];
+
+  if (typeof options.deepseekApiKey === "string" && options.deepseekApiKey.trim()) {
+    args.push("--deepseek-api-key", options.deepseekApiKey.trim());
+  }
+  if (typeof options.deepseekModel === "string" && options.deepseekModel.trim()) {
+    args.push("--deepseek-model", options.deepseekModel.trim());
+  }
+  if (typeof options.deepseekBaseUrl === "string" && options.deepseekBaseUrl.trim()) {
+    args.push("--deepseek-base-url", options.deepseekBaseUrl.trim());
+  }
+  if (typeof options.language === "string" && options.language.trim()) {
+    args.push("--language", options.language.trim());
+  }
+  if (Number.isFinite(options.timeoutMs) && options.timeoutMs > 0) {
+    args.push("--timeout-ms", String(options.timeoutMs));
+  }
+  if (Array.isArray(options.enableScanners)) {
+    for (const scannerId of options.enableScanners) {
+      if (typeof scannerId === "string" && scannerId.trim()) {
+        args.push("--enable-scanner", scannerId.trim());
+      }
+    }
+  }
+  if (Array.isArray(options.disableScanners)) {
+    for (const scannerId of options.disableScanners) {
+      if (typeof scannerId === "string" && scannerId.trim()) {
+        args.push("--disable-scanner", scannerId.trim());
+      }
+    }
+  }
+
+  return args;
+}
+
+async function runUnifiedScanner(scanOptions) {
+  try {
+    const scanArgs = buildUnifiedScannerArgs(scanOptions.targetPath, scanOptions);
+    return await runPythonCommand(scanArgs, {
+      cwd: path.dirname(UNIFIED_SCANNER_SCRIPT_PATH),
+    });
   } catch (error) {
     if (error instanceof Error) {
       throw new Error(`Failed to run scanner: ${error.message}`);
@@ -241,10 +358,10 @@ function skillScanApiPlugin() {
           return;
         }
 
-        if (!fs.existsSync(SCANNER_SCRIPT_PATH)) {
+        if (!fs.existsSync(UNIFIED_SCANNER_SCRIPT_PATH)) {
           sendJson(res, 500, {
             ok: false,
-            message: `Scanner script not found: ${SCANNER_SCRIPT_PATH}`,
+            message: `Scanner script not found: ${UNIFIED_SCANNER_SCRIPT_PATH}`,
           });
           return;
         }
@@ -255,6 +372,17 @@ function skillScanApiPlugin() {
           const slug = typeof body.slug === "string" ? body.slug.trim() : "";
           const version = typeof body.version === "string" ? body.version.trim() : "";
           const files = Array.isArray(body.files) ? body.files : [];
+          const authState = body.authState === "authenticated" ? "authenticated" : "guest";
+          const scanOptions = {
+            authState,
+            deepseekApiKey: typeof body.deepseekApiKey === "string" ? body.deepseekApiKey : "",
+            deepseekModel: typeof body.deepseekModel === "string" ? body.deepseekModel : "",
+            deepseekBaseUrl: typeof body.deepseekBaseUrl === "string" ? body.deepseekBaseUrl : "",
+            language: typeof body.language === "string" ? body.language : "zh",
+            timeoutMs: Number(body.timeoutMs),
+            enableScanners: Array.isArray(body.enableScanners) ? body.enableScanners : [],
+            disableScanners: Array.isArray(body.disableScanners) ? body.disableScanners : [],
+          };
 
           if (!slug && !files.length) {
             sendJson(res, 400, {
@@ -264,19 +392,21 @@ function skillScanApiPlugin() {
             return;
           }
 
-          let scanArgs = [];
+          let targetPath = "";
           if (slug) {
-            scanArgs = ["--slug", slug];
-            if (version) {
-              scanArgs.push("--version", version);
-            }
+            const prepared = await prepareSlugSkillRoot(slug, version);
+            tempDir = prepared.tempDir;
+            targetPath = prepared.skillRoot;
           } else {
             const prepared = await prepareUploadedSkillRoot(files);
             tempDir = prepared.tempDir;
-            scanArgs = [prepared.skillRoot];
+            targetPath = prepared.skillRoot;
           }
 
-          const result = await runScanner(scanArgs);
+          const result = await runUnifiedScanner({
+            ...scanOptions,
+            targetPath,
+          });
           let report = null;
           try {
             report = JSON.parse(result.stdout);

@@ -1,14 +1,24 @@
+import fs from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+import maxmind from "maxmind";
 import { prisma } from "../lib/prisma.mjs";
 import { formatDate, formatDateTime } from "../lib/date.mjs";
 
 const DEFAULT_SOURCE_DIR = "web/clawdbot_alive";
 const CACHE_TTL_MS = Math.max(1000, Number(process.env.EXPOSURE_CACHE_TTL_MS || 30000));
 const endpointCache = new Map();
+const geoLookupCache = new Map();
+let cityReaderPromise;
 const DOMESTIC_SCOPE_KEYWORD = "\u5883\u5185";
 const DOMESTIC_SCOPE_LIKE = `%${DOMESTIC_SCOPE_KEYWORD}%`;
 const HIGH_RISK_CN = "\u9AD8\u5371";
 const UNKNOWN_PROVINCE_ZH = "\u672A\u77E5";
 const INVALID_CHINA_DIVISION_NAMES = new Set(["", "-", "Unknown", "unknown", UNKNOWN_PROVINCE_ZH, "δ֪"]);
+
+const INVALID_GEO_NAMES = new Set(["", "-", "Unknown", "unknown", "UNKNOWN", "\u672A\u77E5", UNKNOWN_PROVINCE_ZH]);
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const projectRoot = path.resolve(__dirname, "../..");
 
 function normalizeChinaDivisionName(name) {
   const raw = String(name || "").trim();
@@ -58,6 +68,106 @@ function maskIp(ip) {
   return parts.length === 4 ? `${parts[0]}.*.*.${parts[3]}` : String(ip);
 }
 
+function readFirstExistingPath(candidates) {
+  for (const candidate of candidates) {
+    if (!candidate) continue;
+    const resolved = path.resolve(candidate);
+    if (fs.existsSync(resolved) && fs.statSync(resolved).isFile()) {
+      return resolved;
+    }
+  }
+  return null;
+}
+
+function pickLocalizedName(node, locales = ["zh-CN", "en"]) {
+  if (!node?.names) return "";
+
+  for (const locale of locales) {
+    if (node.names[locale]) return node.names[locale];
+  }
+
+  return Object.values(node.names)[0] || "";
+}
+
+function normalizeGeoName(value) {
+  const raw = String(value || "").trim();
+  if (!raw || INVALID_GEO_NAMES.has(raw)) return "";
+  return raw;
+}
+
+async function getCityReader() {
+  if (!cityReaderPromise) {
+    cityReaderPromise = (async () => {
+      const dbPath = readFirstExistingPath([
+        process.env.GEOLITE2_CITY_DB,
+        path.join(projectRoot, "geoip", "GeoLite2-City.mmdb"),
+        path.join(projectRoot, "data", "GeoLite2-City.mmdb"),
+        path.join(projectRoot, "GeoLite2-City.mmdb"),
+        path.join(projectRoot, "server", "data", "GeoLite2-City.mmdb"),
+      ]);
+
+      if (!dbPath) return null;
+
+      try {
+        return await maxmind.open(dbPath);
+      } catch (error) {
+        console.warn(`[exposure-api] Failed to load GeoLite2-City: ${error.message}`);
+        return null;
+      }
+    })();
+  }
+
+  return cityReaderPromise;
+}
+
+async function lookupLocalizedGeo(ip) {
+  const normalizedIp = String(ip || "").trim();
+  if (!normalizedIp) return null;
+
+  if (geoLookupCache.has(normalizedIp)) {
+    return geoLookupCache.get(normalizedIp);
+  }
+
+  const reader = await getCityReader();
+  if (!reader) {
+    geoLookupCache.set(normalizedIp, null);
+    return null;
+  }
+
+  const geo = reader.get(normalizedIp);
+  const localized = geo
+    ? {
+        countryZh: normalizeGeoName(pickLocalizedName(geo.country, ["zh-CN", "en"])),
+        subdivisionZh: normalizeGeoName(pickLocalizedName(geo.subdivisions?.[0], ["zh-CN", "en"])),
+        cityZh: normalizeGeoName(pickLocalizedName(geo.city, ["zh-CN", "en"])),
+      }
+    : null;
+
+  geoLookupCache.set(normalizedIp, localized);
+  return localized;
+}
+
+function buildLocalizedRegion(row, localizedGeo) {
+  const country =
+    normalizeGeoName(localizedGeo?.countryZh) || normalizeGeoName(row.countryZh) || normalizeGeoName(row.country);
+  const isChina = row.country === "China" || String(row.countryZh || "").includes("\u4E2D\u56FD");
+  const subdivision = normalizeGeoName(localizedGeo?.subdivisionZh) || (isChina ? normalizeGeoName(row.province) : "");
+
+  const parts = [];
+  if (country) parts.push(country);
+  if (subdivision && subdivision !== country) parts.push(subdivision);
+
+  if (parts.length) {
+    return parts.join(" / ");
+  }
+
+  return row.region || row.location || "-";
+}
+
+function buildLocalizedCity(row, localizedGeo) {
+  return normalizeGeoName(localizedGeo?.cityZh) || normalizeGeoName(row.city) || "-";
+}
+
 function readCache(key) {
   const cached = endpointCache.get(key);
   if (!cached) return null;
@@ -80,16 +190,20 @@ function buildCacheKey(endpoint, latestSnapshot) {
   return `${endpoint}:${latestSnapshot?.dateKey || "none"}`;
 }
 
-function toResponseRow(row, latestDateKey, isLoggedIn) {
+async function toResponseRow(row, latestDateKey, isLoggedIn) {
+  const localizedGeo = await lookupLocalizedGeo(row.ip);
+  const localizedRegion = buildLocalizedRegion(row, localizedGeo);
+  const localizedCity = buildLocalizedCity(row, localizedGeo);
+
   const formatted = {
     id: `${row.ip}-${latestDateKey}`,
     ip: row.ip,
     host: row.host,
     service: row.service,
     serviceDesc: row.serviceDesc,
-    region: row.region,
-    location: row.region,
-    city: row.city,
+    region: localizedRegion,
+    location: localizedRegion,
+    city: localizedCity,
     isp: row.isp,
     asn: row.asn,
     operator: row.operator,
@@ -458,7 +572,13 @@ export async function getExposureList(query = {}) {
   }
 
   if (location) {
-    where.OR = [{ region: { contains: location } }, { country: { contains: location } }, { city: { contains: location } }];
+    where.OR = [
+      { region: { contains: location } },
+      { country: { contains: location } },
+      { countryZh: { contains: location } },
+      { province: { contains: location } },
+      { city: { contains: location } },
+    ];
   }
 
   const total = await prisma.exposureRecord.count({ where });
@@ -468,6 +588,9 @@ export async function getExposureList(query = {}) {
     orderBy: [{ ip: "asc" }],
     select: {
       ip: true,
+      country: true,
+      countryZh: true,
+      province: true,
       host: true,
       service: true,
       serviceDesc: true,
@@ -491,7 +614,7 @@ export async function getExposureList(query = {}) {
   }
 
   const rawRows = await prisma.exposureRecord.findMany(queryOptions);
-  const rows = rawRows.map((row) => toResponseRow(row, latest.dateKey, isLoggedIn));
+  const rows = await Promise.all(rawRows.map((row) => toResponseRow(row, latest.dateKey, isLoggedIn)));
 
   return {
     total,

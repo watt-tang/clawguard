@@ -1,5 +1,23 @@
 const SKILL_SCAN_ENDPOINT = "/api/skill/scan";
 
+function normalizeScanOptions(options = {}) {
+  const authState = options.authState === "authenticated" ? "authenticated" : "guest";
+  const deepseekApiKey = String(options.deepseekApiKey || "").trim();
+  const deepseekModel = String(options.deepseekModel || "").trim();
+  const deepseekBaseUrl = String(options.deepseekBaseUrl || "").trim();
+  const language = String(options.language || "").trim();
+  const timeoutMs = Number(options.timeoutMs);
+
+  return {
+    authState,
+    ...(deepseekApiKey ? { deepseekApiKey } : {}),
+    ...(deepseekModel ? { deepseekModel } : {}),
+    ...(deepseekBaseUrl ? { deepseekBaseUrl } : {}),
+    ...(language ? { language } : {}),
+    ...(Number.isFinite(timeoutMs) && timeoutMs > 0 ? { timeoutMs } : {}),
+  };
+}
+
 function toBase64(file) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -38,7 +56,7 @@ async function requestScan(payload) {
   return data.report;
 }
 
-export async function scanSkillFiles(uploadRecords) {
+export async function scanSkillFiles(uploadRecords, options = {}) {
   if (!Array.isArray(uploadRecords) || !uploadRecords.length) {
     throw new Error("No upload files to scan.");
   }
@@ -58,10 +76,13 @@ export async function scanSkillFiles(uploadRecords) {
     }),
   );
 
-  return requestScan({ files });
+  return requestScan({
+    files,
+    ...normalizeScanOptions(options),
+  });
 }
 
-export async function scanSkillBySlug(slug, version = "") {
+export async function scanSkillBySlug(slug, version = "", options = {}) {
   const cleanSlug = String(slug || "").trim();
   const cleanVersion = String(version || "").trim();
 
@@ -72,5 +93,6 @@ export async function scanSkillBySlug(slug, version = "") {
   return requestScan({
     slug: cleanSlug,
     ...(cleanVersion ? { version: cleanVersion } : {}),
+    ...normalizeScanOptions(options),
   });
 }
