@@ -47,7 +47,9 @@ class BaseAgent:
             capabilities: List[str] = None,
             output_format: Optional[str] = None,
             output_check_fn: callable = None,
-            language: str = "zh"
+            language: str = "zh",
+            max_iter: int = 80,
+            format_retries: int = 3,
     ):
         self.llm = llm
         self.name = name
@@ -57,7 +59,7 @@ class BaseAgent:
         self.capabilities = capabilities or ["standard"]
         self.output_format = output_format
         self.history = []
-        self.max_iter = 80
+        self.max_iter = max(1, int(max_iter))
         self.iter = 0
         self.is_finished = False
         self.step_id = log_step_id
@@ -65,6 +67,7 @@ class BaseAgent:
         self.repo_dir = ""
         self.output_check_fn = output_check_fn
         self.language = language
+        self.format_retries = max(1, int(format_retries))
 
     async def initialize(self):
         """异步初始化系统提示词"""
@@ -207,7 +210,7 @@ class BaseAgent:
         )
         recent_history.append({"role": "user", "content": formatting_prompt})
         final_output = ""
-        for _ in range(3):
+        for _ in range(self.format_retries):
             final_output = self.llm.chat(recent_history)
             logger.info(f"Final Output: {final_output}")
             if self.output_check_fn:

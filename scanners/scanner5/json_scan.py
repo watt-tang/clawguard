@@ -19,6 +19,11 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--model", default="deepseek-chat", help="Model name")
     parser.add_argument("--prompt", default="", help="Optional extra prompt")
     parser.add_argument("--language", default="zh", choices=["zh", "en"], help="Output language")
+    parser.add_argument(
+        "--fast-mode",
+        action="store_true",
+        help="Enable optimized fast workflow to reduce LLM round trips",
+    )
     return parser
 
 
@@ -38,7 +43,14 @@ async def run_scan(args: argparse.Namespace) -> dict:
             api_key=args.api_key,
         )
     specialized_llms = llm_manager.get_specialized_llms(["thinking", "coding"])
-    agent = Agent(llm=llm, specialized_llms=specialized_llms, debug=False, server_url=None, language=args.language)
+    agent = Agent(
+        llm=llm,
+        specialized_llms=specialized_llms,
+        debug=False,
+        server_url=None,
+        language=args.language,
+        fast_mode=args.fast_mode,
+    )
     try:
         return await agent.scan(args.repo, args.prompt)
     finally:

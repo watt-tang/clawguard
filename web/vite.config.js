@@ -2,6 +2,7 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { spawn } from "node:child_process";
+import { randomUUID } from "node:crypto";
 import { fileURLToPath } from "node:url";
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
@@ -14,6 +15,10 @@ const REPO_VENV_PYTHON_WINDOWS = path.resolve(__dirname, "../.venv-skill-scan/Sc
 const REPO_VENV_PYTHON_POSIX = path.resolve(__dirname, "../.venv-skill-scan/bin/python");
 const TEMP_PREFIX = "clawguard-skill-scan-";
 const MAX_REQUEST_SIZE_BYTES = 50 * 1024 * 1024;
+const STATIC_SCANNER_IDS = ["scanner1", "scanner2"];
+const DEEP_ANALYSIS_SCANNER_IDS = ["scanner1", "scanner2", "scanner5"];
+const DEEP_SCAN_JOB_TTL_MS = 2 * 60 * 60 * 1000;
+const deepScanJobs = new Map();
 const PYTHON_CANDIDATES = [
   [REPO_VENV_PYTHON_WINDOWS, []],
   [REPO_VENV_PYTHON_POSIX, []],
@@ -348,11 +353,227 @@ async function prepareUploadedSkillRoot(files) {
   return { tempDir, skillRoot: findSkillRoot(tempDir) };
 }
 
+function parseScannerStdout(result) {
+  try {
+    return JSON.parse(result.stdout);
+  } catch {
+    throw new Error(`Scanner did not return valid JSON. ${result.stderr.trim()}`);
+  }
+}
+
+function getRequestUrl(req) {
+  return new URL(req.originalUrl || req.url || "/", "http://localhost");
+}
+
+function pruneDeepScanJobs() {
+  const now = Date.now();
+  for (const [scanId, job] of deepScanJobs.entries()) {
+    if ((job.status === "completed" || job.status === "failed") && now - job.updatedAt > DEEP_SCAN_JOB_TTL_MS) {
+      deepScanJobs.delete(scanId);
+    }
+  }
+}
+
+function buildDetectionReport(report, options = {}) {
+  const summary = report?.summary || {};
+  const targetName = path.basename(String(report?.target_path || "skill-scan")) || "skill-scan";
+  const timestamp = new Date().toISOString();
+  const safeTimestamp = timestamp.replace(/[.:]/g, "-");
+  const fileName = `${targetName}-detection-report-${safeTimestamp}.md`;
+  const findings = Array.isArray(report?.findings) ? report.findings : [];
+  const severityRank = { CRITICAL: 4, HIGH: 3, MEDIUM: 2, LOW: 1, INFO: 0, UNKNOWN: -1 };
+
+  const byCategory = new Map();
+  const byFile = new Map();
+  for (const item of findings) {
+    const category = String(item?.category || "未分类");
+    const severity = String(item?.severity || "UNKNOWN").toUpperCase();
+    const filePath = String(item?.file_path || "");
+
+    const categoryItem = byCategory.get(category) || { count: 0, maxSeverity: "UNKNOWN" };
+    categoryItem.count += 1;
+    if ((severityRank[severity] ?? -1) > (severityRank[categoryItem.maxSeverity] ?? -1)) {
+      categoryItem.maxSeverity = severity;
+    }
+    byCategory.set(category, categoryItem);
+
+    if (filePath) {
+      byFile.set(filePath, (byFile.get(filePath) || 0) + 1);
+    }
+  }
+
+  const topCategories = Array.from(byCategory.entries())
+    .sort((a, b) => {
+      const severityDiff = (severityRank[b[1].maxSeverity] ?? -1) - (severityRank[a[1].maxSeverity] ?? -1);
+      if (severityDiff !== 0) return severityDiff;
+      return b[1].count - a[1].count;
+    })
+    .slice(0, 6);
+
+  const hotFiles = Array.from(byFile.entries())
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 8);
+
+  const overall = String(summary.overall_conclusion || "unknown");
+  const stageAdvice = overall === "block"
+    ? "建议立即阻断上线，先完成高危修复与复测。"
+    : overall === "manual_review_required"
+      ? "建议进入人工复核流程，逐项确认可利用性与影响范围。"
+      : overall === "review_recommended"
+        ? "建议按风险类别分批整改，优先处理可触发链路。"
+        : "建议保持持续监控并纳入上线前抽检。";
+
+  const lines = [
+    "# Skill 检测报告（深度分析）",
+    "",
+    `- 生成时间：${timestamp}`,
+    `- 任务编号：${options.scanId || "n/a"}`,
+    `- 检测目标：${report?.target_path || "unknown"}`,
+    `- 结论级别：${summary.max_severity || "UNKNOWN"} / ${overall}`,
+    "",
+    "## 一、结论解读",
+    "",
+    stageAdvice,
+    "",
+    "## 二、风险簇画像（按类别聚合）",
+    "",
+  ];
+
+  if (topCategories.length) {
+    topCategories.forEach(([category, meta], index) => {
+      lines.push(`${index + 1}. ${category}`);
+      lines.push(`   - 规模：${meta.count} 条`);
+      lines.push(`   - 最高级别：${meta.maxSeverity}`);
+      lines.push("   - 治理建议：为该类别建立专项修复清单，按“入口点 -> 传播路径 -> 落地危害”顺序闭环。");
+    });
+  } else {
+    lines.push("- 暂未形成明显风险簇。");
+  }
+
+  lines.push("", "## 三、重点文件关注清单", "");
+  if (hotFiles.length) {
+    hotFiles.forEach(([filePath, count], index) => {
+      lines.push(`${index + 1}. \`${filePath}\`（关联 ${count} 条风险）`);
+    });
+  } else {
+    lines.push("- 当前未识别到需要重点关注的文件。");
+  }
+
+  lines.push(
+    "",
+    "## 四、整改行动建议（可直接执行）",
+    "",
+    "1. 先处理高风险入口：优先修复可触发外部输入、命令执行、动态加载、远程调用的代码点。",
+    "2. 建立二次验证门槛：修复后至少执行一次静态复扫 + 关键路径人工复核，避免“修复回退”。",
+    "3. 把修复转成规则：将本次问题抽象为团队规范（代码模板、review checklist、CI 规则）。",
+    "4. 供应链最小权限：限制第三方依赖、脚本和外链访问范围，收敛运行时权限。",
+    "5. 输出审计证据：保留修复提交、复测结果和报告快照，便于追溯与合规审计。",
+    "",
+    "## 五、上线前安全门禁清单",
+    "",
+    "- [ ] 高危项已清零或明确接受风险（含审批记录）",
+    "- [ ] 核心文件已完成双人复核",
+    "- [ ] 依赖与外链已完成来源可信性确认",
+    "- [ ] 已设置发布后回滚与告警策略",
+    "",
+    "## 六、持续监控建议",
+    "",
+    "- 每次版本发布执行自动复扫并保留差异报告。",
+    "- 对高风险文件建立变更告警（路径级监控）。",
+    "- 对外部能力调用建立调用频次与异常行为监控。",
+  );
+
+  return {
+    fileName,
+    generatedAt: timestamp,
+    format: "markdown",
+    content: lines.join("\n"),
+  };
+}
+
+function startDeepScanJob({ scanId, tempDir, targetPath, scanOptions }) {
+  const existing = deepScanJobs.get(scanId);
+  if (!existing) {
+    return;
+  }
+
+  deepScanJobs.set(scanId, {
+    ...existing,
+    status: "running",
+    updatedAt: Date.now(),
+    message: "Deep scan is running.",
+  });
+
+  (async () => {
+    try {
+      const result = await runUnifiedScanner({
+        ...scanOptions,
+        targetPath,
+      });
+      const report = parseScannerStdout(result);
+      const detectionReport = buildDetectionReport(report, { scanId });
+      const current = deepScanJobs.get(scanId);
+      if (!current) {
+        return;
+      }
+      deepScanJobs.set(scanId, {
+        ...current,
+        status: "completed",
+        updatedAt: Date.now(),
+        report,
+        detectionReport,
+        message: "Deep scan completed.",
+      });
+    } catch (error) {
+      const current = deepScanJobs.get(scanId);
+      if (!current) {
+        return;
+      }
+      deepScanJobs.set(scanId, {
+        ...current,
+        status: "failed",
+        updatedAt: Date.now(),
+        message: error instanceof Error ? error.message : "Deep scan failed.",
+      });
+    } finally {
+      if (tempDir) {
+        fs.rmSync(tempDir, { recursive: true, force: true });
+      }
+    }
+  })();
+}
+
 function skillScanApiPlugin() {
   return {
     name: "skill-scan-api",
     configureServer(server) {
       server.middlewares.use("/api/skill/scan", async (req, res, next) => {
+        const requestUrl = getRequestUrl(req);
+        pruneDeepScanJobs();
+
+        if (req.method === "GET" && requestUrl.pathname.endsWith("/status")) {
+          const scanId = String(requestUrl.searchParams.get("scanId") || "").trim();
+          if (!scanId) {
+            sendJson(res, 400, { ok: false, message: "scanId is required." });
+            return;
+          }
+
+          const job = deepScanJobs.get(scanId);
+          if (!job) {
+            sendJson(res, 404, { ok: false, message: "Scan job not found or expired." });
+            return;
+          }
+
+          sendJson(res, 200, {
+            ok: true,
+            status: job.status,
+            message: job.message,
+            report: job.status === "completed" ? job.report : null,
+            detectionReport: job.status === "completed" ? job.detectionReport : null,
+          });
+          return;
+        }
+
         if (req.method !== "POST") {
           next();
           return;
@@ -403,21 +624,61 @@ function skillScanApiPlugin() {
             targetPath = prepared.skillRoot;
           }
 
-          const result = await runUnifiedScanner({
+          const staticResult = await runUnifiedScanner({
             ...scanOptions,
+            authState: "guest",
+            deepseekApiKey: "",
+            enableScanners: STATIC_SCANNER_IDS,
+            disableScanners: [],
             targetPath,
           });
-          let report = null;
-          try {
-            report = JSON.parse(result.stdout);
-          } catch {
-            throw new Error(`Scanner did not return valid JSON. ${result.stderr.trim()}`);
+          const staticReport = parseScannerStdout(staticResult);
+
+          const canRunDeepScan = authState === "authenticated" && Boolean(String(scanOptions.deepseekApiKey || "").trim());
+          if (!canRunDeepScan) {
+            sendJson(res, 200, {
+              ok: true,
+              stage: "static",
+              pending: false,
+              report: staticReport,
+              message: authState === "authenticated"
+                ? "Static report is ready. Provide API key to run deep AI analysis."
+                : "Static report is ready.",
+            });
+            return;
           }
+
+          const scanId = randomUUID();
+          deepScanJobs.set(scanId, {
+            scanId,
+            status: "queued",
+            message: "Deep scan queued.",
+            createdAt: Date.now(),
+            updatedAt: Date.now(),
+            report: null,
+            detectionReport: null,
+          });
+
+          startDeepScanJob({
+            scanId,
+            tempDir,
+            targetPath,
+            scanOptions: {
+              ...scanOptions,
+              authState: "authenticated",
+              enableScanners: DEEP_ANALYSIS_SCANNER_IDS,
+              disableScanners: [],
+            },
+          });
+          tempDir = null;
 
           sendJson(res, 200, {
             ok: true,
-            report,
-            stderr: result.stderr.trim() || undefined,
+            stage: "static",
+            pending: true,
+            scanId,
+            report: staticReport,
+            message: "Static report is ready. Deep AI analysis is running in background.",
           });
         } catch (error) {
           sendJson(res, 500, {

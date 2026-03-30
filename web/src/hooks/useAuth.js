@@ -9,6 +9,7 @@ const ADMIN_ACCOUNT = {
   password: "123456",
   phone: "",
   role: "admin",
+  defaultApiKey: String(AUTH_CONFIG.ADMIN_DEFAULT_API_KEY || "").trim(),
 };
 
 function loadSession() {
@@ -17,7 +18,14 @@ function loadSession() {
     if (!raw) return null;
     const parsed = JSON.parse(raw);
     if (!parsed?.username || !parsed?.role) return null;
-    return parsed;
+    const role = parsed.role === "admin" ? "admin" : "user";
+    return {
+      username: normalizeUsername(parsed.username),
+      role,
+      defaultApiKey: role === "admin"
+        ? String(parsed.defaultApiKey || AUTH_CONFIG.ADMIN_DEFAULT_API_KEY || "").trim()
+        : String(parsed.defaultApiKey || "").trim(),
+    };
   } catch {
     return null;
   }
@@ -48,6 +56,9 @@ function loadUsers() {
         password: String(item.password),
         phone: normalizePhone(item.phone),
         role: item.role === "admin" ? "admin" : "user",
+        defaultApiKey: item.role === "admin"
+          ? String(item.defaultApiKey || AUTH_CONFIG.ADMIN_DEFAULT_API_KEY || "").trim()
+          : String(item.defaultApiKey || "").trim(),
       }));
 
     const hasAdmin = normalized.some((item) => item.username === ADMIN_ACCOUNT.username);
@@ -91,7 +102,11 @@ export function useAuth() {
       return { ok: false, message: "账号或密码错误" };
     }
 
-    const user = { username: matchedUser.username, role: matchedUser.role };
+    const user = {
+      username: matchedUser.username,
+      role: matchedUser.role,
+      defaultApiKey: String(matchedUser.defaultApiKey || "").trim(),
+    };
     sessionStorage.setItem(SESSION_KEY, JSON.stringify(user));
     setSession(user);
     return { ok: true, user };
@@ -140,12 +155,13 @@ export function useAuth() {
       password: normalizedPassword,
       phone: normalizedPhone,
       role: "user",
+      defaultApiKey: "",
     };
     const nextUsers = [...users, nextUser];
     persistUsers(nextUsers);
     setUsers(nextUsers);
 
-    const user = { username: nextUser.username, role: nextUser.role };
+    const user = { username: nextUser.username, role: nextUser.role, defaultApiKey: "" };
     sessionStorage.setItem(SESSION_KEY, JSON.stringify(user));
     setSession(user);
     return { ok: true, user };

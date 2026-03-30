@@ -296,6 +296,7 @@ class Scanner5Adapter(ScannerAdapter):
             settings.deepseek_model,
             "--language",
             settings.language,
+            "--fast-mode",
         ]
         last_failure: dict[str, Any] | None = None
         for attempt in range(1, 3):

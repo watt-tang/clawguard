@@ -136,7 +136,7 @@ function AppLoginModal({ onLogin, onRegister, onClose }) {
       <div className="oc-modal" onClick={(event) => event.stopPropagation()}>
         <div className="oc-modal-title">{mode === "login" ? "账号登录" : "用户注册"}</div>
         <p className="oc-modal-desc">
-          {mode === "login" ? "请输入账号与密码登录平台。" : "创建新账号后将自动登录。管理员账号为 tan。"}
+          {mode === "login" ? "请输入账号与密码登录平台。" : "创建新账号后将自动登录。"}
         </p>
         <div className="oc-modal-switch">
           <button
@@ -306,26 +306,26 @@ function DashboardHome({ modules, activePage, onNavigate }) {
             return <div key={`placeholder-${index}`} className="oc-home-module-card oc-home-module-placeholder" aria-hidden="true" />;
           }
 
-            const Icon = module.icon;
-            const isActive = module.pageId === activePage;
-            const isOnline = module.status === "已上线" || module.status === "前端已就绪";
+          const Icon = module.icon;
+          const isActive = module.pageId === activePage;
+          const isOnline = module.status === "已上线" || module.status === "前端已就绪";
 
-            return (
-              <button
-                key={module.pageId}
-                type="button"
-                className={`oc-home-module-card oc-home-module-button${isActive ? " is-active" : ""}`}
-                onClick={() => onNavigate(module.pageId)}
-              >
-                <div className="oc-home-module-header">
-                  <Icon size={20} strokeWidth={1.8} />
-                  <span className={`oc-badge ${isOnline ? "oc-badge-online" : "oc-badge-review"}`}>{module.status}</span>
-                </div>
-                <div className="oc-home-module-title">{module.label}</div>
-                <div className="oc-home-module-desc">{module.description}</div>
-              </button>
-            );
-          })}
+          return (
+            <button
+              key={module.pageId}
+              type="button"
+              className={`oc-home-module-card oc-home-module-button${isActive ? " is-active" : ""}`}
+              onClick={() => onNavigate(module.pageId)}
+            >
+              <div className="oc-home-module-header">
+                <Icon size={20} strokeWidth={1.8} />
+                <span className={`oc-badge ${isOnline ? "oc-badge-online" : "oc-badge-review"}`}>{module.status}</span>
+              </div>
+              <div className="oc-home-module-title">{module.label}</div>
+              <div className="oc-home-module-desc">{module.description}</div>
+            </button>
+          );
+        })}
       </div>
     </div>
   );

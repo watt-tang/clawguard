@@ -33,14 +33,25 @@ from utils.parse import parse_mcp_invocations
 class ScanStage:
     """定义扫描的一个阶段"""
 
-    def __init__(self, stage_id: str, name: str, template: str, output_format: str = None, output_check_fn=None
-                 , language="zh"):
+    def __init__(
+        self,
+        stage_id: str,
+        name: str,
+        template: str,
+        output_format: str = None,
+        output_check_fn=None,
+        language="zh",
+        max_iter: int = 80,
+        format_retries: int = 3,
+    ):
         self.stage_id = stage_id
         self.name = name
         self.template = template
         self.output_format = output_format
         self.output_check_fn = output_check_fn
         self.language = language
+        self.max_iter = max_iter
+        self.format_retries = format_retries
 
 
 class ScanPipeline:
@@ -69,7 +80,9 @@ class ScanPipeline:
             debug=self.agent_wrapper.debug,
             output_format=stage.output_format,
             output_check_fn=stage.output_check_fn,
-            language=stage.language
+            language=stage.language,
+            max_iter=stage.max_iter,
+            format_retries=stage.format_retries,
         )
         agent.set_repo_dir(repo_dir)
         await agent.initialize()
@@ -107,6 +120,8 @@ class ScanPipeline:
             debug=self.agent_wrapper.debug,
             output_format=stage.output_format,
             output_check_fn=stage.output_check_fn,
+            max_iter=stage.max_iter,
+            format_retries=stage.format_retries,
         )
         await agent.initialize()
 
@@ -127,13 +142,14 @@ class ScanPipeline:
 
 class Agent:
     def __init__(self, llm, specialized_llms: dict = None, debug: bool = False,
-                 server_url: str = None, language='zh', headers=None):
+                 server_url: str = None, language='zh', headers=None, fast_mode: bool = False):
         self.llm = llm
         self.specialized_llms = specialized_llms or {}
         self.debug = debug
         self.dispatcher = ToolDispatcher(mcp_server_url=server_url, mcp_headers=headers)
         self.pipeline = ScanPipeline(self)
         self.language = language
+        self.fast_mode = fast_mode
 
     async def scan(self, repo_dir: str, prompt: str):
         result_meta = {

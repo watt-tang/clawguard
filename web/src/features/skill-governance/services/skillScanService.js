@@ -1,4 +1,5 @@
 const SKILL_SCAN_ENDPOINT = "/api/skill/scan";
+const SKILL_SCAN_STATUS_ENDPOINT = "/api/skill/scan/status";
 
 function normalizeScanOptions(options = {}) {
   const authState = options.authState === "authenticated" ? "authenticated" : "guest";
@@ -53,7 +54,42 @@ async function requestScan(payload) {
     throw new Error(data?.message || "Skill scan request failed.");
   }
 
-  return data.report;
+  return {
+    report: data.report || null,
+    pending: Boolean(data.pending),
+    scanId: typeof data.scanId === "string" ? data.scanId : "",
+    stage: typeof data.stage === "string" ? data.stage : "",
+    detectionReport: data.detectionReport || null,
+  };
+}
+
+export async function getSkillScanStatus(scanId) {
+  const cleanScanId = String(scanId || "").trim();
+  if (!cleanScanId) {
+    throw new Error("scanId is required.");
+  }
+
+  const response = await fetch(`${SKILL_SCAN_STATUS_ENDPOINT}?scanId=${encodeURIComponent(cleanScanId)}`, {
+    method: "GET",
+  });
+
+  let data = null;
+  try {
+    data = await response.json();
+  } catch {
+    throw new Error("Scanner status API returned invalid response.");
+  }
+
+  if (!response.ok || !data?.ok) {
+    throw new Error(data?.message || "Skill scan status request failed.");
+  }
+
+  return {
+    status: typeof data.status === "string" ? data.status : "unknown",
+    report: data.report || null,
+    message: typeof data.message === "string" ? data.message : "",
+    detectionReport: data.detectionReport || null,
+  };
 }
 
 export async function scanSkillFiles(uploadRecords, options = {}) {

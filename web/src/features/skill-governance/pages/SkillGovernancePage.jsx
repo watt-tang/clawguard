@@ -1,7 +1,11 @@
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import {
   AlertCircle,
   Box,
+  Eye,
+  EyeOff,
   FileArchive,
   FileCode2,
   FileSearch,
@@ -14,7 +18,7 @@ import {
   UploadCloud,
   X,
 } from "lucide-react";
-import { scanSkillBySlug, scanSkillFiles } from "../services/skillScanService.js";
+import { getSkillScanStatus, scanSkillBySlug, scanSkillFiles } from "../services/skillScanService.js";
 
 const TABS = [
   { id: "intelligence", label: "基础情报" },
@@ -31,7 +35,6 @@ const SOURCE_OPTIONS = [
 const SEVERITY_ORDER = ["CRITICAL", "HIGH", "MEDIUM", "LOW", "INFO"];
 const SEVERITY_LABELS = { CRITICAL: "严重", HIGH: "高危", MEDIUM: "中危", LOW: "低危", INFO: "提示", SAFE: "安全", UNKNOWN: "未知" };
 const SEVERITY_RANK = { CRITICAL: 0, HIGH: 1, MEDIUM: 2, LOW: 3, INFO: 4, SAFE: 5, UNKNOWN: 6 };
-const RUN_STATE_LABELS = { completed: "已完成", skipped: "已跳过", failed: "执行失败", unavailable: "不可用" };
 const MODE_LABELS = { guest: "访客模式", authenticated: "登录模式" };
 const CONCLUSION_META = {
   block: { tone: "critical", badge: "建议阻断", title: "发现高危风险，建议先阻断", desc: "本轮结果已出现严重风险信号，建议先隔离样本，再决定是否继续安装、上线或分发。" },
@@ -83,44 +86,6 @@ function formatDurationMs(value) {
   const hours = Math.floor(totalMinutes / 60);
   const minutes = totalMinutes % 60;
   return minutes > 0 ? `${hours} 小时 ${minutes} 分` : `${hours} 小时`;
-}
-
-function resolveRunDurationMs(run) {
-  const directDuration = Number(run?.duration_ms);
-  if (Number.isFinite(directDuration) && directDuration >= 0) {
-    return directDuration;
-  }
-
-  if (!run?.started_at || !run?.completed_at) {
-    return null;
-  }
-
-  const startedAt = new Date(run.started_at).getTime();
-  const completedAt = new Date(run.completed_at).getTime();
-  if (!Number.isFinite(startedAt) || !Number.isFinite(completedAt) || completedAt < startedAt) {
-    return null;
-  }
-
-  return completedAt - startedAt;
-}
-
-function getRunDurationLabel(run) {
-  const state = String(run?.state || "").toLowerCase();
-  const durationMs = resolveRunDurationMs(run);
-
-  if (durationMs !== null) {
-    return `参考用时 ${formatDurationMs(durationMs)}`;
-  }
-
-  if (state === "skipped" || state === "unavailable") {
-    return "未执行";
-  }
-
-  if (state === "failed") {
-    return "耗时未知";
-  }
-
-  return "统计中";
 }
 
 function normalizeSeverity(value) {
@@ -180,11 +145,6 @@ function SeverityBadge({ severity }) {
   return <span className={`skill-severity-badge is-${level.toLowerCase()}`}>{SEVERITY_LABELS[level] || level}</span>;
 }
 
-function RunStateBadge({ state }) {
-  const value = String(state || "unavailable").toLowerCase();
-  return <span className={`skill-run-state-badge is-${value}`}>{RUN_STATE_LABELS[value] || value}</span>;
-}
-
 function SkillDetectWorkspace({ auth }) {
   const isAuthenticated = Boolean(auth?.isLoggedIn);
   const authState = isAuthenticated ? "authenticated" : "guest";
@@ -195,6 +155,10 @@ function SkillDetectWorkspace({ auth }) {
   const [scanSource, setScanSource] = useState("");
   const [scanError, setScanError] = useState("");
   const [scanReport, setScanReport] = useState(null);
+  const [isAiScanning, setIsAiScanning] = useState(false);
+  const [aiStatusMessage, setAiStatusMessage] = useState("");
+  const [detectionReport, setDetectionReport] = useState(null);
+  const [showApiKey, setShowApiKey] = useState(false);
   const [runtimeConfig, setRuntimeConfig] = useState({
     deepseekApiKey: "",
     deepseekModel: "deepseek-chat",
@@ -205,10 +169,10 @@ function SkillDetectWorkspace({ auth }) {
   const manifestInputRef = useRef(null);
   const folderInputRef = useRef(null);
   const multiInputRef = useRef(null);
+  const scanPollingTokenRef = useRef(0);
 
   const totalSize = useMemo(() => uploads.reduce((sum, item) => sum + item.size, 0), [uploads]);
   const summary = scanReport?.summary || {};
-  const scannerRuns = Array.isArray(scanReport?.scanner_runs) ? scanReport.scanner_runs : [];
   const findings = Array.isArray(scanReport?.findings) ? scanReport.findings : [];
   const severitySummary = summary.findings_by_severity || {};
   const findingsCount = summary.deduplicated_finding_count ?? findings.length;
@@ -219,10 +183,12 @@ function SkillDetectWorkspace({ auth }) {
   const categoryHighlights = useMemo(() => getCategoryHighlights(findings), [findings]);
   const affectedFileCount = useMemo(() => new Set(findings.map((item) => item.file_path).filter(Boolean)).size, [findings]);
   const totalDurationLabel = useMemo(() => formatDurationMs(scanReport?.duration_ms), [scanReport?.duration_ms]);
-  const lockedScannerCount = useMemo(
-    () => scannerRuns.filter((item) => item.state === "skipped" && String(item.skipped_reason || "").includes("authenticated")).length,
-    [scannerRuns],
-  );
+  const analysisStageLabel = useMemo(() => {
+    if (isAiScanning) return "深度分析中";
+    if (detectionReport?.content) return "已生成报告";
+    if (scanReport) return "静态分析完成";
+    return "--";
+  }, [isAiScanning, detectionReport?.content, scanReport]);
 
   function buildScanOptions() {
     return {
@@ -231,10 +197,10 @@ function SkillDetectWorkspace({ auth }) {
       timeoutMs: 300000,
       ...(isAuthenticated
         ? {
-            deepseekApiKey: runtimeConfig.deepseekApiKey,
-            deepseekModel: runtimeConfig.deepseekModel,
-            deepseekBaseUrl: runtimeConfig.deepseekBaseUrl,
-          }
+          deepseekApiKey: runtimeConfig.deepseekApiKey,
+          deepseekModel: runtimeConfig.deepseekModel,
+          deepseekBaseUrl: runtimeConfig.deepseekBaseUrl,
+        }
         : {}),
     };
   }
@@ -248,6 +214,93 @@ function SkillDetectWorkspace({ auth }) {
     setRuntimeConfig((current) => ({ ...current, [field]: value }));
   }
 
+  async function waitForDeepScan(scanId, token) {
+    setIsAiScanning(true);
+    setAiStatusMessage("AI 深度分析进行中，静态结果已先展示。");
+    const maxAttempts = 120;
+
+    for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
+      if (scanPollingTokenRef.current !== token) {
+        return;
+      }
+
+      await new Promise((resolve) => {
+        setTimeout(resolve, 2500);
+      });
+
+      if (scanPollingTokenRef.current !== token) {
+        return;
+      }
+
+      try {
+        const status = await getSkillScanStatus(scanId);
+        if (scanPollingTokenRef.current !== token) {
+          return;
+        }
+
+        if (status.status === "completed" && status.report) {
+          setScanReport(status.report);
+          setDetectionReport(status.detectionReport || null);
+          setIsAiScanning(false);
+          setAiStatusMessage("AI 深度分析已完成，结果已更新。");
+          return;
+        }
+
+        if (status.status === "failed") {
+          setIsAiScanning(false);
+          setAiStatusMessage("");
+          setScanError(status.message || "静态结果已返回，但 AI 深度分析失败。");
+          return;
+        }
+      } catch (error) {
+        if (scanPollingTokenRef.current !== token) {
+          return;
+        }
+        setIsAiScanning(false);
+        setAiStatusMessage("");
+        setScanError(error instanceof Error ? error.message : "轮询 AI 深度分析状态失败。");
+        return;
+      }
+    }
+
+    if (scanPollingTokenRef.current === token) {
+      setIsAiScanning(false);
+      setAiStatusMessage("AI 深度分析仍在后台运行，可稍后重试扫描查看最新结果。");
+    }
+  }
+
+  function downloadDetectionReport() {
+    const content = String(detectionReport?.content || "");
+    if (!content) {
+      return;
+    }
+    const blob = new Blob([content], { type: "text/markdown;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = detectionReport?.fileName || "skill-detection-report.md";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  }
+
+  useEffect(() => () => {
+    scanPollingTokenRef.current += 1;
+  }, []);
+
+  useEffect(() => {
+    const seededApiKey = String(auth?.user?.defaultApiKey || "").trim();
+    if (!seededApiKey) {
+      return;
+    }
+    setRuntimeConfig((current) => (
+      current.deepseekApiKey
+        ? current
+        : { ...current, deepseekApiKey: seededApiKey }
+    ));
+  }, [auth?.user?.defaultApiKey]);
+
   async function handleScanUploads() {
     if (!uploads.length) {
       setScanError("请先上传至少一个 Skill 文件或目录。");
@@ -257,9 +310,18 @@ function SkillDetectWorkspace({ auth }) {
     setIsScanning(true);
     setScanSource("upload");
     setScanError("");
+    setIsAiScanning(false);
+    setAiStatusMessage("");
+    setDetectionReport(null);
+    scanPollingTokenRef.current += 1;
+    const token = scanPollingTokenRef.current;
     try {
-      const report = await scanSkillFiles(uploads, buildScanOptions());
-      setScanReport(report);
+      const response = await scanSkillFiles(uploads, buildScanOptions());
+      setScanReport(response.report);
+      setDetectionReport(response.detectionReport || null);
+      if (response.pending && response.scanId) {
+        void waitForDeepScan(response.scanId, token);
+      }
     } catch (error) {
       setScanReport(null);
       setScanError(error instanceof Error ? error.message : "扫描失败，请重试。");
@@ -278,9 +340,18 @@ function SkillDetectWorkspace({ auth }) {
     setIsScanning(true);
     setScanSource("slug");
     setScanError("");
+    setIsAiScanning(false);
+    setAiStatusMessage("");
+    setDetectionReport(null);
+    scanPollingTokenRef.current += 1;
+    const token = scanPollingTokenRef.current;
     try {
-      const report = await scanSkillBySlug(slug, "", buildScanOptions());
-      setScanReport(report);
+      const response = await scanSkillBySlug(slug, "", buildScanOptions());
+      setScanReport(response.report);
+      setDetectionReport(response.detectionReport || null);
+      if (response.pending && response.scanId) {
+        void waitForDeepScan(response.scanId, token);
+      }
     } catch (error) {
       setScanReport(null);
       setScanError(error instanceof Error ? error.message : "扫描失败，请重试。");
@@ -412,7 +483,7 @@ function SkillDetectWorkspace({ auth }) {
               </div>
               <div className="skill-mode-kpi">
                 <span>可用能力</span>
-                <strong>{isAuthenticated ? "scanner1-6" : "免费静态能力"}</strong>
+                <strong>{isAuthenticated ? "静态分析LLM分析" : "免费静态能力"}</strong>
               </div>
             </div>
           </div>
@@ -424,7 +495,24 @@ function SkillDetectWorkspace({ auth }) {
               <div className="skill-runtime-grid">
                 <label className="skill-runtime-field">
                   <span>DeepSeek API Key</span>
-                  <input className="oc-input" type="password" value={runtimeConfig.deepseekApiKey} placeholder="仅在需要启用 LLM 扫描器时填写" onChange={(event) => updateRuntimeConfig("deepseekApiKey", event.target.value)} />
+                  <div className="skill-secret-input-wrap">
+                    <input
+                      className="oc-input skill-secret-input"
+                      type={showApiKey ? "text" : "password"}
+                      value={runtimeConfig.deepseekApiKey}
+                      placeholder="仅在需要启用 LLM 扫描器时填写"
+                      onChange={(event) => updateRuntimeConfig("deepseekApiKey", event.target.value)}
+                    />
+                    <button
+                      type="button"
+                      className="skill-secret-toggle-btn"
+                      onClick={() => setShowApiKey((current) => !current)}
+                      aria-label={showApiKey ? "隐藏 API Key" : "显示 API Key"}
+                      title={showApiKey ? "隐藏 API Key" : "显示 API Key"}
+                    >
+                      {showApiKey ? <EyeOff size={16} strokeWidth={2} /> : <Eye size={16} strokeWidth={2} />}
+                    </button>
+                  </div>
                 </label>
                 <label className="skill-runtime-field">
                   <span>模型</span>
@@ -533,7 +621,7 @@ function SkillDetectWorkspace({ auth }) {
         <div className="skill-card-head skill-card-head--result">
           <div>
             <div className="skill-card-title">扫描结果</div>
-            <div className="skill-card-desc">展示统一调度器聚合后的 scanner 执行状态、发现项和总体结论。</div>
+            <div className="skill-card-desc">展示统一调度器聚合后的风险发现、综合结论与处置建议。</div>
           </div>
           {scanReport ? <span className="oc-badge oc-badge-review">{scanSource === "slug" ? "来源：ClawHub slug" : "来源：本地上传"}</span> : null}
         </div>
@@ -542,6 +630,13 @@ function SkillDetectWorkspace({ auth }) {
           <div className="skill-empty-state">
             <LoaderCircle size={20} strokeWidth={1.8} className="skill-spin" />
             <span>扫描进行中，请稍候...</span>
+          </div>
+        ) : null}
+
+        {isAiScanning || aiStatusMessage ? (
+          <div className="skill-empty-state">
+            <LoaderCircle size={20} strokeWidth={1.8} className={isAiScanning ? "skill-spin" : ""} />
+            <span>{aiStatusMessage || "AI 深度分析正在后台运行。"}</span>
           </div>
         ) : null}
 
@@ -591,16 +686,31 @@ function SkillDetectWorkspace({ auth }) {
               </div>
             </section>
 
+            {detectionReport?.content ? (
+              <div className="skill-upload-list" style={{ marginBottom: "12px" }}>
+                <div className="skill-card-head">
+                  <div>
+                    <div className="skill-card-title">检测报告</div>
+                    <div className="skill-card-desc">已基于深度分析生成 Markdown 报告，可预览并下载留存。</div>
+                  </div>
+                  <button className="oc-primary-btn" type="button" onClick={downloadDetectionReport}>
+                    下载报告
+                  </button>
+                </div>
+                <div className="skill-markdown-report">
+                  <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                    {detectionReport.content}
+                  </ReactMarkdown>
+                </div>
+              </div>
+            ) : null}
+
             <div className="skill-result-summary-grid">
               <div className="skill-metric-card"><span className="skill-summary-label">去重发现</span><strong>{findingsCount}</strong><span className="skill-metric-hint">聚合后结果</span></div>
               <div className="skill-metric-card"><span className="skill-summary-label">原始发现</span><strong>{rawFindingsCount}</strong><span className="skill-metric-hint">去重前统计</span></div>
-              <div className="skill-metric-card"><span className="skill-summary-label">完成扫描器</span><strong>{summary?.scanner_runs?.completed ?? 0}</strong><span className="skill-metric-hint">共 {scannerRuns.length} 个</span></div>
+              <div className="skill-metric-card"><span className="skill-summary-label">分析阶段</span><strong>{analysisStageLabel}</strong></div>
               <div className="skill-metric-card"><span className="skill-summary-label">影响文件</span><strong>{affectedFileCount}</strong><span className="skill-metric-hint">涉及路径数</span></div>
               <div className="skill-metric-card"><span className="skill-summary-label">调度总耗时</span><strong>{totalDurationLabel}</strong><span className="skill-metric-hint">整体参考值</span></div>
-            </div>
-
-            <div className="skill-card-desc" style={{ marginBottom: "12px" }}>
-              单个扫描器的耗时仅统计本次统一调度中的单次运行，受重试、网络和外部依赖影响较大，仅供参考。
             </div>
             <div className="skill-severity-strip">
               {SEVERITY_ORDER.map((severity) => (
@@ -610,27 +720,6 @@ function SkillDetectWorkspace({ auth }) {
                     <span className="skill-severity-count">{severitySummary[severity] ?? 0}</span>
                   </div>
                   <div className="skill-severity-card-foot">聚合发现</div>
-                </div>
-              ))}
-            </div>
-
-            <div className="skill-run-grid">
-              {scannerRuns.map((run) => (
-                <div key={run?.scanner?.id || `${run.state}-${Math.random().toString(36).slice(2, 6)}`} className={`skill-run-card is-${run.state}`}>
-                  <div className="skill-run-head">
-                    <div>
-                      <div className="skill-run-title">{run?.scanner?.name || run?.scanner?.id || "未知扫描器"}</div>
-                      <div className="skill-run-meta">{(run?.scanner?.id || "--")} · {(run?.scanner?.kind || "--")} · {(run?.scanner?.resource_tier || "--")}</div>
-                    </div>
-                    <RunStateBadge state={run.state} />
-                  </div>
-                  <div className="skill-run-facts">
-                    <span>{run.finding_count ?? 0} 条发现</span>
-                    <span title="耗时为参考值，未执行或异常中断的扫描器不适合横向比较。">{getRunDurationLabel(run)}</span>
-                    <SeverityBadge severity={run.max_severity} />
-                  </div>
-                  {run.error ? <div className="skill-run-note is-error">{run.error}</div> : null}
-                  {!run.error && run.skipped_reason ? <div className="skill-run-note">{run.skipped_reason}</div> : null}
                 </div>
               ))}
             </div>
@@ -670,9 +759,8 @@ function SkillDetectWorkspace({ auth }) {
                   </div>
                 </div>
                 <div className="skill-recommend-list">
-                  <div className="skill-recommend-item">{lockedScannerCount > 0 ? `当前有 ${lockedScannerCount} 个需认证 scanner 未执行，登录后可补齐更完整结果。` : "本轮调度已覆盖当前模式下的全部注册 scanner。"}</div>
                   <div className="skill-recommend-item">{scanSource === "slug" ? "若样本来自远程仓库，建议同步确认下载链路、版本元数据和实际内容是否一致。" : "若样本来自本地上传，建议保留原始包与扫描报告作为追溯依据。"}</div>
-                  <div className="skill-recommend-item">{summary.overall_conclusion === "clear" ? "当前没有形成聚合风险结论，但仍建议抽查关键脚本、外链与依赖来源。" : "优先根据扫描器来源、风险类别和文件定位做人工复核，再决定是否放行。"} </div>
+                  <div className="skill-recommend-item">{summary.overall_conclusion === "clear" ? "当前没有形成聚合风险结论，但仍建议抽查关键脚本、外链与依赖来源。" : "优先根据风险类别和文件定位做人工复核，再决定是否放行。"} </div>
                 </div>
               </div>
             </div>
@@ -682,7 +770,7 @@ function SkillDetectWorkspace({ auth }) {
                 <div className="skill-table-toolbar">
                   <div>
                     <div className="skill-card-title">命中明细</div>
-                    <div className="skill-card-desc">保留统一归一化后的 findings，便于继续按文件、规则和扫描器来源做人工判断。</div>
+                    <div className="skill-card-desc">保留统一归一化后的 findings，便于继续按文件与规则做人工判断。</div>
                   </div>
                   <div className="skill-table-toolbar-note">当前展示 {visibleFindings.length} 条结果</div>
                 </div>
@@ -694,7 +782,6 @@ function SkillDetectWorkspace({ auth }) {
                         <th>类别</th>
                         <th>标题与说明</th>
                         <th>文件定位</th>
-                        <th>扫描器</th>
                         <th>片段 / 建议</th>
                       </tr>
                     </thead>
@@ -711,11 +798,6 @@ function SkillDetectWorkspace({ auth }) {
                           <td className="is-mono">
                             {item.file_path || "--"}
                             {item.line_number ? <div className="skill-finding-meta">行号：{item.line_number}</div> : null}
-                          </td>
-                          <td>
-                            <div className="skill-scanner-chip-list">
-                              {Array.isArray(item.scanners) && item.scanners.length ? item.scanners.map((scannerId) => <span key={scannerId} className="skill-scanner-chip">{scannerId}</span>) : <span className="skill-scanner-chip is-empty">--</span>}
-                            </div>
                           </td>
                           <td className="is-mono">{item.snippet || item.metadata?.suggestion || "--"}</td>
                         </tr>
@@ -781,3 +863,4 @@ export default function SkillGovernancePage({ auth }) {
     </div>
   );
 }
+

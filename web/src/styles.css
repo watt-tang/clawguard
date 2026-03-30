@@ -2047,6 +2047,101 @@ select {
   max-width: 100%;
 }
 
+.skill-secret-input-wrap {
+  position: relative;
+  width: 100%;
+}
+
+.skill-secret-input {
+  padding-right: 42px;
+}
+
+.skill-secret-toggle-btn {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 28px;
+  height: 28px;
+  border: 0;
+  border-radius: 10px;
+  background: rgba(126, 12, 110, 0.08);
+  color: var(--cg-text-secondary);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.skill-secret-toggle-btn:hover {
+  background: rgba(126, 12, 110, 0.15);
+  color: var(--cg-text-primary);
+}
+
+.skill-markdown-report {
+  margin-top: 10px;
+  max-height: 360px;
+  overflow: auto;
+  border: 1px solid rgba(126, 12, 110, 0.1);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.86);
+  padding: 14px 16px;
+}
+
+.skill-markdown-report h1,
+.skill-markdown-report h2,
+.skill-markdown-report h3 {
+  color: var(--cg-text-primary);
+  margin: 10px 0 8px;
+  line-height: 1.35;
+}
+
+.skill-markdown-report h1 {
+  font-size: 20px;
+}
+
+.skill-markdown-report h2 {
+  font-size: 16px;
+}
+
+.skill-markdown-report h3 {
+  font-size: 14px;
+}
+
+.skill-markdown-report p,
+.skill-markdown-report li {
+  color: var(--cg-text-secondary);
+  font-size: 13px;
+  line-height: 1.75;
+}
+
+.skill-markdown-report ul,
+.skill-markdown-report ol {
+  margin: 6px 0 10px 18px;
+  padding: 0;
+}
+
+.skill-markdown-report code {
+  font-family: "JetBrains Mono", "Consolas", "Monaco", monospace;
+  background: rgba(18, 20, 46, 0.06);
+  border-radius: 6px;
+  padding: 1px 6px;
+  color: var(--cg-text-primary);
+}
+
+.skill-markdown-report pre {
+  margin: 8px 0;
+  background: rgba(18, 20, 46, 0.06);
+  border-radius: 10px;
+  padding: 10px 12px;
+  overflow: auto;
+}
+
+.skill-markdown-report pre code {
+  background: transparent;
+  padding: 0;
+}
+
 .skill-tip-chip {
   padding: 6px 10px;
   border-radius: 999px;
@@ -2387,7 +2482,7 @@ select {
   position: relative;
   z-index: 1;
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: 12px;
   margin-top: 16px;
 }
@@ -2420,7 +2515,7 @@ select {
   position: relative;
   z-index: 1;
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: 12px;
   margin-top: 16px;
 }

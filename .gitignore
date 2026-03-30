@@ -1,6 +1,8 @@
 web/node_modules/
 web/dist/
 web/.env
+web/.env.local
+web/.env.*.local
 *.log
 .DS_Store
 Thumbs.db
