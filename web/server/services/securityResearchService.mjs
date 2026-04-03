@@ -8,13 +8,17 @@ import { prisma } from "../lib/prisma.mjs";
 
 const CROSSREF_API_BASE = "https://api.crossref.org/works";
 const ARXIV_API_BASE = "http://export.arxiv.org/api/query";
+const DBLP_API_BASE = "https://dblp.org/search/publ/api";
 const MEMORY_CACHE_TTL_MS = Math.max(10000, Number(process.env.SECURITY_RESEARCH_CACHE_TTL_MS || 5 * 60 * 1000));
 const WEEKLY_REFRESH_MS = Math.max(60000, Number(process.env.SECURITY_RESEARCH_REFRESH_INTERVAL_MS || 7 * 24 * 60 * 60 * 1000));
 const REFRESH_CHECK_MS = Math.max(60000, Number(process.env.SECURITY_RESEARCH_REFRESH_CHECK_MS || 6 * 60 * 60 * 1000));
 const CONFERENCE_SINCE_DATE = process.env.SECURITY_RESEARCH_CONFERENCE_SINCE_DATE || "2023-01-01";
 const ARXIV_MAX_RESULTS = Math.max(3, Math.min(20, Number(process.env.SECURITY_RESEARCH_ARXIV_MAX_RESULTS || 8)));
 const CROSSREF_ROWS_PER_QUERY = Math.max(4, Math.min(20, Number(process.env.SECURITY_RESEARCH_CROSSREF_ROWS || 8)));
-const CROSSREF_CONCURRENCY = Math.max(1, Math.min(4, Number(process.env.SECURITY_RESEARCH_CONCURRENCY || 3)));
+const DBLP_ROWS_PER_QUERY = Math.max(4, Math.min(20, Number(process.env.SECURITY_RESEARCH_DBLP_ROWS || 8)));
+const CROSSREF_CONCURRENCY = Math.max(1, Math.min(3, Number(process.env.SECURITY_RESEARCH_CONCURRENCY || 2)));
+const REQUEST_RETRY_ATTEMPTS = Math.max(1, Math.min(4, Number(process.env.SECURITY_RESEARCH_REQUEST_RETRIES || 3)));
+const CONTACT_EMAIL = process.env.SECURITY_RESEARCH_CONTACT_EMAIL || process.env.CROSSREF_MAILTO || "devnull@example.com";
 const DEFAULT_KEYWORDS = [
   "OpenClaw security",
   "OpenClaw skill security",
@@ -188,6 +192,12 @@ function extractDatePart(item = {}) {
   return new Date(Date.UTC(year, Math.max(month - 1, 0), day || 1)).toISOString();
 }
 
+function yearToIsoDate(year) {
+  const safeYear = Number.parseInt(year, 10);
+  if (!Number.isFinite(safeYear) || safeYear < 1900 || safeYear > 3000) return "";
+  return new Date(Date.UTC(safeYear, 0, 1)).toISOString();
+}
+
 function normalizeAuthors(authors = []) {
   return uniqueStrings(
     authors.map((author) => {
@@ -296,6 +306,11 @@ function buildConferenceSummary(title, keyword, venue, abstract = "") {
   return `${title} is indexed as a ${venue} paper. This summary is inferred from title and venue metadata because the source record does not expose an abstract.`;
 }
 
+function buildDblpSummary(title, venue, year) {
+  const yearText = year ? ` from ${year}` : "";
+  return `${title} is indexed by DBLP as a ${venue} paper${yearText}. This summary is inferred from title and venue metadata because DBLP does not expose an abstract in this search response.`;
+}
+
 function buildArxivSummary(summary = "") {
   return normalizeWhitespace(decodeXmlEntities(summary));
 }
@@ -361,6 +376,11 @@ function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
+function isRetryableRequestError(error) {
+  const message = String(error?.message || "");
+  return /timed out|429|rate|econnreset|socket hang up|eai_again|etimedout|temporary failure/i.test(message);
+}
+
 function requestTextOnce(url, headers = {}, timeoutMs = 45000) {
   return new Promise((resolve, reject) => {
     const requestUrl = new URL(url);
@@ -370,7 +390,7 @@ function requestTextOnce(url, headers = {}, timeoutMs = 45000) {
       {
         method: "GET",
         headers: {
-          "User-Agent": "clawguard-security-research/1.0 (mailto:devnull@example.com)",
+          "User-Agent": `clawguard-security-research/1.0 (mailto:${CONTACT_EMAIL})`,
           Accept: "*/*",
           "Accept-Encoding": "identity",
           ...headers,
@@ -403,14 +423,19 @@ function requestTextOnce(url, headers = {}, timeoutMs = 45000) {
 }
 
 async function requestText(url, headers = {}, timeoutMs = 45000) {
-  try {
-    return await requestTextOnce(url, headers, timeoutMs);
-  } catch (error) {
-    const message = String(error?.message || "");
-    if (!/timed out|429|rate/i.test(message)) throw error;
-    await sleep(1200);
-    return requestTextOnce(url, headers, timeoutMs);
+  let lastError = null;
+  for (let attempt = 0; attempt < REQUEST_RETRY_ATTEMPTS; attempt += 1) {
+    try {
+      return await requestTextOnce(url, headers, timeoutMs);
+    } catch (error) {
+      lastError = error;
+      if (!isRetryableRequestError(error) || attempt === REQUEST_RETRY_ATTEMPTS - 1) {
+        throw error;
+      }
+      await sleep(1200 * (attempt + 1));
+    }
   }
+  throw lastError || new Error(`Request failed: ${url}`);
 }
 
 async function fetchJson(url, headers = {}) {
@@ -544,6 +569,17 @@ function parseArxivFeed(xml) {
   });
 }
 
+function normalizeDblpAuthors(authorsField) {
+  if (!authorsField?.author) return [];
+  const entries = Array.isArray(authorsField.author) ? authorsField.author : [authorsField.author];
+  return uniqueStrings(
+    entries.map((author) => {
+      if (typeof author === "string") return author;
+      return author?.text || author?.["@text"] || "";
+    }),
+  );
+}
+
 async function fetchCrossrefPapers(forceRefresh = false) {
   const cacheKey = "security-research:http:crossref";
   if (!forceRefresh) {
@@ -558,16 +594,27 @@ async function fetchCrossrefPapers(forceRefresh = false) {
     }
   }
 
+  const taskFailures = [];
   const results = await mapLimit(tasks, CROSSREF_CONCURRENCY, async ({ venueConfig, keyword }) => {
-    const searchPhrase = `${keyword} ${venueConfig.queries[0]}`;
-    const url = new URL(CROSSREF_API_BASE);
-    url.searchParams.set("rows", String(CROSSREF_ROWS_PER_QUERY));
-    url.searchParams.set("query.bibliographic", searchPhrase);
-    url.searchParams.set("filter", `from-pub-date:${CONFERENCE_SINCE_DATE},type:proceedings-article`);
-    const payload = await fetchJson(url);
-    const items = Array.isArray(payload?.message?.items) ? payload.message.items : [];
-    return items.map((item) => ({ item, keyword, venueConfig }));
+    try {
+      const searchPhrase = `${keyword} ${venueConfig.queries[0]}`;
+      const url = new URL(CROSSREF_API_BASE);
+      url.searchParams.set("rows", String(CROSSREF_ROWS_PER_QUERY));
+      url.searchParams.set("query.bibliographic", searchPhrase);
+      url.searchParams.set("filter", `from-pub-date:${CONFERENCE_SINCE_DATE},type:proceedings-article`);
+      url.searchParams.set("mailto", CONTACT_EMAIL);
+      const payload = await fetchJson(url);
+      const items = Array.isArray(payload?.message?.items) ? payload.message.items : [];
+      return items.map((item) => ({ item, keyword, venueConfig }));
+    } catch (error) {
+      taskFailures.push(`${venueConfig.venue}/${keyword}: ${error.message || "request failed"}`);
+      return [];
+    }
   });
+
+  if (!results.flat().length && taskFailures.length) {
+    throw new Error(`Crossref fetch failed after retries. ${taskFailures.slice(0, 3).join(" | ")}`);
+  }
 
   const papers = [];
   for (const group of results.flat()) {
@@ -690,18 +737,104 @@ async function fetchArxivPapers(forceRefresh = false) {
   return writeMemoryCache(cacheKey, papers);
 }
 
-async function fetchReservedProviders() {
+async function fetchDblpPapers(forceRefresh = false) {
+  const cacheKey = "security-research:http:dblp";
+  if (!forceRefresh) {
+    const cached = readMemoryCache(cacheKey);
+    if (cached) return cached;
+  }
+
+  const results = await mapLimit(SEARCH_KEYWORDS, CROSSREF_CONCURRENCY, async (keyword) => {
+    const url = new URL(DBLP_API_BASE);
+    url.searchParams.set("q", keyword);
+    url.searchParams.set("format", "json");
+    url.searchParams.set("h", String(DBLP_ROWS_PER_QUERY));
+    const payload = await fetchJson(url);
+    const hits = payload?.result?.hits?.hit;
+    const list = Array.isArray(hits) ? hits : hits ? [hits] : [];
+    return list.map((hit) => ({ hit, keyword }));
+  });
+
+  const papers = [];
+  for (const group of results.flat()) {
+    const info = group.hit?.info || {};
+    const venue = normalizeVenueLabel(info.venue || "");
+    if (!venue) continue;
+
+    const title = normalizeWhitespace(stripHtmlTags(decodeHtmlEntities(info.title || "")));
+    if (!title || isExcludedTitle(title)) continue;
+
+    const abstractOrSummary = buildDblpSummary(title, venue, info.year);
+    const combinedText = `${title}\n${abstractOrSummary}`;
+    if (!isResearchRelevant(combinedText)) continue;
+
+    const projectScope = inferProjectScope(combinedText);
+    const relevanceScore = scorePaper({
+      title,
+      summary: abstractOrSummary,
+      venue,
+      sourceType: "conference_paper",
+      projectScope,
+    });
+    if (relevanceScore < 24) continue;
+
+    const paper = {
+      title,
+      normalizedTitle: normalizeTitle(title),
+      sourceType: "conference_paper",
+      projectScope,
+      venue,
+      sourcePrimary: "dblp",
+      abstractOrSummary,
+      tags: buildTags(title, abstractOrSummary, venue, projectScope, "conference_paper"),
+      sourceUrl: info.ee || info.url || "",
+      authors: normalizeDblpAuthors(info.authors),
+      externalIds: {
+        doi: info.doi || "",
+        dblpUrl: info.url || "",
+        electronicEdition: info.ee || "",
+      },
+      relevanceScore,
+      isTopVenue: true,
+      publishedAt: yearToIsoDate(info.year),
+      status: "active",
+      rawData: {
+        keyword: group.keyword,
+        source: group.hit,
+      },
+    };
+    paper.canonicalId = buildCanonicalId(paper);
+    papers.push(paper);
+  }
+
+  return writeMemoryCache(cacheKey, papers);
+}
+
+function buildProviderStatus({
+  name,
+  enabled = true,
+  ok = false,
+  count = 0,
+  error = "",
+  note = "",
+  recommendation = "",
+}) {
+  const message = String(error || "");
+  let status = ok ? "online" : enabled ? "error" : "manual";
+
+  if (/429|rate/i.test(message)) {
+    status = "rate_limited";
+  }
+
   return {
-    dblp: {
-      enabled: false,
-      status: "reserved",
-      note: "Reserved interface for future metadata enrichment.",
-    },
-    googleScholar: {
-      enabled: false,
-      status: "reserved",
-      note: "Reserved interface for future metadata enrichment.",
-    },
+    name,
+    enabled,
+    ok,
+    status,
+    count,
+    error: ok ? "" : message,
+    note,
+    recommendation,
   };
 }
 
@@ -806,14 +939,15 @@ function buildOverview(papers, sourceMeta) {
 
 async function collectSecurityResearch({ forceRefresh = false } = {}) {
   const collectedAt = nowIso();
-  const [conferenceResult, arxivResult, reservedProviders] = await Promise.all([
+  const [conferenceResult, dblpResult, arxivResult] = await Promise.all([
     fetchCrossrefPapers(forceRefresh).then((value) => ({ ok: true, value })).catch((error) => ({ ok: false, error })),
+    fetchDblpPapers(forceRefresh).then((value) => ({ ok: true, value })).catch((error) => ({ ok: false, error })),
     fetchArxivPapers(forceRefresh).then((value) => ({ ok: true, value })).catch((error) => ({ ok: false, error })),
-    fetchReservedProviders(),
   ]);
 
   const papers = dedupePapers([
     ...(conferenceResult.ok ? conferenceResult.value : []),
+    ...(dblpResult.ok ? dblpResult.value : []),
     ...(arxivResult.ok ? arxivResult.value : []),
   ]);
 
@@ -823,17 +957,43 @@ async function collectSecurityResearch({ forceRefresh = false } = {}) {
     keywords: SEARCH_KEYWORDS,
     conferenceWhitelist: VENUE_CONFIGS.map((item) => item.venue),
     providers: {
-      crossref: {
+      crossref: buildProviderStatus({
+        name: "Crossref",
+        enabled: true,
         ok: conferenceResult.ok,
-        error: conferenceResult.ok ? "" : conferenceResult.error?.message || "Crossref fetch failed",
         count: conferenceResult.ok ? conferenceResult.value.length : 0,
-      },
-      arxiv: {
+        error: conferenceResult.ok ? "" : conferenceResult.error?.message || "Crossref fetch failed",
+        note: "Primary source for top-tier conference metadata.",
+        recommendation: "If Crossref fails, check outbound network access and retry the refresh.",
+      }),
+      dblp: buildProviderStatus({
+        name: "DBLP",
+        enabled: true,
+        ok: dblpResult.ok,
+        count: dblpResult.ok ? dblpResult.value.length : 0,
+        error: dblpResult.ok ? "" : dblpResult.error?.message || "DBLP fetch failed",
+        note: "Metadata enrichment source used to supplement top-tier conference indexing.",
+        recommendation: "If DBLP fails, keep Crossref online and retry later; deduplication will merge overlapping records automatically.",
+      }),
+      arxiv: buildProviderStatus({
+        name: "arXiv",
+        enabled: true,
         ok: arxivResult.ok,
-        error: arxivResult.ok ? "" : arxivResult.error?.message || "arXiv fetch failed",
         count: arxivResult.ok ? arxivResult.value.length : 0,
-      },
-      ...reservedProviders,
+        error: arxivResult.ok ? "" : arxivResult.error?.message || "arXiv fetch failed",
+        note: "Supplementary preprint source. All arXiv records are marked as preprint/non-top-tier.",
+        recommendation: arxivResult.ok
+          ? "Use scheduled refreshes for stable ingestion and avoid repeated manual refreshes in a short window."
+          : "If arXiv returns 429, reduce manual refresh frequency, rely on cached snapshots, or refresh during off-peak hours.",
+      }),
+      googleScholar: buildProviderStatus({
+        name: "Google Scholar",
+        enabled: false,
+        ok: false,
+        count: 0,
+        note: "Direct scraping is intentionally disabled to avoid unstable anti-bot failures and compliance issues.",
+        recommendation: "Use a compliant provider such as SerpAPI or a curated import pipeline, then map results into the existing normalization flow.",
+      }),
     },
   };
 
@@ -843,6 +1003,7 @@ async function collectSecurityResearch({ forceRefresh = false } = {}) {
     sourceMeta,
     raw: {
       conferencePapers: conferenceResult.ok ? conferenceResult.value : [],
+      dblpPapers: dblpResult.ok ? dblpResult.value : [],
       preprints: arxivResult.ok ? arxivResult.value : [],
     },
   };

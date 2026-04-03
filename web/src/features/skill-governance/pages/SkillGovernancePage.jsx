@@ -3,13 +3,16 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import {
   AlertCircle,
+  BarChart3,
   Box,
+  Database,
   Eye,
   EyeOff,
   FileArchive,
   FileCode2,
   FileSearch,
   FolderOpen,
+  GitBranch,
   LoaderCircle,
   Search,
   ShieldAlert,
@@ -18,7 +21,9 @@ import {
   UploadCloud,
   X,
 } from "lucide-react";
-import { getSkillScanStatus, scanSkillBySlug, scanSkillFiles } from "../services/skillScanService.js";
+import { getSkillScanStatus, scanSkillByRepositoryUrl, scanSkillBySlug, scanSkillFiles } from "../services/skillScanService.js";
+import { getSkillIntelligenceOverview } from "../services/skillIntelligenceService.js";
+import { searchSkills } from "../services/skillSearchService.js";
 
 const TABS = [
   { id: "intelligence", label: "基础情报" },
@@ -150,6 +155,10 @@ function SkillDetectWorkspace({ auth }) {
   const authState = isAuthenticated ? "authenticated" : "guest";
   const [uploads, setUploads] = useState([]);
   const [searchText, setSearchText] = useState("");
+  const [searchResults, setSearchResults] = useState([]);
+  const [searchMeta, setSearchMeta] = useState({ query: "", total: 0 });
+  const [isSearching, setIsSearching] = useState(false);
+  const [searchError, setSearchError] = useState("");
   const [dragging, setDragging] = useState(false);
   const [isScanning, setIsScanning] = useState(false);
   const [scanSource, setScanSource] = useState("");
@@ -360,6 +369,60 @@ function SkillDetectWorkspace({ auth }) {
     }
   }
 
+  async function handleSearchSkills() {
+    const query = searchText.trim();
+    if (!query) {
+      setSearchResults([]);
+      setSearchMeta({ query: "", total: 0 });
+      setSearchError("请输入关键词后再搜索。");
+      return;
+    }
+
+    setIsSearching(true);
+    setSearchError("");
+    try {
+      const result = await searchSkills(query, 12);
+      setSearchResults(result.items || []);
+      setSearchMeta({ query: result.query || query, total: Number(result.total || 0) });
+    } catch (error) {
+      setSearchResults([]);
+      setSearchMeta({ query, total: 0 });
+      setSearchError(error instanceof Error ? error.message : "数据库搜索失败，请稍后重试。");
+    } finally {
+      setIsSearching(false);
+    }
+  }
+
+  async function handleScanByRepository(record) {
+    const repositoryUrl = String(record?.repositoryUrl || "").trim();
+    if (!repositoryUrl) {
+      setScanError("该 Skill 缺少可扫描的 repository URL。");
+      return;
+    }
+
+    setIsScanning(true);
+    setScanSource("repository");
+    setScanError("");
+    setIsAiScanning(false);
+    setAiStatusMessage("");
+    setDetectionReport(null);
+    scanPollingTokenRef.current += 1;
+    const token = scanPollingTokenRef.current;
+    try {
+      const response = await scanSkillByRepositoryUrl(repositoryUrl, buildScanOptions());
+      setScanReport(response.report);
+      setDetectionReport(response.detectionReport || null);
+      if (response.pending && response.scanId) {
+        void waitForDeepScan(response.scanId, token);
+      }
+    } catch (error) {
+      setScanReport(null);
+      setScanError(error instanceof Error ? error.message : "按仓库复扫失败，请稍后重试。");
+    } finally {
+      setIsScanning(false);
+    }
+  }
+
   function handleDrop(event) {
     event.preventDefault();
     setDragging(false);
@@ -534,21 +597,90 @@ function SkillDetectWorkspace({ auth }) {
           <div className="skill-search-bar">
             <div className="skill-search-input-wrap">
               <Search size={16} className="skill-search-input-icon" />
-              <input className="oc-input skill-query-input" value={searchText} onChange={(event) => setSearchText(event.target.value)} placeholder="输入 Skill slug，例如 owner/skill-name" />
+              <input
+                className="oc-input skill-query-input"
+                value={searchText}
+                onChange={(event) => setSearchText(event.target.value)}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter") {
+                    void handleSearchSkills();
+                  }
+                }}
+                placeholder="输入 Skill 名称、作者或仓库地址"
+              />
             </div>
+            <button className="oc-ghost-btn" type="button" onClick={handleSearchSkills} disabled={isSearching}>
+              {isSearching ? "搜索中..." : "搜索数据库"}
+            </button>
             <button className="oc-primary-btn" type="button" onClick={handleScanBySlug} disabled={isScanning}>
-              {isScanning && scanSource === "slug" ? "扫描中..." : "按 slug 扫描"}
+              {isScanning && scanSource === "slug" ? "扫描中..." : "按输入直扫"}
             </button>
           </div>
 
           <div className="skill-search-state">
             <FileSearch size={18} strokeWidth={1.8} />
-            <span>{searchText ? `当前 slug：${searchText}` : "可直接输入远程 Skill slug，系统会先拉取样本，再交给统一调度器分析。"}</span>
+            <span>{searchText ? `当前查询：${searchText}` : "可先搜索数据库中的 Skill 元数据，也可以直接输入 ClawHub slug 做远程直扫。"}</span>
           </div>
+
+          {searchError ? (
+            <div className="skill-search-state skill-search-state--error">
+              <AlertCircle size={18} strokeWidth={1.8} />
+              <span>{searchError}</span>
+            </div>
+          ) : null}
+
+          {searchMeta.query ? (
+            <div className="skill-search-result-head">
+              <div>
+                <div className="skill-card-title">数据库搜索结果</div>
+                <div className="skill-card-desc">关键词 “{searchMeta.query}” 命中 {searchMeta.total} 条，展示前 {searchResults.length} 条。</div>
+              </div>
+            </div>
+          ) : null}
+
+          {searchResults.length ? (
+            <div className="skill-search-result-list">
+              {searchResults.map((item) => (
+                <div key={item.id} className="skill-search-result-card">
+                  <div className="skill-search-result-top">
+                    <div>
+                      <div className="skill-search-result-title">{item.name}</div>
+                      <div className="skill-search-result-meta">
+                        <span>{item.author || "未知作者"}</span>
+                        {item.language ? <span>{item.language}</span> : null}
+                        <span>{item.stars || 0} stars</span>
+                        {item.latestScanStatus ? <span>最近扫描：{item.latestScanStatus}</span> : null}
+                      </div>
+                    </div>
+                    <button
+                      className="oc-primary-btn"
+                      type="button"
+                      onClick={() => handleScanByRepository(item)}
+                      disabled={isScanning}
+                    >
+                      {isScanning && scanSource === "repository" ? "复扫中..." : "按仓库复扫"}
+                    </button>
+                  </div>
+                  {item.description ? <div className="skill-card-desc">{item.description}</div> : null}
+                  <div className="skill-search-result-foot">
+                    <span className="is-mono">{item.repositoryUrl}</span>
+                    {item.latestRiskLabel ? <span className={`skill-search-risk-chip is-${item.latestRiskLabel}`}>{item.latestRiskLabel}</span> : null}
+                    {item.latestMaxSeverity ? <SeverityBadge severity={item.latestMaxSeverity} /> : null}
+                    {item.latestFindingCount ? <span className="skill-search-count-chip">{item.latestFindingCount} findings</span> : null}
+                  </div>
+                  {item.latestErrorMessage ? <div className="skill-finding-meta">最近错误：{item.latestErrorMessage}</div> : null}
+                </div>
+              ))}
+            </div>
+          ) : searchMeta.query && !isSearching && !searchError ? (
+            <div className="skill-inline-empty">没有命中数据库记录，可以直接把完整 slug 输入右侧按钮做远程直扫。</div>
+          ) : null}
 
           <div className="skill-search-tips">
             <div className="skill-tip-chip">支持本地样本上传</div>
+            <div className="skill-tip-chip">支持数据库检索</div>
             <div className="skill-tip-chip">支持远程 slug 拉取</div>
+            <div className="skill-tip-chip">支持仓库地址复扫</div>
             <div className="skill-tip-chip">返回统一扫描报告</div>
           </div>
         </div>
@@ -623,7 +755,11 @@ function SkillDetectWorkspace({ auth }) {
             <div className="skill-card-title">扫描结果</div>
             <div className="skill-card-desc">展示统一调度器聚合后的风险发现、综合结论与处置建议。</div>
           </div>
-          {scanReport ? <span className="oc-badge oc-badge-review">{scanSource === "slug" ? "来源：ClawHub slug" : "来源：本地上传"}</span> : null}
+          {scanReport ? (
+            <span className="oc-badge oc-badge-review">
+              {scanSource === "slug" ? "来源：ClawHub slug" : scanSource === "repository" ? "来源：数据库仓库复扫" : "来源：本地上传"}
+            </span>
+          ) : null}
         </div>
 
         {isScanning ? (
@@ -759,7 +895,7 @@ function SkillDetectWorkspace({ auth }) {
                   </div>
                 </div>
                 <div className="skill-recommend-list">
-                  <div className="skill-recommend-item">{scanSource === "slug" ? "若样本来自远程仓库，建议同步确认下载链路、版本元数据和实际内容是否一致。" : "若样本来自本地上传，建议保留原始包与扫描报告作为追溯依据。"}</div>
+                  <div className="skill-recommend-item">{scanSource === "upload" ? "若样本来自本地上传，建议保留原始包与扫描报告作为追溯依据。" : "若样本来自远程仓库，建议同步确认下载链路、版本元数据和实际内容是否一致。"}</div>
                   <div className="skill-recommend-item">{summary.overall_conclusion === "clear" ? "当前没有形成聚合风险结论，但仍建议抽查关键脚本、外链与依赖来源。" : "优先根据风险类别和文件定位做人工复核，再决定是否放行。"} </div>
                 </div>
               </div>
@@ -833,6 +969,723 @@ function SkillPlaceholder({ title, desc, icon: Icon }) {
   );
 }
 
+function formatPercent(value) {
+  const amount = Number(value);
+  if (!Number.isFinite(amount)) return "--";
+  return `${amount.toFixed(amount >= 10 ? 1 : 1)}%`;
+}
+
+function formatCompactCount(value) {
+  const amount = Number(value);
+  if (!Number.isFinite(amount)) return "--";
+  return new Intl.NumberFormat("zh-CN", {
+    notation: amount >= 10000 ? "compact" : "standard",
+    maximumFractionDigits: amount >= 10000 ? 1 : 0,
+  }).format(amount);
+}
+
+function getFailureReasonLabel(reason) {
+  const labels = {
+    timeout: "超时",
+    network: "网络 / 拉取异常",
+    "invalid-url": "仓库地址无效",
+    "missing-skill-md": "缺少 SKILL.md",
+    "windows-path": "Windows 路径限制",
+    other: "其他异常",
+    unknown: "未知",
+  };
+  return labels[reason] || reason;
+}
+
+function getUnknownReasonLabel(reason) {
+  const labels = {
+    "missing-skill-md": "仓库缺少 SKILL.md",
+    "invalid-repository": "仓库地址无效",
+    "unsupported-host": "仓库源不受支持",
+    other: "其他待确认原因",
+  };
+  return labels[reason] || reason;
+}
+
+function SkillIntelligencePanel() {
+  const [overview, setOverview] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadOverview() {
+      setLoading(true);
+      setError("");
+      try {
+        const data = await getSkillIntelligenceOverview();
+        if (!cancelled) {
+          setOverview(data);
+        }
+      } catch (loadError) {
+        if (!cancelled) {
+          setError(loadError instanceof Error ? loadError.message : "基础情报加载失败。");
+        }
+      } finally {
+        if (!cancelled) {
+          setLoading(false);
+        }
+      }
+    }
+
+    loadOverview();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="skill-subpanel">
+        <div className="skill-empty-state">
+          <LoaderCircle size={20} strokeWidth={1.8} className="skill-spin" />
+          <div>
+            <div className="skill-card-title">基础情报加载中</div>
+            <div className="skill-card-desc">正在汇总最近批次的扫描覆盖、失败压力与风险分布。</div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="skill-subpanel">
+        <div className="skill-empty-state skill-error-state">
+          <AlertCircle size={20} strokeWidth={1.8} />
+          <div>
+            <div className="skill-card-title">基础情报暂时不可用</div>
+            <div className="skill-card-desc">{error}</div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  const summary = overview?.summary || {};
+  const latestBatch = overview?.latestBatch || null;
+  const riskDistribution = Array.isArray(overview?.riskDistribution) ? overview.riskDistribution : [];
+  const recentBatches = Array.isArray(overview?.recentBatches) ? overview.recentBatches : [];
+  const failureClusters = Array.isArray(overview?.failureClusters) ? overview.failureClusters : [];
+  const scannedSkills = Number(summary.scannedSkills || 0);
+  const ringStyle = {
+    background: `conic-gradient(
+      #0f766e 0% ${summary.completionRate || 0}%,
+      #dc2626 ${summary.completionRate || 0}% ${(summary.completionRate || 0) + (summary.failureRate || 0)}%,
+      #d97706 ${(summary.completionRate || 0) + (summary.failureRate || 0)}% 100%
+    )`,
+  };
+
+  return (
+    <section className="skill-intel-shell">
+      <div className="skill-intel-hero">
+        <div className="skill-intel-hero-copy">
+          <span className="skill-intel-badge">基础情报 / 最近批次</span>
+          <h3 className="skill-intel-title">Skill 扫描态势已经接入情报面板</h3>
+          <p className="skill-intel-desc">
+            用最近一次数据库批量扫描作为底座，集中观察覆盖率、异常压力、风险标签分布和近几批次的执行趋势。
+          </p>
+          <div className="skill-intel-meta">
+            <span>最近批次 #{latestBatch?.id ?? "--"}</span>
+            <span>更新时间 {formatScanTime(latestBatch?.updatedAt)}</span>
+            <span>语料仓库 {formatCompactCount(summary.totalRepos)}</span>
+          </div>
+        </div>
+
+        <div className="skill-intel-ring-card">
+          <div className="skill-intel-ring" style={ringStyle}>
+            <div className="skill-intel-ring-inner">
+              <strong>{formatPercent(summary.coverageRate)}</strong>
+              <span>扫描覆盖率</span>
+            </div>
+          </div>
+          <div className="skill-intel-legend">
+            <div><i className="is-completed" />完成 {formatPercent(summary.completionRate)}</div>
+            <div><i className="is-failed" />失败 {formatPercent(summary.failureRate)}</div>
+            <div><i className="is-skipped" />跳过 {formatPercent(summary.skipRate)}</div>
+          </div>
+        </div>
+      </div>
+
+      <div className="skill-intel-kpi-grid">
+        <div className="skill-intel-kpi-card">
+          <div className="skill-intel-kpi-icon"><Database size={18} strokeWidth={1.8} /></div>
+          <span className="skill-summary-label">Skill 总量</span>
+          <strong>{formatCompactCount(summary.totalSkills)}</strong>
+          <span className="skill-metric-hint">数据库当前样本池</span>
+        </div>
+        <div className="skill-intel-kpi-card">
+          <div className="skill-intel-kpi-icon"><BarChart3 size={18} strokeWidth={1.8} /></div>
+          <span className="skill-summary-label">已写入扫描结果</span>
+          <strong>{formatCompactCount(scannedSkills)}</strong>
+          <span className="skill-metric-hint">最近批次结果总数</span>
+        </div>
+        <div className="skill-intel-kpi-card is-alert">
+          <div className="skill-intel-kpi-icon"><AlertCircle size={18} strokeWidth={1.8} /></div>
+          <span className="skill-summary-label">失败压力</span>
+          <strong>{formatCompactCount(latestBatch?.failedSkills)}</strong>
+          <span className="skill-metric-hint">需重试或归因的失败项</span>
+        </div>
+        <div className="skill-intel-kpi-card is-warm">
+          <div className="skill-intel-kpi-icon"><GitBranch size={18} strokeWidth={1.8} /></div>
+          <span className="skill-summary-label">跳过样本</span>
+          <strong>{formatCompactCount(latestBatch?.skippedSkills)}</strong>
+          <span className="skill-metric-hint">多为无效仓库或缺少 SKILL.md</span>
+        </div>
+      </div>
+
+      <div className="skill-intel-grid">
+        <div className="skill-upload-list skill-intel-panel">
+          <div className="skill-card-head">
+            <div>
+              <div className="skill-card-title">安全与待确定结构</div>
+              <div className="skill-card-desc">按最近批次的落库结果观察 safe / dangerous / unknown 的分层情况。</div>
+            </div>
+          </div>
+          <div className="skill-intel-stack">
+            {riskDistribution.length ? riskDistribution.map((item) => (
+              <div key={item.riskLabel} className={`skill-intel-stack-row is-${item.riskLabel}`}>
+                <div className="skill-intel-stack-head">
+                  <span>{item.riskLabel}</span>
+                  <strong>{formatCompactCount(item.total)}</strong>
+                </div>
+                <div className="skill-intel-bar-track">
+                  <div className="skill-intel-bar-fill" style={{ width: `${Math.max(item.percent, 1)}%` }} />
+                </div>
+                <div className="skill-intel-stack-meta">{formatPercent(item.percent)}</div>
+              </div>
+            )) : (
+              <div className="skill-inline-empty">最近批次暂无风险标签分布可展示。</div>
+            )}
+          </div>
+        </div>
+
+        <div className="skill-upload-list skill-intel-panel">
+          <div className="skill-card-head">
+            <div>
+              <div className="skill-card-title">待确定原因</div>
+              <div className="skill-card-desc">对失败项按常见原因归并，方便决定先修重试策略还是做数据清洗。</div>
+            </div>
+          </div>
+          <div className="skill-intel-cluster-list">
+            {unknownClusters.length ? unknownClusters.map((item) => (
+              <div key={item.reason} className="skill-intel-cluster-item">
+                <div>
+                  <div className="skill-intel-cluster-title">{getUnknownReasonLabel(item.reason)}</div>
+                  <div className="skill-card-desc">占待确定项 {formatPercent(item.percent)}</div>
+                </div>
+                <strong>{formatCompactCount(item.total)}</strong>
+              </div>
+            )) : (
+              <div className="skill-inline-empty">最近批次没有失败项聚类数据。</div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      <div className="skill-upload-list skill-intel-panel">
+        <div className="skill-card-head">
+          <div>
+            <div className="skill-card-title">扫描执行概览</div>
+            <div className="skill-card-desc">展示最近 6 个扫描批次的完成、失败与跳过结构，便于快速感知执行质量变化。</div>
+          </div>
+        </div>
+        <div className="skill-intel-batch-list">
+          {[latestBatch].filter(Boolean).map((batch) => {
+            const total = batch.completedSkills + batch.failedSkills + batch.skippedSkills;
+            const completedWidth = total ? (batch.completedSkills / total) * 100 : 0;
+            const failedWidth = total ? (batch.failedSkills / total) * 100 : 0;
+            const skippedWidth = total ? (batch.skippedSkills / total) * 100 : 0;
+
+            return (
+              <div key={batch.id} className="skill-intel-batch-row">
+                <div className="skill-intel-batch-meta">
+                  <div className="skill-intel-batch-id">Batch #{batch.id}</div>
+                  <div className="skill-card-desc">
+                    {formatScanTime(batch.startedAt)} {batch.completedAt ? `→ ${formatScanTime(batch.completedAt)}` : "→ 进行中"}
+                  </div>
+                </div>
+                <div className="skill-intel-batch-bar">
+                  <span className="is-completed" style={{ width: `${completedWidth}%` }} />
+                  <span className="is-failed" style={{ width: `${failedWidth}%` }} />
+                  <span className="is-skipped" style={{ width: `${skippedWidth}%` }} />
+                </div>
+                <div className="skill-intel-batch-facts">
+                  <span><ShieldCheck size={14} strokeWidth={1.8} /> {formatCompactCount(batch.completedSkills)}</span>
+                  <span><AlertCircle size={14} strokeWidth={1.8} /> {formatCompactCount(batch.failedSkills)}</span>
+                  <span><Sparkles size={14} strokeWidth={1.8} /> {formatCompactCount(batch.skippedSkills)}</span>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function SkillIntelligencePanelV2() {
+  const [overview, setOverview] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+    const cacheKey = "clawguard.skill.intelligence.overview";
+
+    try {
+      const cachedRaw = window.sessionStorage.getItem(cacheKey);
+      if (cachedRaw) {
+        const cached = JSON.parse(cachedRaw);
+        if (cached && typeof cached === "object") {
+          setOverview(cached);
+          setLoading(false);
+        }
+      }
+    } catch {
+      // Ignore stale cache payloads.
+    }
+
+    async function loadOverview() {
+      try {
+        const data = await getSkillIntelligenceOverview();
+        if (cancelled) return;
+        setOverview(data);
+        setLoading(false);
+        try {
+          window.sessionStorage.setItem(cacheKey, JSON.stringify(data));
+        } catch {
+          // Ignore browser storage failures.
+        }
+      } catch {
+        if (!cancelled) {
+          setLoading(false);
+        }
+      }
+    }
+
+    void loadOverview();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="skill-intel-shell skill-intel-shell--compact">
+        <div className="skill-intel-skeleton skill-intel-skeleton--hero" />
+        <div className="skill-intel-kpi-grid">
+          {Array.from({ length: 4 }).map((_, index) => <div key={index} className="skill-intel-skeleton skill-intel-skeleton--card" />)}
+        </div>
+        <div className="skill-intel-grid">
+          <div className="skill-intel-skeleton skill-intel-skeleton--panel" />
+          <div className="skill-intel-skeleton skill-intel-skeleton--panel" />
+        </div>
+      </div>
+    );
+  }
+
+  const summary = overview?.summary || {};
+  const latestBatch = overview?.latestBatch || null;
+  const riskDistribution = Array.isArray(overview?.riskDistribution) ? overview.riskDistribution : [];
+  const reviewRows = Array.isArray(overview?.reviewRows) ? overview.reviewRows : [];
+  const unknownClusters = Array.isArray(overview?.unknownClusters)
+    ? overview.unknownClusters.filter((item) => Number(item.total || 0) > 0)
+    : [];
+  const scannedSkills = Number(summary.scannedSkills || 0);
+  const scannedRepos = Number(summary.scannedRepos || 0);
+  const successRate = Number(summary.successRate || 0);
+  const failureRate = Number(summary.failureRate || 0);
+  const skipRate = Number(summary.skipRate || 0);
+  const safeSlice = riskDistribution.find((item) => item.riskLabel === "safe");
+  const unknownSlice = riskDistribution.find((item) => item.riskLabel === "unknown");
+  const reviewSlice = riskDistribution.find((item) => item.riskLabel === "dangerous");
+  const ringStyle = {
+    background: `conic-gradient(#0f766e 0% ${Number(safeSlice?.percent || 0)}%, #dc2626 ${Number(safeSlice?.percent || 0)}% ${Number(safeSlice?.percent || 0) + Number(reviewSlice?.percent || 0)}%, #d97706 ${Number(safeSlice?.percent || 0) + Number(reviewSlice?.percent || 0)}% 100%)`,
+  };
+
+  return (
+    <section className="skill-intel-shell skill-intel-shell--compact">
+      <div className="skill-intel-hero skill-intel-hero--clean">
+        <div className="skill-intel-hero-copy">
+          <span className="skill-intel-badge">基础情报 / 最近批次</span>
+          <h3 className="skill-intel-title">Skill 扫描基线</h3>
+          <p className="skill-intel-desc">聚焦数据库中的批量扫描基线，快速判断样本池覆盖、批次成功率、失败压力和近期执行质量。</p>
+          <div className="skill-intel-meta">
+            <span>最近批次 #{latestBatch?.id ?? "--"}</span>
+            <span>更新时间 {formatScanTime(latestBatch?.updatedAt)}</span>
+            <span>仓库覆盖 {formatCompactCount(scannedRepos)} / {formatCompactCount(summary.totalRepos)}</span>
+          </div>
+        </div>
+
+        <div className="skill-intel-ring-card skill-intel-ring-card--clean">
+          <div className="skill-intel-ring" style={ringStyle}>
+            <div className="skill-intel-ring-inner">
+              <strong>{formatPercent(safeSlice?.percent)}</strong>
+              <span>安全 Skill 占比</span>
+            </div>
+          </div>
+          <div className="skill-intel-legend">
+            <div><i className="is-completed" />安全 {formatPercent(safeSlice?.percent)}</div>
+            <div><i className="is-failed" />待复核 {formatPercent(reviewSlice?.percent)}</div>
+            <div><i className="is-skipped" />待确定 {formatPercent(unknownSlice?.percent)}</div>
+          </div>
+        </div>
+      </div>
+
+      <div className="skill-intel-kpi-grid">
+        <div className="skill-intel-kpi-card skill-intel-kpi-card--clean">
+          <div className="skill-intel-kpi-icon"><Database size={18} strokeWidth={1.8} /></div>
+          <span className="skill-summary-label">Skill 总量</span>
+          <strong>{formatCompactCount(summary.totalSkills)}</strong>
+          <span className="skill-metric-hint">数据库当前样本池</span>
+        </div>
+        <div className="skill-intel-kpi-card skill-intel-kpi-card--clean">
+          <div className="skill-intel-kpi-icon"><BarChart3 size={18} strokeWidth={1.8} /></div>
+          <span className="skill-summary-label">安全 Skill 比例</span>
+          <strong>{formatPercent(safeSlice?.percent)}</strong>
+          <span className="skill-metric-hint">{formatCompactCount(safeSlice?.total)} 个已归为 safe</span>
+        </div>
+        <div className="skill-intel-kpi-card skill-intel-kpi-card--danger">
+          <div className="skill-intel-kpi-icon"><AlertCircle size={18} strokeWidth={1.8} /></div>
+          <span className="skill-summary-label">待确定比例</span>
+          <strong>{formatPercent(unknownSlice?.percent)}</strong>
+          <span className="skill-metric-hint">{formatCompactCount(unknownSlice?.total)} 个仍待确认</span>
+        </div>
+        <div className="skill-intel-kpi-card skill-intel-kpi-card--warm">
+          <div className="skill-intel-kpi-icon"><GitBranch size={18} strokeWidth={1.8} /></div>
+          <span className="skill-summary-label">待复核比例</span>
+          <strong>{formatPercent(reviewSlice?.percent)}</strong>
+          <span className="skill-metric-hint">{formatCompactCount(reviewSlice?.total)} 个进入危险或复核队列</span>
+        </div>
+      </div>
+
+      <div className="skill-intel-grid">
+        <div className="skill-upload-list skill-intel-panel">
+          <div className="skill-card-head">
+            <div>
+              <div className="skill-card-title">安全与待确定结构</div>
+              <div className="skill-card-desc">优先看 safe 与 unknown 的比例，再结合待复核队列判断需要人工介入的密度。</div>
+            </div>
+          </div>
+          <div className="skill-intel-stack">
+            {riskDistribution.length ? riskDistribution.map((item) => (
+              <div key={item.riskLabel} className={`skill-intel-stack-row is-${item.riskLabel}`}>
+                <div className="skill-intel-stack-head">
+                  <span>{item.riskLabel === "safe" ? "低风险 / safe" : item.riskLabel === "dangerous" ? "待复核 / dangerous" : "未定 / unknown"}</span>
+                  <strong>{formatCompactCount(item.total)}</strong>
+                </div>
+                <div className="skill-intel-bar-track">
+                  <div className="skill-intel-bar-fill" style={{ width: `${Math.max(Number(item.percent || 0), 1)}%` }} />
+                </div>
+                <div className="skill-intel-stack-meta">{formatPercent(item.percent)}</div>
+              </div>
+            )) : (
+              <div className="skill-inline-empty">后台同步中，风险标签会自动补齐。</div>
+            )}
+          </div>
+        </div>
+
+        <div className="skill-upload-list skill-intel-panel">
+          <div className="skill-card-head">
+            <div>
+              <div className="skill-card-title">待确定原因</div>
+              <div className="skill-card-desc">待确定并不等于危险，更多是当前证据不足。这里展示最常见的待确定来源。</div>
+            </div>
+          </div>
+          <div className="skill-intel-cluster-list">
+            {unknownClusters.length ? unknownClusters.map((item) => (
+              <div key={item.reason} className="skill-intel-cluster-item">
+                <div>
+                  <div className="skill-intel-cluster-title">{getUnknownReasonLabel(item.reason)}</div>
+                  <div className="skill-card-desc">占待确定项 {formatPercent(item.percent)}</div>
+                </div>
+                <strong>{formatCompactCount(item.total)}</strong>
+              </div>
+            )) : (
+              <div className="skill-inline-empty">当前待确定项较少，暂无需要单独强调的原因。</div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      <div className="skill-upload-list skill-intel-panel">
+        <div className="skill-card-head">
+          <div>
+            <div className="skill-card-title">扫描执行概览</div>
+            <div className="skill-card-desc">仅保留一个轻量图层观察扫描执行状态，避免喧宾夺主。</div>
+          </div>
+        </div>
+        <div className="skill-intel-batch-list">
+          {[latestBatch].filter(Boolean).map((batch) => {
+            const total = batch.completedSkills + batch.failedSkills + batch.skippedSkills;
+            const completedWidth = total ? (batch.completedSkills / total) * 100 : 0;
+            const failedWidth = total ? (batch.failedSkills / total) * 100 : 0;
+            const skippedWidth = total ? (batch.skippedSkills / total) * 100 : 0;
+
+            return (
+              <div key={batch.id} className="skill-intel-batch-row">
+                <div className="skill-intel-batch-meta">
+                  <div className="skill-intel-batch-id">Batch #{batch.id}</div>
+                  <div className="skill-card-desc">
+                    {formatScanTime(batch.startedAt)} {batch.completedAt ? `-> ${formatScanTime(batch.completedAt)}` : "-> 进行中"}
+                  </div>
+                </div>
+                <div className="skill-intel-batch-bar">
+                  <span className="is-completed" style={{ width: `${completedWidth}%` }} />
+                  <span className="is-failed" style={{ width: `${failedWidth}%` }} />
+                  <span className="is-skipped" style={{ width: `${skippedWidth}%` }} />
+                </div>
+                <div className="skill-intel-batch-facts">
+                  <span><ShieldCheck size={14} strokeWidth={1.8} /> 成功 {formatCompactCount(batch.completedSkills)}</span>
+                  <span><AlertCircle size={14} strokeWidth={1.8} /> 失败 {formatCompactCount(batch.failedSkills)}</span>
+                  <span><Sparkles size={14} strokeWidth={1.8} /> 跳过 {formatCompactCount(batch.skippedSkills)}</span>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function SkillIntelligencePanelV3() {
+  const [overview, setOverview] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+    const cacheKey = "clawguard.skill.intelligence.overview.v3";
+
+    async function loadOverview() {
+      try {
+        const cachedRaw = window.sessionStorage.getItem(cacheKey);
+        if (cachedRaw) {
+          const cached = JSON.parse(cachedRaw);
+          if (!cancelled && cached && typeof cached === "object") {
+            setOverview(cached);
+            setLoading(false);
+          }
+        }
+      } catch {
+        // Ignore stale cache payloads.
+      }
+
+      try {
+        const data = await getSkillIntelligenceOverview();
+        if (cancelled) return;
+        setOverview(data);
+        setLoading(false);
+        try {
+          window.sessionStorage.setItem(cacheKey, JSON.stringify(data));
+        } catch {
+          // Ignore browser storage failures.
+        }
+      } catch {
+        if (!cancelled) {
+          setLoading(false);
+        }
+      }
+    }
+
+    void loadOverview();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="skill-intel-shell skill-intel-shell--compact">
+        <div className="skill-intel-skeleton skill-intel-skeleton--hero" />
+        <div className="skill-intel-kpi-grid">
+          {Array.from({ length: 4 }).map((_, index) => <div key={index} className="skill-intel-skeleton skill-intel-skeleton--card" />)}
+        </div>
+        <div className="skill-intel-grid">
+          <div className="skill-intel-skeleton skill-intel-skeleton--panel" />
+          <div className="skill-intel-skeleton skill-intel-skeleton--panel" />
+        </div>
+        <div className="skill-intel-skeleton skill-intel-skeleton--table" />
+      </div>
+    );
+  }
+
+  const summary = overview?.summary || {};
+  const latestBatch = overview?.latestBatch || null;
+  const riskDistribution = Array.isArray(overview?.riskDistribution) ? overview.riskDistribution : [];
+  const unknownClusters = Array.isArray(overview?.unknownClusters)
+    ? overview.unknownClusters.filter((item) => Number(item.total || 0) > 0)
+    : [];
+  const reviewRows = Array.isArray(overview?.reviewRows) ? overview.reviewRows : [];
+  const safeSlice = riskDistribution.find((item) => item.riskLabel === "safe");
+  const reviewSlice = riskDistribution.find((item) => item.riskLabel === "dangerous");
+  const unknownSlice = riskDistribution.find((item) => item.riskLabel === "unknown");
+  const safePercent = Number(safeSlice?.percent || 0);
+  const reviewPercent = Number(reviewSlice?.percent || 0);
+  const unknownPercent = Number(unknownSlice?.percent || 0);
+  const ringStyle = {
+    background: `conic-gradient(#0f766e 0% ${safePercent}%, #dc2626 ${safePercent}% ${safePercent + reviewPercent}%, #d97706 ${safePercent + reviewPercent}% 100%)`,
+  };
+
+  return (
+    <section className="skill-intel-shell skill-intel-shell--compact">
+      <div className="skill-intel-hero skill-intel-hero--clean">
+        <div className="skill-intel-hero-copy">
+          <span className="skill-intel-badge">基础情报 / 最近批次</span>
+          <h3 className="skill-intel-title">Skill 安全结构</h3>
+          <p className="skill-intel-desc">重点看安全 Skill、待复核 Skill 和待确定 Skill 的占比，再结合待确定原因与待复核清单做人工判断。</p>
+          <div className="skill-intel-meta">
+            <span>最近批次 #{latestBatch?.id ?? "--"}</span>
+            <span>更新时间 {formatScanTime(latestBatch?.updatedAt)}</span>
+            <span>已覆盖仓库 {formatCompactCount(summary.scannedRepos)} / {formatCompactCount(summary.totalRepos)}</span>
+          </div>
+        </div>
+
+        <div className="skill-intel-ring-card skill-intel-ring-card--clean">
+          <div className="skill-intel-ring" style={ringStyle}>
+            <div className="skill-intel-ring-inner">
+              <strong>{formatPercent(safePercent)}</strong>
+              <span>安全 Skill 占比</span>
+            </div>
+          </div>
+          <div className="skill-intel-legend">
+            <div><i className="is-completed" />安全 {formatPercent(safePercent)}</div>
+            <div><i className="is-failed" />待复核 {formatPercent(reviewPercent)}</div>
+            <div><i className="is-skipped" />待确定 {formatPercent(unknownPercent)}</div>
+          </div>
+        </div>
+      </div>
+
+      <div className="skill-intel-kpi-grid">
+        <div className="skill-intel-kpi-card skill-intel-kpi-card--clean">
+          <div className="skill-intel-kpi-icon"><Database size={18} strokeWidth={1.8} /></div>
+          <span className="skill-summary-label">Skill 总量</span>
+          <strong>{formatCompactCount(summary.totalSkills)}</strong>
+          <span className="skill-metric-hint">数据库当前样本池</span>
+        </div>
+        <div className="skill-intel-kpi-card skill-intel-kpi-card--clean">
+          <div className="skill-intel-kpi-icon"><ShieldCheck size={18} strokeWidth={1.8} /></div>
+          <span className="skill-summary-label">安全 Skill 比例</span>
+          <strong>{formatPercent(safePercent)}</strong>
+          <span className="skill-metric-hint">{formatCompactCount(safeSlice?.total)} 个已归为 safe</span>
+        </div>
+        <div className="skill-intel-kpi-card skill-intel-kpi-card--danger">
+          <div className="skill-intel-kpi-icon"><AlertCircle size={18} strokeWidth={1.8} /></div>
+          <span className="skill-summary-label">待复核比例</span>
+          <strong>{formatPercent(reviewPercent)}</strong>
+          <span className="skill-metric-hint">{formatCompactCount(reviewSlice?.total)} 个进入待复核队列</span>
+        </div>
+        <div className="skill-intel-kpi-card skill-intel-kpi-card--warm">
+          <div className="skill-intel-kpi-icon"><Sparkles size={18} strokeWidth={1.8} /></div>
+          <span className="skill-summary-label">待确定比例</span>
+          <strong>{formatPercent(unknownPercent)}</strong>
+          <span className="skill-metric-hint">{formatCompactCount(unknownSlice?.total)} 个仍待确认</span>
+        </div>
+      </div>
+
+      <div className="skill-intel-grid">
+        <div className="skill-upload-list skill-intel-panel">
+          <div className="skill-card-head">
+            <div>
+              <div className="skill-card-title">安全与待确定结构</div>
+              <div className="skill-card-desc">优先看 safe、待复核、待确定三类的结构分布，判断人工介入密度。</div>
+            </div>
+          </div>
+          <div className="skill-intel-stack">
+            {riskDistribution.map((item) => (
+              <div key={item.riskLabel} className={`skill-intel-stack-row is-${item.riskLabel}`}>
+                <div className="skill-intel-stack-head">
+                  <span>{item.riskLabel === "safe" ? "安全 Skill / safe" : item.riskLabel === "dangerous" ? "待复核 / dangerous" : "待确定 / unknown"}</span>
+                  <strong>{formatCompactCount(item.total)}</strong>
+                </div>
+                <div className="skill-intel-bar-track">
+                  <div className="skill-intel-bar-fill" style={{ width: `${Math.max(Number(item.percent || 0), 1)}%` }} />
+                </div>
+                <div className="skill-intel-stack-meta">{formatPercent(item.percent)}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="skill-upload-list skill-intel-panel">
+          <div className="skill-card-head">
+            <div>
+              <div className="skill-card-title">待确定原因</div>
+              <div className="skill-card-desc">待确定并不等于危险，更多是当前证据不足。这里展示最常见的待确定来源。</div>
+            </div>
+          </div>
+          <div className="skill-intel-cluster-list">
+            {unknownClusters.length ? unknownClusters.map((item) => (
+              <div key={item.reason} className="skill-intel-cluster-item">
+                <div>
+                  <div className="skill-intel-cluster-title">{getUnknownReasonLabel(item.reason)}</div>
+                  <div className="skill-card-desc">占待确定项 {formatPercent(item.percent)}</div>
+                </div>
+                <strong>{formatCompactCount(item.total)}</strong>
+              </div>
+            )) : (
+              <div className="skill-inline-empty">当前待确定项较少，暂无需要单独强调的原因。</div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      <div className="skill-upload-list skill-intel-panel">
+        <div className="skill-card-head">
+          <div>
+            <div className="skill-card-title">待复核 Skill</div>
+            <div className="skill-card-desc">展示当前最需要人工复核的 Skill，表格样式与其他界面保持一致。</div>
+          </div>
+        </div>
+        <div className="risk-table-wrap risk-table-wrap-strong">
+          <table className="risk-table">
+            <thead>
+              <tr>
+                <th>Skill</th>
+                <th>作者 / 仓库</th>
+                <th>级别</th>
+                <th>发现数</th>
+                <th>判定依据</th>
+                <th>扫描时间</th>
+              </tr>
+            </thead>
+            <tbody>
+              {reviewRows.map((item) => (
+                <tr key={`${item.id}-${item.repositoryUrl}`}>
+                  <td>
+                    <div className="risk-table-title">{item.name || "-"}</div>
+                  </td>
+                  <td>
+                    <div className="risk-table-sub">{item.author || "-"}</div>
+                    <div className="risk-table-sub is-mono">{item.repositoryUrl || "-"}</div>
+                  </td>
+                  <td>
+                    <div className="risk-table-badge-row">
+                      <SeverityBadge severity={item.maxSeverity} />
+                    </div>
+                  </td>
+                  <td>{formatCompactCount(item.findingCount)}</td>
+                  <td>
+                    <div className="risk-table-sub">{item.riskSourceText || "-"}</div>
+                  </td>
+                  <td>{formatScanTime(item.scannedAt)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          {!reviewRows.length ? <div className="skill-inline-empty">当前没有需要额外展示的待复核 Skill。</div> : null}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 export default function SkillGovernancePage({ auth }) {
   const [activeTab, setActiveTab] = useState("skill-detect");
 
@@ -856,7 +1709,7 @@ export default function SkillGovernancePage({ auth }) {
       </div>
 
       {activeTab === "skill-detect" ? <SkillDetectWorkspace auth={auth} /> : activeTab === "intelligence" ? (
-        <SkillPlaceholder title="基础情报面板" desc="用于聚合 Skill 来源、信誉、家族关联与传播画像等情报信息，支撑研判和溯源。" icon={Sparkles} />
+        <SkillIntelligencePanelV3 />
       ) : (
         <SkillPlaceholder title="文件沙箱分析" desc="用于承接 Skill 文件的静态分析、行为观察与投毒链路回放，辅助识别高风险样本。" icon={Box} />
       )}

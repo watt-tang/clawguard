@@ -106,6 +106,26 @@ else:
     print(extract_dir)
 `;
 
+function normalizeRepositoryUrl(repositoryUrl) {
+  const value = String(repositoryUrl || "").trim();
+  if (!value) {
+    throw new Error("Repository URL is required.");
+  }
+
+  let parsedUrl;
+  try {
+    parsedUrl = new URL(value);
+  } catch {
+    throw new Error("Repository URL is not a valid URL.");
+  }
+
+  if (!["http:", "https:"].includes(parsedUrl.protocol)) {
+    throw new Error(`Unsupported repository URL protocol: ${parsedUrl.protocol}`);
+  }
+
+  return parsedUrl.toString();
+}
+
 function sendJson(res, statusCode, payload) {
   res.statusCode = statusCode;
   res.setHeader("Content-Type", "application/json; charset=utf-8");
@@ -282,6 +302,32 @@ async function prepareSlugSkillRoot(slug, version = "") {
     fs.rmSync(tempDir, { recursive: true, force: true });
     if (error instanceof Error) {
       throw new Error(`Failed to download skill by slug: ${error.message}`);
+    }
+    throw error;
+  }
+}
+
+async function prepareRepositorySkillRoot(repositoryUrl) {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), TEMP_PREFIX));
+  const normalizedUrl = normalizeRepositoryUrl(repositoryUrl);
+  const targetDir = path.join(tempDir, "repository");
+
+  try {
+    await spawnAndCapture(
+      "git",
+      ["-c", "core.longpaths=true", "clone", "--depth", "1", normalizedUrl, targetDir],
+      __dirname,
+    );
+
+    if (!fs.existsSync(targetDir)) {
+      throw new Error("Repository clone target was not created.");
+    }
+
+    return { tempDir, skillRoot: findSkillRoot(targetDir) };
+  } catch (error) {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+    if (error instanceof Error) {
+      throw new Error(`Failed to clone repository: ${error.message}`);
     }
     throw error;
   }
@@ -591,6 +637,7 @@ function skillScanApiPlugin() {
         try {
           const body = await readJsonBody(req);
           const slug = typeof body.slug === "string" ? body.slug.trim() : "";
+          const repositoryUrl = typeof body.repositoryUrl === "string" ? body.repositoryUrl.trim() : "";
           const version = typeof body.version === "string" ? body.version.trim() : "";
           const files = Array.isArray(body.files) ? body.files : [];
           const authState = body.authState === "authenticated" ? "authenticated" : "guest";
@@ -605,10 +652,10 @@ function skillScanApiPlugin() {
             disableScanners: Array.isArray(body.disableScanners) ? body.disableScanners : [],
           };
 
-          if (!slug && !files.length) {
+          if (!slug && !repositoryUrl && !files.length) {
             sendJson(res, 400, {
               ok: false,
-              message: "Request must include either 'slug' or non-empty 'files'.",
+              message: "Request must include either 'slug', 'repositoryUrl', or non-empty 'files'.",
             });
             return;
           }
@@ -616,6 +663,10 @@ function skillScanApiPlugin() {
           let targetPath = "";
           if (slug) {
             const prepared = await prepareSlugSkillRoot(slug, version);
+            tempDir = prepared.tempDir;
+            targetPath = prepared.skillRoot;
+          } else if (repositoryUrl) {
+            const prepared = await prepareRepositorySkillRoot(repositoryUrl);
             tempDir = prepared.tempDir;
             targetPath = prepared.skillRoot;
           } else {
@@ -710,6 +761,14 @@ export default defineConfig({
         changeOrigin: true,
       },
       "/api/security-research": {
+        target: process.env.EXPOSURE_API_PROXY || "http://127.0.0.1:8787",
+        changeOrigin: true,
+      },
+      "/api/skill/search": {
+        target: process.env.EXPOSURE_API_PROXY || "http://127.0.0.1:8787",
+        changeOrigin: true,
+      },
+      "/api/skill/intelligence": {
         target: process.env.EXPOSURE_API_PROXY || "http://127.0.0.1:8787",
         changeOrigin: true,
       },

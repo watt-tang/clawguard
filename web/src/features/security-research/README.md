@@ -7,6 +7,7 @@ This module replaces the old deployment-risk placeholder with an academic-intell
 - Aggregates recent research related to OpenClaw / Claw / Skill / Agent / Plugin security
 - Prioritizes top-tier conference papers from `USENIX`, `IEEE S&P`, `ACM CCS`, `NDSS`, and `Euro S&P`
 - Supplements with `arXiv` and always labels those records as `preprint`
+- Uses `DBLP` as a live metadata-enrichment source for top-tier conference records
 - Deduplicates conference and preprint variants of the same paper
 - Stores normalized snapshots in MySQL and cache files outside `web/`
 - Exposes overview, list, and manual-refresh APIs
@@ -77,11 +78,24 @@ Automatic refresh:
 - If the latest snapshot is older than 7 days, it refreshes automatically
 - Cache files are written under `../clawguard-cache/security-research`
 
-## Reserved interfaces
+## Provider status
 
-The service keeps placeholders for:
+- Live:
+  - `Crossref`
+  - `DBLP`
+  - `arXiv`
 
-- `DBLP`
-- `Google Scholar`
+- Not directly connected:
+  - `Google Scholar`
 
-They are intentionally marked as reserved and are not treated as live providers yet.
+Why Google Scholar is not directly connected:
+
+- Direct scraping is unstable and often blocked by anti-bot protections
+- It is better to plug in a compliant search provider or a curated import pipeline
+- The current normalization and deduplication flow already supports adding such a provider later
+
+Recommended solution for Google Scholar:
+
+- Use a compliant metadata API such as `SerpAPI` or an internal proxy/import job
+- Normalize those results into the same `SecurityResearchPaper` shape
+- Reuse the existing deduplication logic so a Scholar hit does not create duplicate rows

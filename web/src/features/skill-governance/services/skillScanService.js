@@ -132,3 +132,16 @@ export async function scanSkillBySlug(slug, version = "", options = {}) {
     ...normalizeScanOptions(options),
   });
 }
+
+export async function scanSkillByRepositoryUrl(repositoryUrl, options = {}) {
+  const cleanRepositoryUrl = String(repositoryUrl || "").trim();
+
+  if (!cleanRepositoryUrl) {
+    throw new Error("Repository URL is required.");
+  }
+
+  return requestScan({
+    repositoryUrl: cleanRepositoryUrl,
+    ...normalizeScanOptions(options),
+  });
+}

@@ -21,6 +21,8 @@ import {
   initializeSecurityResearchScheduler,
   triggerSecurityResearchRefresh,
 } from "./services/securityResearchService.mjs";
+import { getSkillIntelligenceOverview } from "./services/skillIntelligenceService.mjs";
+import { searchSkills } from "./services/skillSearchService.mjs";
 import { prisma } from "./lib/prisma.mjs";
 
 const app = express();
@@ -129,6 +131,24 @@ app.get("/api/security-research/papers", async (req, res) => {
     res.json(data);
   } catch (error) {
     res.status(500).json({ message: error.message || "Failed to fetch security research papers." });
+  }
+});
+
+app.get("/api/skill/intelligence/overview", async (_req, res) => {
+  try {
+    const data = await getSkillIntelligenceOverview();
+    res.json(data);
+  } catch (error) {
+    res.status(500).json({ message: error.message || "Failed to fetch skill intelligence overview." });
+  }
+});
+
+app.get("/api/skill/search", async (req, res) => {
+  try {
+    const data = await searchSkills(req.query.q, { limit: req.query.limit });
+    res.json(data);
+  } catch (error) {
+    res.status(500).json({ message: error.message || "Failed to search skills." });
   }
 });
 
