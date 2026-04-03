@@ -82,3 +82,151 @@ model ExposureVersionDailyAgg {
   @@index([snapshotDate])
   @@index([version])
 }
+
+model OpenclawRiskSnapshot {
+  id                      Int                 @id @default(autoincrement())
+  snapshotKey             String              @unique @db.VarChar(32)
+  triggerSource           String              @default("scheduled") @db.VarChar(32)
+  status                  String              @default("completed") @db.VarChar(32)
+  latestStableTag         String?             @db.VarChar(64)
+  latestStableVersion     String?             @db.VarChar(64)
+  latestStableUrl         String?             @db.VarChar(255)
+  latestStablePublishedAt DateTime?
+  totalIssues             Int                 @default(0)
+  githubAdvisories        Int                 @default(0)
+  nvdCves                 Int                 @default(0)
+  officialAdvisoryCount   Int                 @default(0)
+  cveRecordCount          Int                 @default(0)
+  conferencePaperCount    Int                 @default(0)
+  preprintCount           Int                 @default(0)
+  researchCount           Int                 @default(0)
+  newsCount               Int                 @default(0)
+  criticalCount           Int                 @default(0)
+  highRiskCount           Int                 @default(0)
+  fixedCount              Int                 @default(0)
+  unfixedCount            Int                 @default(0)
+  unknownCount            Int                 @default(0)
+  fixProgressPercent      Int                 @default(0)
+  sourceMeta              Json
+  cacheDir                String?             @db.VarChar(255)
+  createdAt               DateTime            @default(now())
+  updatedAt               DateTime            @updatedAt
+  issues                  OpenclawRiskIssue[]
+
+  @@index([createdAt])
+  @@index([status, createdAt])
+}
+
+model OpenclawRiskIssue {
+  id                  BigInt               @id @default(autoincrement()) @db.UnsignedBigInt
+  snapshotId          Int
+  snapshot            OpenclawRiskSnapshot @relation(fields: [snapshotId], references: [id], onDelete: Cascade)
+  canonicalId         String               @db.VarChar(128)
+  issueId             String               @db.VarChar(128)
+  title               String               @db.VarChar(255)
+  summary             String               @db.Text
+  description         String               @db.LongText
+  sourcePrimary       String               @db.VarChar(32)
+  sourceType          String               @default("official_advisory") @db.VarChar(32)
+  sourceSearch        String               @db.VarChar(64)
+  sourceLabels        Json
+  sources             Json
+  githubIds           Json
+  cveIds              Json
+  projectScope        String               @default("agent") @db.VarChar(32)
+  venue               String?              @db.VarChar(128)
+  authors             Json
+  severity            String               @db.VarChar(32)
+  score               Float?
+  cvssVector          String?              @db.VarChar(255)
+  cwes                Json
+  affectedRange       String?              @db.Text
+  fixedVersion        String?              @db.VarChar(64)
+  latestStableVersion String?              @db.VarChar(64)
+  fixStatus           String               @db.VarChar(32)
+  fixLabel            String               @db.VarChar(32)
+  fixReason           String               @db.Text
+  issueUrl            String?              @db.VarChar(255)
+  repoUrl             String?              @db.VarChar(255)
+  referenceUrls       Json
+  tags                Json
+  status              String               @default("new") @db.VarChar(32)
+  relevanceScore      Float?
+  publishedAt         DateTime?
+  sourceUpdatedAt     DateTime?
+  rawData             Json
+  createdAt           DateTime             @default(now())
+
+  @@unique([snapshotId, canonicalId])
+  @@index([snapshotId])
+  @@index([canonicalId])
+  @@index([issueId])
+  @@index([severity])
+  @@index([fixStatus])
+  @@index([sourcePrimary])
+  @@index([sourceType])
+  @@index([projectScope])
+  @@index([venue])
+  @@index([status])
+  @@index([publishedAt])
+}
+
+model SecurityResearchSnapshot {
+  id                   Int                     @id @default(autoincrement())
+  snapshotKey          String                  @unique @db.VarChar(32)
+  triggerSource        String                  @default("scheduled") @db.VarChar(32)
+  status               String                  @default("completed") @db.VarChar(32)
+  totalPapers          Int                     @default(0)
+  conferencePaperCount Int                     @default(0)
+  preprintCount        Int                     @default(0)
+  openclawCount        Int                     @default(0)
+  clawCount            Int                     @default(0)
+  skillCount           Int                     @default(0)
+  agentCount           Int                     @default(0)
+  pluginCount          Int                     @default(0)
+  sourceMeta           Json
+  cacheDir             String?                 @db.VarChar(255)
+  createdAt            DateTime                @default(now())
+  updatedAt            DateTime                @updatedAt
+  papers               SecurityResearchPaper[]
+
+  @@index([createdAt])
+  @@index([status, createdAt])
+}
+
+model SecurityResearchPaper {
+  id                BigInt                   @id @default(autoincrement()) @db.UnsignedBigInt
+  snapshotId        Int
+  snapshot          SecurityResearchSnapshot @relation(fields: [snapshotId], references: [id], onDelete: Cascade)
+  canonicalId       String                   @db.VarChar(191)
+  title             String                   @db.VarChar(500)
+  normalizedTitle   String                   @db.VarChar(500)
+  sourceType        String                   @db.VarChar(32)
+  projectScope      String                   @db.VarChar(32)
+  venue             String                   @db.VarChar(128)
+  sourcePrimary     String                   @db.VarChar(32)
+  sourceSearch      String                   @db.VarChar(128)
+  abstractOrSummary String                   @db.LongText
+  tags              Json
+  sourceUrl         String?                  @db.VarChar(255)
+  authors           Json
+  externalIds       Json
+  relevanceScore    Float                    @default(0)
+  isTopVenue        Boolean                  @default(false)
+  publishedAt       DateTime?
+  status            String                   @default("active") @db.VarChar(32)
+  rawData           Json
+  createdAt         DateTime                 @default(now())
+
+  @@unique([snapshotId, canonicalId])
+  @@index([snapshotId])
+  @@index([canonicalId])
+  @@index([normalizedTitle])
+  @@index([sourceType])
+  @@index([projectScope])
+  @@index([venue])
+  @@index([sourcePrimary])
+  @@index([isTopVenue])
+  @@index([publishedAt])
+  @@index([relevanceScore])
+}

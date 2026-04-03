@@ -15,10 +15,12 @@ import {
 import { PAGE_IDS } from "./config.js";
 import { useAuth } from "./hooks/useAuth.js";
 import OpenclawExposurePage from "./features/openclaw-exposure/pages/OpenclawExposurePage.jsx";
+import OpenclawRiskPage from "./features/openclaw-risk/pages/OpenclawRiskPage.jsx";
+import SecurityResearchPage from "./features/security-research/pages/SecurityResearchPage.jsx";
 import SkillGovernancePage from "./features/skill-governance/pages/SkillGovernancePage.jsx";
 import nkuLogo from "./pic/南开logo.png";
 
-const MODULES = [
+const RAW_MODULES = [
   {
     icon: House,
     label: "平台主页",
@@ -62,6 +64,17 @@ const MODULES = [
     status: "建设中",
   },
 ];
+
+const MODULES = RAW_MODULES.map((module) =>
+  module.pageId === "openclaw-deploy"
+    ? {
+        ...module,
+        label: "学术安全前沿",
+        description: "聚合 OpenClaw / Skill / Agent / Plugin 安全研究，区分顶会论文与预印本，支撑生态安全分析。",
+        status: "已上线",
+      }
+    : module,
+);
 
 const QUICK_TAGS = ["实时监测", "重点暴露", "最新发现", "技能检测", "公网资产", "边界服务"];
 
@@ -369,8 +382,16 @@ export default function App() {
       return <OpenclawExposurePage auth={auth} />;
     }
 
+    if (activePage === "openclaw-risk") {
+      return <OpenclawRiskPage auth={auth} />;
+    }
+
     if (activePage === "skill-governance") {
       return <SkillGovernancePage auth={auth} />;
+    }
+
+    if (activePage === "openclaw-deploy") {
+      return <SecurityResearchPage auth={auth} />;
     }
 
     return <PlaceholderPage module={activeModule} />;

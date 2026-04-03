@@ -1,0 +1,28 @@
+# Findings
+
+- 2026-04-02: Current Prisma schema in `web/prisma/schema.prisma` has been reverted to exposure-only models, but MySQL database `clawguard` still contains skill tables: `skillimportbatch`, `skillrecord`, `skillstaticscanbatch`, `skillstaticscanresult`.
+- 2026-04-02: `web/server/scripts` no longer contains the prior skill import/scan scripts after repo rollback.
+- 2026-04-02: User explicitly wants scanning resumed from previously unscanned skills and requires temp files to stay out of `web/`.
+- 2026-04-02: Latest unfinished scan batch is `7`; it has `43400` rows already written, with `44004` skill rows and `8416` distinct repo URLs still missing at inspection time.
+- 2026-04-02: Existing batch 7 already contains many duplicate per-repo results, so continuing by `repositoryUrl` and fanning results back to pending `SkillRecord` rows will avoid large amounts of rescanning.
+- 2026-04-02: `scanner2` requires the repo virtualenv Python (`.venv-skill-scan/Scripts/python.exe`) because the system Python lacks `yaml`.
+- 2026-04-02: New scan cache root is `D:\\clawguard-cache\\skill-static-scan`, which keeps scanner churn fully outside `web/`.
+- 2026-04-02: Batch 7 failures were dominated by a few non-detection causes: clone/network failures, timeouts, invalid repo URLs, Windows checkout/path issues, and repositories lacking `SKILL.md`.
+- 2026-04-02: The scan script was optimized to retry transient failures, validate GitHub repo URLs early, use `core.longpaths=true`, recursively locate `SKILL.md`, and mark non-scanable repos as `skipped` instead of `failed`.
+- 2026-04-02: `https://api.github.com/advisories?affects=openclaw` returns public OpenClaw GitHub Security Advisories with `vulnerabilities[].first_patched_version`, CVSS, CWE, references, and source repo metadata, which is enough to infer upstream fix availability.
+- 2026-04-02: `https://api.github.com/repos/openclaw/openclaw/releases` exposes current stable release tags such as `v2026.4.1`, enabling comparison between latest stable and patched versions.
+- 2026-04-02: `https://services.nvd.nist.gov/rest/json/cves/2.0?keywordSearch=OpenClaw` returns OpenClaw CVEs with CVSS metrics, references, and vulnerable CPE version ranges; many entries expose `versionEndExcluding`, which can be treated as the fixed threshold version.
+- 2026-04-02: NVD requests require `Accept: application/json`; without that header the endpoint returned `406` in local testing.
+- 2026-04-02: `prisma db push` is unsafe in this repository right now because the current Prisma schema does not include legacy skill-scan tables that still exist in MySQL; using `db push` would attempt to drop non-empty unrelated tables.
+- 2026-04-02: New risk-tracking storage was created without touching existing tables by manually ensuring `OpenclawRiskSnapshot` and `OpenclawRiskIssue` in MySQL.
+- 2026-04-02: Weekly risk snapshots are now cached outside the frontend tree at `D:\clawguard-cache\openclaw-risk\...`, which keeps runtime artifacts away from Vite/public assets.
+- 2026-04-02: The first stored OpenClaw risk snapshot is `20260402T114736Z`; it wrote `1` snapshot row and `328` issue rows to MySQL.
+- 2026-04-03: Current `openclawRiskService.mjs` only aggregates GitHub advisories, GitHub releases, and NVD CVEs; it does not yet fetch security-policy pages, conference venues, arXiv, or generalized agent/plugin/sandbox research.
+- 2026-04-03: Current `OpenclawRiskSnapshot` / `OpenclawRiskIssue` schema is vulnerability-centric and is missing research-centric fields such as `sourceType`, `projectScope`, `venue`, `authors`, `status`, and `relevanceScore`.
+- 2026-04-03: The frontend page under `web/src/features/openclaw-risk/pages/OpenclawRiskPage.jsx` is also vulnerability-centric, so the replacement needs both API and UI contract changes instead of a simple restyle.
+- 2026-04-03: The user clarified that the new academic module should replace the `openclaw-deploy` page, not the existing `openclaw-risk` vulnerability page. That means the risk module should remain intact and the placeholder deploy module becomes the academic-progress entry point.
+- 2026-04-03: Current navigation already exposes a separate `openclaw-deploy` slot in `web/src/App.jsx`, so the academic module can be added without disturbing the existing risk workflows.
+- 2026-04-03: The new academic module now lives in a dedicated `security-research` feature path and is rendered from the existing `openclaw-deploy` route, which preserves the vulnerability page and only replaces the deployment-risk placeholder.
+- 2026-04-03: A first working version of `securityResearchService.mjs` now aggregates top-conference papers through Crossref metadata with strict venue whitelisting, persists snapshots into MySQL, and exposes overview/list/manual-refresh APIs.
+- 2026-04-03: arXiv supplementation is implemented through the official export API, but repeated local refresh tests hit `429 Rate exceeded`; the provider state is surfaced in the API/UI and empty snapshots are now blocked from persistence.
+- 2026-04-03: Local build succeeded after wiring the new page, API routes, scheduler, refresh script, Prisma models, and README.

@@ -33,6 +33,26 @@ export type ExposureDailyAgg = $Result.DefaultSelection<Prisma.$ExposureDailyAgg
  * 
  */
 export type ExposureVersionDailyAgg = $Result.DefaultSelection<Prisma.$ExposureVersionDailyAggPayload>
+/**
+ * Model OpenclawRiskSnapshot
+ * 
+ */
+export type OpenclawRiskSnapshot = $Result.DefaultSelection<Prisma.$OpenclawRiskSnapshotPayload>
+/**
+ * Model OpenclawRiskIssue
+ * 
+ */
+export type OpenclawRiskIssue = $Result.DefaultSelection<Prisma.$OpenclawRiskIssuePayload>
+/**
+ * Model SecurityResearchSnapshot
+ * 
+ */
+export type SecurityResearchSnapshot = $Result.DefaultSelection<Prisma.$SecurityResearchSnapshotPayload>
+/**
+ * Model SecurityResearchPaper
+ * 
+ */
+export type SecurityResearchPaper = $Result.DefaultSelection<Prisma.$SecurityResearchPaperPayload>
 
 /**
  * ##  Prisma Client ʲˢ
@@ -191,6 +211,46 @@ export class PrismaClient<
     * ```
     */
   get exposureVersionDailyAgg(): Prisma.ExposureVersionDailyAggDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.openclawRiskSnapshot`: Exposes CRUD operations for the **OpenclawRiskSnapshot** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more OpenclawRiskSnapshots
+    * const openclawRiskSnapshots = await prisma.openclawRiskSnapshot.findMany()
+    * ```
+    */
+  get openclawRiskSnapshot(): Prisma.OpenclawRiskSnapshotDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.openclawRiskIssue`: Exposes CRUD operations for the **OpenclawRiskIssue** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more OpenclawRiskIssues
+    * const openclawRiskIssues = await prisma.openclawRiskIssue.findMany()
+    * ```
+    */
+  get openclawRiskIssue(): Prisma.OpenclawRiskIssueDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.securityResearchSnapshot`: Exposes CRUD operations for the **SecurityResearchSnapshot** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more SecurityResearchSnapshots
+    * const securityResearchSnapshots = await prisma.securityResearchSnapshot.findMany()
+    * ```
+    */
+  get securityResearchSnapshot(): Prisma.SecurityResearchSnapshotDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.securityResearchPaper`: Exposes CRUD operations for the **SecurityResearchPaper** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more SecurityResearchPapers
+    * const securityResearchPapers = await prisma.securityResearchPaper.findMany()
+    * ```
+    */
+  get securityResearchPaper(): Prisma.SecurityResearchPaperDelegate<ExtArgs, ClientOptions>;
 }
 
 export namespace Prisma {
@@ -634,7 +694,11 @@ export namespace Prisma {
     ExposureSnapshot: 'ExposureSnapshot',
     ExposureRecord: 'ExposureRecord',
     ExposureDailyAgg: 'ExposureDailyAgg',
-    ExposureVersionDailyAgg: 'ExposureVersionDailyAgg'
+    ExposureVersionDailyAgg: 'ExposureVersionDailyAgg',
+    OpenclawRiskSnapshot: 'OpenclawRiskSnapshot',
+    OpenclawRiskIssue: 'OpenclawRiskIssue',
+    SecurityResearchSnapshot: 'SecurityResearchSnapshot',
+    SecurityResearchPaper: 'SecurityResearchPaper'
   };
 
   export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -653,7 +717,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "exposureSnapshot" | "exposureRecord" | "exposureDailyAgg" | "exposureVersionDailyAgg"
+      modelProps: "exposureSnapshot" | "exposureRecord" | "exposureDailyAgg" | "exposureVersionDailyAgg" | "openclawRiskSnapshot" | "openclawRiskIssue" | "securityResearchSnapshot" | "securityResearchPaper"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -921,6 +985,270 @@ export namespace Prisma {
           }
         }
       }
+      OpenclawRiskSnapshot: {
+        payload: Prisma.$OpenclawRiskSnapshotPayload<ExtArgs>
+        fields: Prisma.OpenclawRiskSnapshotFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.OpenclawRiskSnapshotFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OpenclawRiskSnapshotPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.OpenclawRiskSnapshotFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OpenclawRiskSnapshotPayload>
+          }
+          findFirst: {
+            args: Prisma.OpenclawRiskSnapshotFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OpenclawRiskSnapshotPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.OpenclawRiskSnapshotFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OpenclawRiskSnapshotPayload>
+          }
+          findMany: {
+            args: Prisma.OpenclawRiskSnapshotFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OpenclawRiskSnapshotPayload>[]
+          }
+          create: {
+            args: Prisma.OpenclawRiskSnapshotCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OpenclawRiskSnapshotPayload>
+          }
+          createMany: {
+            args: Prisma.OpenclawRiskSnapshotCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          delete: {
+            args: Prisma.OpenclawRiskSnapshotDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OpenclawRiskSnapshotPayload>
+          }
+          update: {
+            args: Prisma.OpenclawRiskSnapshotUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OpenclawRiskSnapshotPayload>
+          }
+          deleteMany: {
+            args: Prisma.OpenclawRiskSnapshotDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.OpenclawRiskSnapshotUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          upsert: {
+            args: Prisma.OpenclawRiskSnapshotUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OpenclawRiskSnapshotPayload>
+          }
+          aggregate: {
+            args: Prisma.OpenclawRiskSnapshotAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateOpenclawRiskSnapshot>
+          }
+          groupBy: {
+            args: Prisma.OpenclawRiskSnapshotGroupByArgs<ExtArgs>
+            result: $Utils.Optional<OpenclawRiskSnapshotGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.OpenclawRiskSnapshotCountArgs<ExtArgs>
+            result: $Utils.Optional<OpenclawRiskSnapshotCountAggregateOutputType> | number
+          }
+        }
+      }
+      OpenclawRiskIssue: {
+        payload: Prisma.$OpenclawRiskIssuePayload<ExtArgs>
+        fields: Prisma.OpenclawRiskIssueFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.OpenclawRiskIssueFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OpenclawRiskIssuePayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.OpenclawRiskIssueFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OpenclawRiskIssuePayload>
+          }
+          findFirst: {
+            args: Prisma.OpenclawRiskIssueFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OpenclawRiskIssuePayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.OpenclawRiskIssueFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OpenclawRiskIssuePayload>
+          }
+          findMany: {
+            args: Prisma.OpenclawRiskIssueFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OpenclawRiskIssuePayload>[]
+          }
+          create: {
+            args: Prisma.OpenclawRiskIssueCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OpenclawRiskIssuePayload>
+          }
+          createMany: {
+            args: Prisma.OpenclawRiskIssueCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          delete: {
+            args: Prisma.OpenclawRiskIssueDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OpenclawRiskIssuePayload>
+          }
+          update: {
+            args: Prisma.OpenclawRiskIssueUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OpenclawRiskIssuePayload>
+          }
+          deleteMany: {
+            args: Prisma.OpenclawRiskIssueDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.OpenclawRiskIssueUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          upsert: {
+            args: Prisma.OpenclawRiskIssueUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OpenclawRiskIssuePayload>
+          }
+          aggregate: {
+            args: Prisma.OpenclawRiskIssueAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateOpenclawRiskIssue>
+          }
+          groupBy: {
+            args: Prisma.OpenclawRiskIssueGroupByArgs<ExtArgs>
+            result: $Utils.Optional<OpenclawRiskIssueGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.OpenclawRiskIssueCountArgs<ExtArgs>
+            result: $Utils.Optional<OpenclawRiskIssueCountAggregateOutputType> | number
+          }
+        }
+      }
+      SecurityResearchSnapshot: {
+        payload: Prisma.$SecurityResearchSnapshotPayload<ExtArgs>
+        fields: Prisma.SecurityResearchSnapshotFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.SecurityResearchSnapshotFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SecurityResearchSnapshotPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.SecurityResearchSnapshotFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SecurityResearchSnapshotPayload>
+          }
+          findFirst: {
+            args: Prisma.SecurityResearchSnapshotFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SecurityResearchSnapshotPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.SecurityResearchSnapshotFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SecurityResearchSnapshotPayload>
+          }
+          findMany: {
+            args: Prisma.SecurityResearchSnapshotFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SecurityResearchSnapshotPayload>[]
+          }
+          create: {
+            args: Prisma.SecurityResearchSnapshotCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SecurityResearchSnapshotPayload>
+          }
+          createMany: {
+            args: Prisma.SecurityResearchSnapshotCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          delete: {
+            args: Prisma.SecurityResearchSnapshotDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SecurityResearchSnapshotPayload>
+          }
+          update: {
+            args: Prisma.SecurityResearchSnapshotUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SecurityResearchSnapshotPayload>
+          }
+          deleteMany: {
+            args: Prisma.SecurityResearchSnapshotDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.SecurityResearchSnapshotUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          upsert: {
+            args: Prisma.SecurityResearchSnapshotUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SecurityResearchSnapshotPayload>
+          }
+          aggregate: {
+            args: Prisma.SecurityResearchSnapshotAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateSecurityResearchSnapshot>
+          }
+          groupBy: {
+            args: Prisma.SecurityResearchSnapshotGroupByArgs<ExtArgs>
+            result: $Utils.Optional<SecurityResearchSnapshotGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.SecurityResearchSnapshotCountArgs<ExtArgs>
+            result: $Utils.Optional<SecurityResearchSnapshotCountAggregateOutputType> | number
+          }
+        }
+      }
+      SecurityResearchPaper: {
+        payload: Prisma.$SecurityResearchPaperPayload<ExtArgs>
+        fields: Prisma.SecurityResearchPaperFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.SecurityResearchPaperFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SecurityResearchPaperPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.SecurityResearchPaperFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SecurityResearchPaperPayload>
+          }
+          findFirst: {
+            args: Prisma.SecurityResearchPaperFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SecurityResearchPaperPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.SecurityResearchPaperFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SecurityResearchPaperPayload>
+          }
+          findMany: {
+            args: Prisma.SecurityResearchPaperFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SecurityResearchPaperPayload>[]
+          }
+          create: {
+            args: Prisma.SecurityResearchPaperCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SecurityResearchPaperPayload>
+          }
+          createMany: {
+            args: Prisma.SecurityResearchPaperCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          delete: {
+            args: Prisma.SecurityResearchPaperDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SecurityResearchPaperPayload>
+          }
+          update: {
+            args: Prisma.SecurityResearchPaperUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SecurityResearchPaperPayload>
+          }
+          deleteMany: {
+            args: Prisma.SecurityResearchPaperDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.SecurityResearchPaperUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          upsert: {
+            args: Prisma.SecurityResearchPaperUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SecurityResearchPaperPayload>
+          }
+          aggregate: {
+            args: Prisma.SecurityResearchPaperAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateSecurityResearchPaper>
+          }
+          groupBy: {
+            args: Prisma.SecurityResearchPaperGroupByArgs<ExtArgs>
+            result: $Utils.Optional<SecurityResearchPaperGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.SecurityResearchPaperCountArgs<ExtArgs>
+            result: $Utils.Optional<SecurityResearchPaperCountAggregateOutputType> | number
+          }
+        }
+      }
     }
   } & {
     other: {
@@ -1021,6 +1349,10 @@ export namespace Prisma {
     exposureRecord?: ExposureRecordOmit
     exposureDailyAgg?: ExposureDailyAggOmit
     exposureVersionDailyAgg?: ExposureVersionDailyAggOmit
+    openclawRiskSnapshot?: OpenclawRiskSnapshotOmit
+    openclawRiskIssue?: OpenclawRiskIssueOmit
+    securityResearchSnapshot?: SecurityResearchSnapshotOmit
+    securityResearchPaper?: SecurityResearchPaperOmit
   }
 
   /* Types for Logging */
@@ -1124,6 +1456,68 @@ export namespace Prisma {
    */
   export type ExposureSnapshotCountOutputTypeCountRecordsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: ExposureRecordWhereInput
+  }
+
+
+  /**
+   * Count Type OpenclawRiskSnapshotCountOutputType
+   */
+
+  export type OpenclawRiskSnapshotCountOutputType = {
+    issues: number
+  }
+
+  export type OpenclawRiskSnapshotCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    issues?: boolean | OpenclawRiskSnapshotCountOutputTypeCountIssuesArgs
+  }
+
+  // Custom InputTypes
+  /**
+   * OpenclawRiskSnapshotCountOutputType without action
+   */
+  export type OpenclawRiskSnapshotCountOutputTypeDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OpenclawRiskSnapshotCountOutputType
+     */
+    select?: OpenclawRiskSnapshotCountOutputTypeSelect<ExtArgs> | null
+  }
+
+  /**
+   * OpenclawRiskSnapshotCountOutputType without action
+   */
+  export type OpenclawRiskSnapshotCountOutputTypeCountIssuesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: OpenclawRiskIssueWhereInput
+  }
+
+
+  /**
+   * Count Type SecurityResearchSnapshotCountOutputType
+   */
+
+  export type SecurityResearchSnapshotCountOutputType = {
+    papers: number
+  }
+
+  export type SecurityResearchSnapshotCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    papers?: boolean | SecurityResearchSnapshotCountOutputTypeCountPapersArgs
+  }
+
+  // Custom InputTypes
+  /**
+   * SecurityResearchSnapshotCountOutputType without action
+   */
+  export type SecurityResearchSnapshotCountOutputTypeDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SecurityResearchSnapshotCountOutputType
+     */
+    select?: SecurityResearchSnapshotCountOutputTypeSelect<ExtArgs> | null
+  }
+
+  /**
+   * SecurityResearchSnapshotCountOutputType without action
+   */
+  export type SecurityResearchSnapshotCountOutputTypeCountPapersArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: SecurityResearchPaperWhereInput
   }
 
 
@@ -5264,6 +5658,4853 @@ export namespace Prisma {
 
 
   /**
+   * Model OpenclawRiskSnapshot
+   */
+
+  export type AggregateOpenclawRiskSnapshot = {
+    _count: OpenclawRiskSnapshotCountAggregateOutputType | null
+    _avg: OpenclawRiskSnapshotAvgAggregateOutputType | null
+    _sum: OpenclawRiskSnapshotSumAggregateOutputType | null
+    _min: OpenclawRiskSnapshotMinAggregateOutputType | null
+    _max: OpenclawRiskSnapshotMaxAggregateOutputType | null
+  }
+
+  export type OpenclawRiskSnapshotAvgAggregateOutputType = {
+    id: number | null
+    totalIssues: number | null
+    githubAdvisories: number | null
+    nvdCves: number | null
+    officialAdvisoryCount: number | null
+    cveRecordCount: number | null
+    conferencePaperCount: number | null
+    preprintCount: number | null
+    researchCount: number | null
+    newsCount: number | null
+    criticalCount: number | null
+    highRiskCount: number | null
+    fixedCount: number | null
+    unfixedCount: number | null
+    unknownCount: number | null
+    fixProgressPercent: number | null
+  }
+
+  export type OpenclawRiskSnapshotSumAggregateOutputType = {
+    id: number | null
+    totalIssues: number | null
+    githubAdvisories: number | null
+    nvdCves: number | null
+    officialAdvisoryCount: number | null
+    cveRecordCount: number | null
+    conferencePaperCount: number | null
+    preprintCount: number | null
+    researchCount: number | null
+    newsCount: number | null
+    criticalCount: number | null
+    highRiskCount: number | null
+    fixedCount: number | null
+    unfixedCount: number | null
+    unknownCount: number | null
+    fixProgressPercent: number | null
+  }
+
+  export type OpenclawRiskSnapshotMinAggregateOutputType = {
+    id: number | null
+    snapshotKey: string | null
+    triggerSource: string | null
+    status: string | null
+    latestStableTag: string | null
+    latestStableVersion: string | null
+    latestStableUrl: string | null
+    latestStablePublishedAt: Date | null
+    totalIssues: number | null
+    githubAdvisories: number | null
+    nvdCves: number | null
+    officialAdvisoryCount: number | null
+    cveRecordCount: number | null
+    conferencePaperCount: number | null
+    preprintCount: number | null
+    researchCount: number | null
+    newsCount: number | null
+    criticalCount: number | null
+    highRiskCount: number | null
+    fixedCount: number | null
+    unfixedCount: number | null
+    unknownCount: number | null
+    fixProgressPercent: number | null
+    cacheDir: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type OpenclawRiskSnapshotMaxAggregateOutputType = {
+    id: number | null
+    snapshotKey: string | null
+    triggerSource: string | null
+    status: string | null
+    latestStableTag: string | null
+    latestStableVersion: string | null
+    latestStableUrl: string | null
+    latestStablePublishedAt: Date | null
+    totalIssues: number | null
+    githubAdvisories: number | null
+    nvdCves: number | null
+    officialAdvisoryCount: number | null
+    cveRecordCount: number | null
+    conferencePaperCount: number | null
+    preprintCount: number | null
+    researchCount: number | null
+    newsCount: number | null
+    criticalCount: number | null
+    highRiskCount: number | null
+    fixedCount: number | null
+    unfixedCount: number | null
+    unknownCount: number | null
+    fixProgressPercent: number | null
+    cacheDir: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type OpenclawRiskSnapshotCountAggregateOutputType = {
+    id: number
+    snapshotKey: number
+    triggerSource: number
+    status: number
+    latestStableTag: number
+    latestStableVersion: number
+    latestStableUrl: number
+    latestStablePublishedAt: number
+    totalIssues: number
+    githubAdvisories: number
+    nvdCves: number
+    officialAdvisoryCount: number
+    cveRecordCount: number
+    conferencePaperCount: number
+    preprintCount: number
+    researchCount: number
+    newsCount: number
+    criticalCount: number
+    highRiskCount: number
+    fixedCount: number
+    unfixedCount: number
+    unknownCount: number
+    fixProgressPercent: number
+    sourceMeta: number
+    cacheDir: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type OpenclawRiskSnapshotAvgAggregateInputType = {
+    id?: true
+    totalIssues?: true
+    githubAdvisories?: true
+    nvdCves?: true
+    officialAdvisoryCount?: true
+    cveRecordCount?: true
+    conferencePaperCount?: true
+    preprintCount?: true
+    researchCount?: true
+    newsCount?: true
+    criticalCount?: true
+    highRiskCount?: true
+    fixedCount?: true
+    unfixedCount?: true
+    unknownCount?: true
+    fixProgressPercent?: true
+  }
+
+  export type OpenclawRiskSnapshotSumAggregateInputType = {
+    id?: true
+    totalIssues?: true
+    githubAdvisories?: true
+    nvdCves?: true
+    officialAdvisoryCount?: true
+    cveRecordCount?: true
+    conferencePaperCount?: true
+    preprintCount?: true
+    researchCount?: true
+    newsCount?: true
+    criticalCount?: true
+    highRiskCount?: true
+    fixedCount?: true
+    unfixedCount?: true
+    unknownCount?: true
+    fixProgressPercent?: true
+  }
+
+  export type OpenclawRiskSnapshotMinAggregateInputType = {
+    id?: true
+    snapshotKey?: true
+    triggerSource?: true
+    status?: true
+    latestStableTag?: true
+    latestStableVersion?: true
+    latestStableUrl?: true
+    latestStablePublishedAt?: true
+    totalIssues?: true
+    githubAdvisories?: true
+    nvdCves?: true
+    officialAdvisoryCount?: true
+    cveRecordCount?: true
+    conferencePaperCount?: true
+    preprintCount?: true
+    researchCount?: true
+    newsCount?: true
+    criticalCount?: true
+    highRiskCount?: true
+    fixedCount?: true
+    unfixedCount?: true
+    unknownCount?: true
+    fixProgressPercent?: true
+    cacheDir?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type OpenclawRiskSnapshotMaxAggregateInputType = {
+    id?: true
+    snapshotKey?: true
+    triggerSource?: true
+    status?: true
+    latestStableTag?: true
+    latestStableVersion?: true
+    latestStableUrl?: true
+    latestStablePublishedAt?: true
+    totalIssues?: true
+    githubAdvisories?: true
+    nvdCves?: true
+    officialAdvisoryCount?: true
+    cveRecordCount?: true
+    conferencePaperCount?: true
+    preprintCount?: true
+    researchCount?: true
+    newsCount?: true
+    criticalCount?: true
+    highRiskCount?: true
+    fixedCount?: true
+    unfixedCount?: true
+    unknownCount?: true
+    fixProgressPercent?: true
+    cacheDir?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type OpenclawRiskSnapshotCountAggregateInputType = {
+    id?: true
+    snapshotKey?: true
+    triggerSource?: true
+    status?: true
+    latestStableTag?: true
+    latestStableVersion?: true
+    latestStableUrl?: true
+    latestStablePublishedAt?: true
+    totalIssues?: true
+    githubAdvisories?: true
+    nvdCves?: true
+    officialAdvisoryCount?: true
+    cveRecordCount?: true
+    conferencePaperCount?: true
+    preprintCount?: true
+    researchCount?: true
+    newsCount?: true
+    criticalCount?: true
+    highRiskCount?: true
+    fixedCount?: true
+    unfixedCount?: true
+    unknownCount?: true
+    fixProgressPercent?: true
+    sourceMeta?: true
+    cacheDir?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type OpenclawRiskSnapshotAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which OpenclawRiskSnapshot to aggregate.
+     */
+    where?: OpenclawRiskSnapshotWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of OpenclawRiskSnapshots to fetch.
+     */
+    orderBy?: OpenclawRiskSnapshotOrderByWithRelationInput | OpenclawRiskSnapshotOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: OpenclawRiskSnapshotWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` OpenclawRiskSnapshots from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` OpenclawRiskSnapshots.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned OpenclawRiskSnapshots
+    **/
+    _count?: true | OpenclawRiskSnapshotCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: OpenclawRiskSnapshotAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: OpenclawRiskSnapshotSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: OpenclawRiskSnapshotMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: OpenclawRiskSnapshotMaxAggregateInputType
+  }
+
+  export type GetOpenclawRiskSnapshotAggregateType<T extends OpenclawRiskSnapshotAggregateArgs> = {
+        [P in keyof T & keyof AggregateOpenclawRiskSnapshot]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateOpenclawRiskSnapshot[P]>
+      : GetScalarType<T[P], AggregateOpenclawRiskSnapshot[P]>
+  }
+
+
+
+
+  export type OpenclawRiskSnapshotGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: OpenclawRiskSnapshotWhereInput
+    orderBy?: OpenclawRiskSnapshotOrderByWithAggregationInput | OpenclawRiskSnapshotOrderByWithAggregationInput[]
+    by: OpenclawRiskSnapshotScalarFieldEnum[] | OpenclawRiskSnapshotScalarFieldEnum
+    having?: OpenclawRiskSnapshotScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: OpenclawRiskSnapshotCountAggregateInputType | true
+    _avg?: OpenclawRiskSnapshotAvgAggregateInputType
+    _sum?: OpenclawRiskSnapshotSumAggregateInputType
+    _min?: OpenclawRiskSnapshotMinAggregateInputType
+    _max?: OpenclawRiskSnapshotMaxAggregateInputType
+  }
+
+  export type OpenclawRiskSnapshotGroupByOutputType = {
+    id: number
+    snapshotKey: string
+    triggerSource: string
+    status: string
+    latestStableTag: string | null
+    latestStableVersion: string | null
+    latestStableUrl: string | null
+    latestStablePublishedAt: Date | null
+    totalIssues: number
+    githubAdvisories: number
+    nvdCves: number
+    officialAdvisoryCount: number
+    cveRecordCount: number
+    conferencePaperCount: number
+    preprintCount: number
+    researchCount: number
+    newsCount: number
+    criticalCount: number
+    highRiskCount: number
+    fixedCount: number
+    unfixedCount: number
+    unknownCount: number
+    fixProgressPercent: number
+    sourceMeta: JsonValue
+    cacheDir: string | null
+    createdAt: Date
+    updatedAt: Date
+    _count: OpenclawRiskSnapshotCountAggregateOutputType | null
+    _avg: OpenclawRiskSnapshotAvgAggregateOutputType | null
+    _sum: OpenclawRiskSnapshotSumAggregateOutputType | null
+    _min: OpenclawRiskSnapshotMinAggregateOutputType | null
+    _max: OpenclawRiskSnapshotMaxAggregateOutputType | null
+  }
+
+  type GetOpenclawRiskSnapshotGroupByPayload<T extends OpenclawRiskSnapshotGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<OpenclawRiskSnapshotGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof OpenclawRiskSnapshotGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], OpenclawRiskSnapshotGroupByOutputType[P]>
+            : GetScalarType<T[P], OpenclawRiskSnapshotGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type OpenclawRiskSnapshotSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    snapshotKey?: boolean
+    triggerSource?: boolean
+    status?: boolean
+    latestStableTag?: boolean
+    latestStableVersion?: boolean
+    latestStableUrl?: boolean
+    latestStablePublishedAt?: boolean
+    totalIssues?: boolean
+    githubAdvisories?: boolean
+    nvdCves?: boolean
+    officialAdvisoryCount?: boolean
+    cveRecordCount?: boolean
+    conferencePaperCount?: boolean
+    preprintCount?: boolean
+    researchCount?: boolean
+    newsCount?: boolean
+    criticalCount?: boolean
+    highRiskCount?: boolean
+    fixedCount?: boolean
+    unfixedCount?: boolean
+    unknownCount?: boolean
+    fixProgressPercent?: boolean
+    sourceMeta?: boolean
+    cacheDir?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    issues?: boolean | OpenclawRiskSnapshot$issuesArgs<ExtArgs>
+    _count?: boolean | OpenclawRiskSnapshotCountOutputTypeDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["openclawRiskSnapshot"]>
+
+
+
+  export type OpenclawRiskSnapshotSelectScalar = {
+    id?: boolean
+    snapshotKey?: boolean
+    triggerSource?: boolean
+    status?: boolean
+    latestStableTag?: boolean
+    latestStableVersion?: boolean
+    latestStableUrl?: boolean
+    latestStablePublishedAt?: boolean
+    totalIssues?: boolean
+    githubAdvisories?: boolean
+    nvdCves?: boolean
+    officialAdvisoryCount?: boolean
+    cveRecordCount?: boolean
+    conferencePaperCount?: boolean
+    preprintCount?: boolean
+    researchCount?: boolean
+    newsCount?: boolean
+    criticalCount?: boolean
+    highRiskCount?: boolean
+    fixedCount?: boolean
+    unfixedCount?: boolean
+    unknownCount?: boolean
+    fixProgressPercent?: boolean
+    sourceMeta?: boolean
+    cacheDir?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type OpenclawRiskSnapshotOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "snapshotKey" | "triggerSource" | "status" | "latestStableTag" | "latestStableVersion" | "latestStableUrl" | "latestStablePublishedAt" | "totalIssues" | "githubAdvisories" | "nvdCves" | "officialAdvisoryCount" | "cveRecordCount" | "conferencePaperCount" | "preprintCount" | "researchCount" | "newsCount" | "criticalCount" | "highRiskCount" | "fixedCount" | "unfixedCount" | "unknownCount" | "fixProgressPercent" | "sourceMeta" | "cacheDir" | "createdAt" | "updatedAt", ExtArgs["result"]["openclawRiskSnapshot"]>
+  export type OpenclawRiskSnapshotInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    issues?: boolean | OpenclawRiskSnapshot$issuesArgs<ExtArgs>
+    _count?: boolean | OpenclawRiskSnapshotCountOutputTypeDefaultArgs<ExtArgs>
+  }
+
+  export type $OpenclawRiskSnapshotPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "OpenclawRiskSnapshot"
+    objects: {
+      issues: Prisma.$OpenclawRiskIssuePayload<ExtArgs>[]
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: number
+      snapshotKey: string
+      triggerSource: string
+      status: string
+      latestStableTag: string | null
+      latestStableVersion: string | null
+      latestStableUrl: string | null
+      latestStablePublishedAt: Date | null
+      totalIssues: number
+      githubAdvisories: number
+      nvdCves: number
+      officialAdvisoryCount: number
+      cveRecordCount: number
+      conferencePaperCount: number
+      preprintCount: number
+      researchCount: number
+      newsCount: number
+      criticalCount: number
+      highRiskCount: number
+      fixedCount: number
+      unfixedCount: number
+      unknownCount: number
+      fixProgressPercent: number
+      sourceMeta: Prisma.JsonValue
+      cacheDir: string | null
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["openclawRiskSnapshot"]>
+    composites: {}
+  }
+
+  type OpenclawRiskSnapshotGetPayload<S extends boolean | null | undefined | OpenclawRiskSnapshotDefaultArgs> = $Result.GetResult<Prisma.$OpenclawRiskSnapshotPayload, S>
+
+  type OpenclawRiskSnapshotCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<OpenclawRiskSnapshotFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: OpenclawRiskSnapshotCountAggregateInputType | true
+    }
+
+  export interface OpenclawRiskSnapshotDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['OpenclawRiskSnapshot'], meta: { name: 'OpenclawRiskSnapshot' } }
+    /**
+     * Find zero or one OpenclawRiskSnapshot that matches the filter.
+     * @param {OpenclawRiskSnapshotFindUniqueArgs} args - Arguments to find a OpenclawRiskSnapshot
+     * @example
+     * // Get one OpenclawRiskSnapshot
+     * const openclawRiskSnapshot = await prisma.openclawRiskSnapshot.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends OpenclawRiskSnapshotFindUniqueArgs>(args: SelectSubset<T, OpenclawRiskSnapshotFindUniqueArgs<ExtArgs>>): Prisma__OpenclawRiskSnapshotClient<$Result.GetResult<Prisma.$OpenclawRiskSnapshotPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one OpenclawRiskSnapshot that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {OpenclawRiskSnapshotFindUniqueOrThrowArgs} args - Arguments to find a OpenclawRiskSnapshot
+     * @example
+     * // Get one OpenclawRiskSnapshot
+     * const openclawRiskSnapshot = await prisma.openclawRiskSnapshot.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends OpenclawRiskSnapshotFindUniqueOrThrowArgs>(args: SelectSubset<T, OpenclawRiskSnapshotFindUniqueOrThrowArgs<ExtArgs>>): Prisma__OpenclawRiskSnapshotClient<$Result.GetResult<Prisma.$OpenclawRiskSnapshotPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first OpenclawRiskSnapshot that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {OpenclawRiskSnapshotFindFirstArgs} args - Arguments to find a OpenclawRiskSnapshot
+     * @example
+     * // Get one OpenclawRiskSnapshot
+     * const openclawRiskSnapshot = await prisma.openclawRiskSnapshot.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends OpenclawRiskSnapshotFindFirstArgs>(args?: SelectSubset<T, OpenclawRiskSnapshotFindFirstArgs<ExtArgs>>): Prisma__OpenclawRiskSnapshotClient<$Result.GetResult<Prisma.$OpenclawRiskSnapshotPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first OpenclawRiskSnapshot that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {OpenclawRiskSnapshotFindFirstOrThrowArgs} args - Arguments to find a OpenclawRiskSnapshot
+     * @example
+     * // Get one OpenclawRiskSnapshot
+     * const openclawRiskSnapshot = await prisma.openclawRiskSnapshot.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends OpenclawRiskSnapshotFindFirstOrThrowArgs>(args?: SelectSubset<T, OpenclawRiskSnapshotFindFirstOrThrowArgs<ExtArgs>>): Prisma__OpenclawRiskSnapshotClient<$Result.GetResult<Prisma.$OpenclawRiskSnapshotPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more OpenclawRiskSnapshots that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {OpenclawRiskSnapshotFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all OpenclawRiskSnapshots
+     * const openclawRiskSnapshots = await prisma.openclawRiskSnapshot.findMany()
+     * 
+     * // Get first 10 OpenclawRiskSnapshots
+     * const openclawRiskSnapshots = await prisma.openclawRiskSnapshot.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const openclawRiskSnapshotWithIdOnly = await prisma.openclawRiskSnapshot.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends OpenclawRiskSnapshotFindManyArgs>(args?: SelectSubset<T, OpenclawRiskSnapshotFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$OpenclawRiskSnapshotPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a OpenclawRiskSnapshot.
+     * @param {OpenclawRiskSnapshotCreateArgs} args - Arguments to create a OpenclawRiskSnapshot.
+     * @example
+     * // Create one OpenclawRiskSnapshot
+     * const OpenclawRiskSnapshot = await prisma.openclawRiskSnapshot.create({
+     *   data: {
+     *     // ... data to create a OpenclawRiskSnapshot
+     *   }
+     * })
+     * 
+     */
+    create<T extends OpenclawRiskSnapshotCreateArgs>(args: SelectSubset<T, OpenclawRiskSnapshotCreateArgs<ExtArgs>>): Prisma__OpenclawRiskSnapshotClient<$Result.GetResult<Prisma.$OpenclawRiskSnapshotPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many OpenclawRiskSnapshots.
+     * @param {OpenclawRiskSnapshotCreateManyArgs} args - Arguments to create many OpenclawRiskSnapshots.
+     * @example
+     * // Create many OpenclawRiskSnapshots
+     * const openclawRiskSnapshot = await prisma.openclawRiskSnapshot.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends OpenclawRiskSnapshotCreateManyArgs>(args?: SelectSubset<T, OpenclawRiskSnapshotCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Delete a OpenclawRiskSnapshot.
+     * @param {OpenclawRiskSnapshotDeleteArgs} args - Arguments to delete one OpenclawRiskSnapshot.
+     * @example
+     * // Delete one OpenclawRiskSnapshot
+     * const OpenclawRiskSnapshot = await prisma.openclawRiskSnapshot.delete({
+     *   where: {
+     *     // ... filter to delete one OpenclawRiskSnapshot
+     *   }
+     * })
+     * 
+     */
+    delete<T extends OpenclawRiskSnapshotDeleteArgs>(args: SelectSubset<T, OpenclawRiskSnapshotDeleteArgs<ExtArgs>>): Prisma__OpenclawRiskSnapshotClient<$Result.GetResult<Prisma.$OpenclawRiskSnapshotPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one OpenclawRiskSnapshot.
+     * @param {OpenclawRiskSnapshotUpdateArgs} args - Arguments to update one OpenclawRiskSnapshot.
+     * @example
+     * // Update one OpenclawRiskSnapshot
+     * const openclawRiskSnapshot = await prisma.openclawRiskSnapshot.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends OpenclawRiskSnapshotUpdateArgs>(args: SelectSubset<T, OpenclawRiskSnapshotUpdateArgs<ExtArgs>>): Prisma__OpenclawRiskSnapshotClient<$Result.GetResult<Prisma.$OpenclawRiskSnapshotPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more OpenclawRiskSnapshots.
+     * @param {OpenclawRiskSnapshotDeleteManyArgs} args - Arguments to filter OpenclawRiskSnapshots to delete.
+     * @example
+     * // Delete a few OpenclawRiskSnapshots
+     * const { count } = await prisma.openclawRiskSnapshot.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends OpenclawRiskSnapshotDeleteManyArgs>(args?: SelectSubset<T, OpenclawRiskSnapshotDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more OpenclawRiskSnapshots.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {OpenclawRiskSnapshotUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many OpenclawRiskSnapshots
+     * const openclawRiskSnapshot = await prisma.openclawRiskSnapshot.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends OpenclawRiskSnapshotUpdateManyArgs>(args: SelectSubset<T, OpenclawRiskSnapshotUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create or update one OpenclawRiskSnapshot.
+     * @param {OpenclawRiskSnapshotUpsertArgs} args - Arguments to update or create a OpenclawRiskSnapshot.
+     * @example
+     * // Update or create a OpenclawRiskSnapshot
+     * const openclawRiskSnapshot = await prisma.openclawRiskSnapshot.upsert({
+     *   create: {
+     *     // ... data to create a OpenclawRiskSnapshot
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the OpenclawRiskSnapshot we want to update
+     *   }
+     * })
+     */
+    upsert<T extends OpenclawRiskSnapshotUpsertArgs>(args: SelectSubset<T, OpenclawRiskSnapshotUpsertArgs<ExtArgs>>): Prisma__OpenclawRiskSnapshotClient<$Result.GetResult<Prisma.$OpenclawRiskSnapshotPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of OpenclawRiskSnapshots.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {OpenclawRiskSnapshotCountArgs} args - Arguments to filter OpenclawRiskSnapshots to count.
+     * @example
+     * // Count the number of OpenclawRiskSnapshots
+     * const count = await prisma.openclawRiskSnapshot.count({
+     *   where: {
+     *     // ... the filter for the OpenclawRiskSnapshots we want to count
+     *   }
+     * })
+    **/
+    count<T extends OpenclawRiskSnapshotCountArgs>(
+      args?: Subset<T, OpenclawRiskSnapshotCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], OpenclawRiskSnapshotCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a OpenclawRiskSnapshot.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {OpenclawRiskSnapshotAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends OpenclawRiskSnapshotAggregateArgs>(args: Subset<T, OpenclawRiskSnapshotAggregateArgs>): Prisma.PrismaPromise<GetOpenclawRiskSnapshotAggregateType<T>>
+
+    /**
+     * Group by OpenclawRiskSnapshot.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {OpenclawRiskSnapshotGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends OpenclawRiskSnapshotGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: OpenclawRiskSnapshotGroupByArgs['orderBy'] }
+        : { orderBy?: OpenclawRiskSnapshotGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, OpenclawRiskSnapshotGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetOpenclawRiskSnapshotGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the OpenclawRiskSnapshot model
+   */
+  readonly fields: OpenclawRiskSnapshotFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for OpenclawRiskSnapshot.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__OpenclawRiskSnapshotClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    issues<T extends OpenclawRiskSnapshot$issuesArgs<ExtArgs> = {}>(args?: Subset<T, OpenclawRiskSnapshot$issuesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$OpenclawRiskIssuePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the OpenclawRiskSnapshot model
+   */
+  interface OpenclawRiskSnapshotFieldRefs {
+    readonly id: FieldRef<"OpenclawRiskSnapshot", 'Int'>
+    readonly snapshotKey: FieldRef<"OpenclawRiskSnapshot", 'String'>
+    readonly triggerSource: FieldRef<"OpenclawRiskSnapshot", 'String'>
+    readonly status: FieldRef<"OpenclawRiskSnapshot", 'String'>
+    readonly latestStableTag: FieldRef<"OpenclawRiskSnapshot", 'String'>
+    readonly latestStableVersion: FieldRef<"OpenclawRiskSnapshot", 'String'>
+    readonly latestStableUrl: FieldRef<"OpenclawRiskSnapshot", 'String'>
+    readonly latestStablePublishedAt: FieldRef<"OpenclawRiskSnapshot", 'DateTime'>
+    readonly totalIssues: FieldRef<"OpenclawRiskSnapshot", 'Int'>
+    readonly githubAdvisories: FieldRef<"OpenclawRiskSnapshot", 'Int'>
+    readonly nvdCves: FieldRef<"OpenclawRiskSnapshot", 'Int'>
+    readonly officialAdvisoryCount: FieldRef<"OpenclawRiskSnapshot", 'Int'>
+    readonly cveRecordCount: FieldRef<"OpenclawRiskSnapshot", 'Int'>
+    readonly conferencePaperCount: FieldRef<"OpenclawRiskSnapshot", 'Int'>
+    readonly preprintCount: FieldRef<"OpenclawRiskSnapshot", 'Int'>
+    readonly researchCount: FieldRef<"OpenclawRiskSnapshot", 'Int'>
+    readonly newsCount: FieldRef<"OpenclawRiskSnapshot", 'Int'>
+    readonly criticalCount: FieldRef<"OpenclawRiskSnapshot", 'Int'>
+    readonly highRiskCount: FieldRef<"OpenclawRiskSnapshot", 'Int'>
+    readonly fixedCount: FieldRef<"OpenclawRiskSnapshot", 'Int'>
+    readonly unfixedCount: FieldRef<"OpenclawRiskSnapshot", 'Int'>
+    readonly unknownCount: FieldRef<"OpenclawRiskSnapshot", 'Int'>
+    readonly fixProgressPercent: FieldRef<"OpenclawRiskSnapshot", 'Int'>
+    readonly sourceMeta: FieldRef<"OpenclawRiskSnapshot", 'Json'>
+    readonly cacheDir: FieldRef<"OpenclawRiskSnapshot", 'String'>
+    readonly createdAt: FieldRef<"OpenclawRiskSnapshot", 'DateTime'>
+    readonly updatedAt: FieldRef<"OpenclawRiskSnapshot", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * OpenclawRiskSnapshot findUnique
+   */
+  export type OpenclawRiskSnapshotFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OpenclawRiskSnapshot
+     */
+    select?: OpenclawRiskSnapshotSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OpenclawRiskSnapshot
+     */
+    omit?: OpenclawRiskSnapshotOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: OpenclawRiskSnapshotInclude<ExtArgs> | null
+    /**
+     * Filter, which OpenclawRiskSnapshot to fetch.
+     */
+    where: OpenclawRiskSnapshotWhereUniqueInput
+  }
+
+  /**
+   * OpenclawRiskSnapshot findUniqueOrThrow
+   */
+  export type OpenclawRiskSnapshotFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OpenclawRiskSnapshot
+     */
+    select?: OpenclawRiskSnapshotSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OpenclawRiskSnapshot
+     */
+    omit?: OpenclawRiskSnapshotOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: OpenclawRiskSnapshotInclude<ExtArgs> | null
+    /**
+     * Filter, which OpenclawRiskSnapshot to fetch.
+     */
+    where: OpenclawRiskSnapshotWhereUniqueInput
+  }
+
+  /**
+   * OpenclawRiskSnapshot findFirst
+   */
+  export type OpenclawRiskSnapshotFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OpenclawRiskSnapshot
+     */
+    select?: OpenclawRiskSnapshotSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OpenclawRiskSnapshot
+     */
+    omit?: OpenclawRiskSnapshotOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: OpenclawRiskSnapshotInclude<ExtArgs> | null
+    /**
+     * Filter, which OpenclawRiskSnapshot to fetch.
+     */
+    where?: OpenclawRiskSnapshotWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of OpenclawRiskSnapshots to fetch.
+     */
+    orderBy?: OpenclawRiskSnapshotOrderByWithRelationInput | OpenclawRiskSnapshotOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for OpenclawRiskSnapshots.
+     */
+    cursor?: OpenclawRiskSnapshotWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` OpenclawRiskSnapshots from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` OpenclawRiskSnapshots.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of OpenclawRiskSnapshots.
+     */
+    distinct?: OpenclawRiskSnapshotScalarFieldEnum | OpenclawRiskSnapshotScalarFieldEnum[]
+  }
+
+  /**
+   * OpenclawRiskSnapshot findFirstOrThrow
+   */
+  export type OpenclawRiskSnapshotFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OpenclawRiskSnapshot
+     */
+    select?: OpenclawRiskSnapshotSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OpenclawRiskSnapshot
+     */
+    omit?: OpenclawRiskSnapshotOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: OpenclawRiskSnapshotInclude<ExtArgs> | null
+    /**
+     * Filter, which OpenclawRiskSnapshot to fetch.
+     */
+    where?: OpenclawRiskSnapshotWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of OpenclawRiskSnapshots to fetch.
+     */
+    orderBy?: OpenclawRiskSnapshotOrderByWithRelationInput | OpenclawRiskSnapshotOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for OpenclawRiskSnapshots.
+     */
+    cursor?: OpenclawRiskSnapshotWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` OpenclawRiskSnapshots from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` OpenclawRiskSnapshots.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of OpenclawRiskSnapshots.
+     */
+    distinct?: OpenclawRiskSnapshotScalarFieldEnum | OpenclawRiskSnapshotScalarFieldEnum[]
+  }
+
+  /**
+   * OpenclawRiskSnapshot findMany
+   */
+  export type OpenclawRiskSnapshotFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OpenclawRiskSnapshot
+     */
+    select?: OpenclawRiskSnapshotSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OpenclawRiskSnapshot
+     */
+    omit?: OpenclawRiskSnapshotOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: OpenclawRiskSnapshotInclude<ExtArgs> | null
+    /**
+     * Filter, which OpenclawRiskSnapshots to fetch.
+     */
+    where?: OpenclawRiskSnapshotWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of OpenclawRiskSnapshots to fetch.
+     */
+    orderBy?: OpenclawRiskSnapshotOrderByWithRelationInput | OpenclawRiskSnapshotOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing OpenclawRiskSnapshots.
+     */
+    cursor?: OpenclawRiskSnapshotWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` OpenclawRiskSnapshots from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` OpenclawRiskSnapshots.
+     */
+    skip?: number
+    distinct?: OpenclawRiskSnapshotScalarFieldEnum | OpenclawRiskSnapshotScalarFieldEnum[]
+  }
+
+  /**
+   * OpenclawRiskSnapshot create
+   */
+  export type OpenclawRiskSnapshotCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OpenclawRiskSnapshot
+     */
+    select?: OpenclawRiskSnapshotSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OpenclawRiskSnapshot
+     */
+    omit?: OpenclawRiskSnapshotOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: OpenclawRiskSnapshotInclude<ExtArgs> | null
+    /**
+     * The data needed to create a OpenclawRiskSnapshot.
+     */
+    data: XOR<OpenclawRiskSnapshotCreateInput, OpenclawRiskSnapshotUncheckedCreateInput>
+  }
+
+  /**
+   * OpenclawRiskSnapshot createMany
+   */
+  export type OpenclawRiskSnapshotCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many OpenclawRiskSnapshots.
+     */
+    data: OpenclawRiskSnapshotCreateManyInput | OpenclawRiskSnapshotCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * OpenclawRiskSnapshot update
+   */
+  export type OpenclawRiskSnapshotUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OpenclawRiskSnapshot
+     */
+    select?: OpenclawRiskSnapshotSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OpenclawRiskSnapshot
+     */
+    omit?: OpenclawRiskSnapshotOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: OpenclawRiskSnapshotInclude<ExtArgs> | null
+    /**
+     * The data needed to update a OpenclawRiskSnapshot.
+     */
+    data: XOR<OpenclawRiskSnapshotUpdateInput, OpenclawRiskSnapshotUncheckedUpdateInput>
+    /**
+     * Choose, which OpenclawRiskSnapshot to update.
+     */
+    where: OpenclawRiskSnapshotWhereUniqueInput
+  }
+
+  /**
+   * OpenclawRiskSnapshot updateMany
+   */
+  export type OpenclawRiskSnapshotUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update OpenclawRiskSnapshots.
+     */
+    data: XOR<OpenclawRiskSnapshotUpdateManyMutationInput, OpenclawRiskSnapshotUncheckedUpdateManyInput>
+    /**
+     * Filter which OpenclawRiskSnapshots to update
+     */
+    where?: OpenclawRiskSnapshotWhereInput
+    /**
+     * Limit how many OpenclawRiskSnapshots to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * OpenclawRiskSnapshot upsert
+   */
+  export type OpenclawRiskSnapshotUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OpenclawRiskSnapshot
+     */
+    select?: OpenclawRiskSnapshotSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OpenclawRiskSnapshot
+     */
+    omit?: OpenclawRiskSnapshotOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: OpenclawRiskSnapshotInclude<ExtArgs> | null
+    /**
+     * The filter to search for the OpenclawRiskSnapshot to update in case it exists.
+     */
+    where: OpenclawRiskSnapshotWhereUniqueInput
+    /**
+     * In case the OpenclawRiskSnapshot found by the `where` argument doesn't exist, create a new OpenclawRiskSnapshot with this data.
+     */
+    create: XOR<OpenclawRiskSnapshotCreateInput, OpenclawRiskSnapshotUncheckedCreateInput>
+    /**
+     * In case the OpenclawRiskSnapshot was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<OpenclawRiskSnapshotUpdateInput, OpenclawRiskSnapshotUncheckedUpdateInput>
+  }
+
+  /**
+   * OpenclawRiskSnapshot delete
+   */
+  export type OpenclawRiskSnapshotDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OpenclawRiskSnapshot
+     */
+    select?: OpenclawRiskSnapshotSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OpenclawRiskSnapshot
+     */
+    omit?: OpenclawRiskSnapshotOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: OpenclawRiskSnapshotInclude<ExtArgs> | null
+    /**
+     * Filter which OpenclawRiskSnapshot to delete.
+     */
+    where: OpenclawRiskSnapshotWhereUniqueInput
+  }
+
+  /**
+   * OpenclawRiskSnapshot deleteMany
+   */
+  export type OpenclawRiskSnapshotDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which OpenclawRiskSnapshots to delete
+     */
+    where?: OpenclawRiskSnapshotWhereInput
+    /**
+     * Limit how many OpenclawRiskSnapshots to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * OpenclawRiskSnapshot.issues
+   */
+  export type OpenclawRiskSnapshot$issuesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OpenclawRiskIssue
+     */
+    select?: OpenclawRiskIssueSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OpenclawRiskIssue
+     */
+    omit?: OpenclawRiskIssueOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: OpenclawRiskIssueInclude<ExtArgs> | null
+    where?: OpenclawRiskIssueWhereInput
+    orderBy?: OpenclawRiskIssueOrderByWithRelationInput | OpenclawRiskIssueOrderByWithRelationInput[]
+    cursor?: OpenclawRiskIssueWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: OpenclawRiskIssueScalarFieldEnum | OpenclawRiskIssueScalarFieldEnum[]
+  }
+
+  /**
+   * OpenclawRiskSnapshot without action
+   */
+  export type OpenclawRiskSnapshotDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OpenclawRiskSnapshot
+     */
+    select?: OpenclawRiskSnapshotSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OpenclawRiskSnapshot
+     */
+    omit?: OpenclawRiskSnapshotOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: OpenclawRiskSnapshotInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model OpenclawRiskIssue
+   */
+
+  export type AggregateOpenclawRiskIssue = {
+    _count: OpenclawRiskIssueCountAggregateOutputType | null
+    _avg: OpenclawRiskIssueAvgAggregateOutputType | null
+    _sum: OpenclawRiskIssueSumAggregateOutputType | null
+    _min: OpenclawRiskIssueMinAggregateOutputType | null
+    _max: OpenclawRiskIssueMaxAggregateOutputType | null
+  }
+
+  export type OpenclawRiskIssueAvgAggregateOutputType = {
+    id: number | null
+    snapshotId: number | null
+    score: number | null
+    relevanceScore: number | null
+  }
+
+  export type OpenclawRiskIssueSumAggregateOutputType = {
+    id: bigint | null
+    snapshotId: number | null
+    score: number | null
+    relevanceScore: number | null
+  }
+
+  export type OpenclawRiskIssueMinAggregateOutputType = {
+    id: bigint | null
+    snapshotId: number | null
+    canonicalId: string | null
+    issueId: string | null
+    title: string | null
+    summary: string | null
+    description: string | null
+    sourcePrimary: string | null
+    sourceType: string | null
+    sourceSearch: string | null
+    projectScope: string | null
+    venue: string | null
+    severity: string | null
+    score: number | null
+    cvssVector: string | null
+    affectedRange: string | null
+    fixedVersion: string | null
+    latestStableVersion: string | null
+    fixStatus: string | null
+    fixLabel: string | null
+    fixReason: string | null
+    issueUrl: string | null
+    repoUrl: string | null
+    status: string | null
+    relevanceScore: number | null
+    publishedAt: Date | null
+    sourceUpdatedAt: Date | null
+    createdAt: Date | null
+  }
+
+  export type OpenclawRiskIssueMaxAggregateOutputType = {
+    id: bigint | null
+    snapshotId: number | null
+    canonicalId: string | null
+    issueId: string | null
+    title: string | null
+    summary: string | null
+    description: string | null
+    sourcePrimary: string | null
+    sourceType: string | null
+    sourceSearch: string | null
+    projectScope: string | null
+    venue: string | null
+    severity: string | null
+    score: number | null
+    cvssVector: string | null
+    affectedRange: string | null
+    fixedVersion: string | null
+    latestStableVersion: string | null
+    fixStatus: string | null
+    fixLabel: string | null
+    fixReason: string | null
+    issueUrl: string | null
+    repoUrl: string | null
+    status: string | null
+    relevanceScore: number | null
+    publishedAt: Date | null
+    sourceUpdatedAt: Date | null
+    createdAt: Date | null
+  }
+
+  export type OpenclawRiskIssueCountAggregateOutputType = {
+    id: number
+    snapshotId: number
+    canonicalId: number
+    issueId: number
+    title: number
+    summary: number
+    description: number
+    sourcePrimary: number
+    sourceType: number
+    sourceSearch: number
+    sourceLabels: number
+    sources: number
+    githubIds: number
+    cveIds: number
+    projectScope: number
+    venue: number
+    authors: number
+    severity: number
+    score: number
+    cvssVector: number
+    cwes: number
+    affectedRange: number
+    fixedVersion: number
+    latestStableVersion: number
+    fixStatus: number
+    fixLabel: number
+    fixReason: number
+    issueUrl: number
+    repoUrl: number
+    referenceUrls: number
+    tags: number
+    status: number
+    relevanceScore: number
+    publishedAt: number
+    sourceUpdatedAt: number
+    rawData: number
+    createdAt: number
+    _all: number
+  }
+
+
+  export type OpenclawRiskIssueAvgAggregateInputType = {
+    id?: true
+    snapshotId?: true
+    score?: true
+    relevanceScore?: true
+  }
+
+  export type OpenclawRiskIssueSumAggregateInputType = {
+    id?: true
+    snapshotId?: true
+    score?: true
+    relevanceScore?: true
+  }
+
+  export type OpenclawRiskIssueMinAggregateInputType = {
+    id?: true
+    snapshotId?: true
+    canonicalId?: true
+    issueId?: true
+    title?: true
+    summary?: true
+    description?: true
+    sourcePrimary?: true
+    sourceType?: true
+    sourceSearch?: true
+    projectScope?: true
+    venue?: true
+    severity?: true
+    score?: true
+    cvssVector?: true
+    affectedRange?: true
+    fixedVersion?: true
+    latestStableVersion?: true
+    fixStatus?: true
+    fixLabel?: true
+    fixReason?: true
+    issueUrl?: true
+    repoUrl?: true
+    status?: true
+    relevanceScore?: true
+    publishedAt?: true
+    sourceUpdatedAt?: true
+    createdAt?: true
+  }
+
+  export type OpenclawRiskIssueMaxAggregateInputType = {
+    id?: true
+    snapshotId?: true
+    canonicalId?: true
+    issueId?: true
+    title?: true
+    summary?: true
+    description?: true
+    sourcePrimary?: true
+    sourceType?: true
+    sourceSearch?: true
+    projectScope?: true
+    venue?: true
+    severity?: true
+    score?: true
+    cvssVector?: true
+    affectedRange?: true
+    fixedVersion?: true
+    latestStableVersion?: true
+    fixStatus?: true
+    fixLabel?: true
+    fixReason?: true
+    issueUrl?: true
+    repoUrl?: true
+    status?: true
+    relevanceScore?: true
+    publishedAt?: true
+    sourceUpdatedAt?: true
+    createdAt?: true
+  }
+
+  export type OpenclawRiskIssueCountAggregateInputType = {
+    id?: true
+    snapshotId?: true
+    canonicalId?: true
+    issueId?: true
+    title?: true
+    summary?: true
+    description?: true
+    sourcePrimary?: true
+    sourceType?: true
+    sourceSearch?: true
+    sourceLabels?: true
+    sources?: true
+    githubIds?: true
+    cveIds?: true
+    projectScope?: true
+    venue?: true
+    authors?: true
+    severity?: true
+    score?: true
+    cvssVector?: true
+    cwes?: true
+    affectedRange?: true
+    fixedVersion?: true
+    latestStableVersion?: true
+    fixStatus?: true
+    fixLabel?: true
+    fixReason?: true
+    issueUrl?: true
+    repoUrl?: true
+    referenceUrls?: true
+    tags?: true
+    status?: true
+    relevanceScore?: true
+    publishedAt?: true
+    sourceUpdatedAt?: true
+    rawData?: true
+    createdAt?: true
+    _all?: true
+  }
+
+  export type OpenclawRiskIssueAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which OpenclawRiskIssue to aggregate.
+     */
+    where?: OpenclawRiskIssueWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of OpenclawRiskIssues to fetch.
+     */
+    orderBy?: OpenclawRiskIssueOrderByWithRelationInput | OpenclawRiskIssueOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: OpenclawRiskIssueWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` OpenclawRiskIssues from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` OpenclawRiskIssues.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned OpenclawRiskIssues
+    **/
+    _count?: true | OpenclawRiskIssueCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: OpenclawRiskIssueAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: OpenclawRiskIssueSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: OpenclawRiskIssueMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: OpenclawRiskIssueMaxAggregateInputType
+  }
+
+  export type GetOpenclawRiskIssueAggregateType<T extends OpenclawRiskIssueAggregateArgs> = {
+        [P in keyof T & keyof AggregateOpenclawRiskIssue]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateOpenclawRiskIssue[P]>
+      : GetScalarType<T[P], AggregateOpenclawRiskIssue[P]>
+  }
+
+
+
+
+  export type OpenclawRiskIssueGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: OpenclawRiskIssueWhereInput
+    orderBy?: OpenclawRiskIssueOrderByWithAggregationInput | OpenclawRiskIssueOrderByWithAggregationInput[]
+    by: OpenclawRiskIssueScalarFieldEnum[] | OpenclawRiskIssueScalarFieldEnum
+    having?: OpenclawRiskIssueScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: OpenclawRiskIssueCountAggregateInputType | true
+    _avg?: OpenclawRiskIssueAvgAggregateInputType
+    _sum?: OpenclawRiskIssueSumAggregateInputType
+    _min?: OpenclawRiskIssueMinAggregateInputType
+    _max?: OpenclawRiskIssueMaxAggregateInputType
+  }
+
+  export type OpenclawRiskIssueGroupByOutputType = {
+    id: bigint
+    snapshotId: number
+    canonicalId: string
+    issueId: string
+    title: string
+    summary: string
+    description: string
+    sourcePrimary: string
+    sourceType: string
+    sourceSearch: string
+    sourceLabels: JsonValue
+    sources: JsonValue
+    githubIds: JsonValue
+    cveIds: JsonValue
+    projectScope: string
+    venue: string | null
+    authors: JsonValue
+    severity: string
+    score: number | null
+    cvssVector: string | null
+    cwes: JsonValue
+    affectedRange: string | null
+    fixedVersion: string | null
+    latestStableVersion: string | null
+    fixStatus: string
+    fixLabel: string
+    fixReason: string
+    issueUrl: string | null
+    repoUrl: string | null
+    referenceUrls: JsonValue
+    tags: JsonValue
+    status: string
+    relevanceScore: number | null
+    publishedAt: Date | null
+    sourceUpdatedAt: Date | null
+    rawData: JsonValue
+    createdAt: Date
+    _count: OpenclawRiskIssueCountAggregateOutputType | null
+    _avg: OpenclawRiskIssueAvgAggregateOutputType | null
+    _sum: OpenclawRiskIssueSumAggregateOutputType | null
+    _min: OpenclawRiskIssueMinAggregateOutputType | null
+    _max: OpenclawRiskIssueMaxAggregateOutputType | null
+  }
+
+  type GetOpenclawRiskIssueGroupByPayload<T extends OpenclawRiskIssueGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<OpenclawRiskIssueGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof OpenclawRiskIssueGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], OpenclawRiskIssueGroupByOutputType[P]>
+            : GetScalarType<T[P], OpenclawRiskIssueGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type OpenclawRiskIssueSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    snapshotId?: boolean
+    canonicalId?: boolean
+    issueId?: boolean
+    title?: boolean
+    summary?: boolean
+    description?: boolean
+    sourcePrimary?: boolean
+    sourceType?: boolean
+    sourceSearch?: boolean
+    sourceLabels?: boolean
+    sources?: boolean
+    githubIds?: boolean
+    cveIds?: boolean
+    projectScope?: boolean
+    venue?: boolean
+    authors?: boolean
+    severity?: boolean
+    score?: boolean
+    cvssVector?: boolean
+    cwes?: boolean
+    affectedRange?: boolean
+    fixedVersion?: boolean
+    latestStableVersion?: boolean
+    fixStatus?: boolean
+    fixLabel?: boolean
+    fixReason?: boolean
+    issueUrl?: boolean
+    repoUrl?: boolean
+    referenceUrls?: boolean
+    tags?: boolean
+    status?: boolean
+    relevanceScore?: boolean
+    publishedAt?: boolean
+    sourceUpdatedAt?: boolean
+    rawData?: boolean
+    createdAt?: boolean
+    snapshot?: boolean | OpenclawRiskSnapshotDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["openclawRiskIssue"]>
+
+
+
+  export type OpenclawRiskIssueSelectScalar = {
+    id?: boolean
+    snapshotId?: boolean
+    canonicalId?: boolean
+    issueId?: boolean
+    title?: boolean
+    summary?: boolean
+    description?: boolean
+    sourcePrimary?: boolean
+    sourceType?: boolean
+    sourceSearch?: boolean
+    sourceLabels?: boolean
+    sources?: boolean
+    githubIds?: boolean
+    cveIds?: boolean
+    projectScope?: boolean
+    venue?: boolean
+    authors?: boolean
+    severity?: boolean
+    score?: boolean
+    cvssVector?: boolean
+    cwes?: boolean
+    affectedRange?: boolean
+    fixedVersion?: boolean
+    latestStableVersion?: boolean
+    fixStatus?: boolean
+    fixLabel?: boolean
+    fixReason?: boolean
+    issueUrl?: boolean
+    repoUrl?: boolean
+    referenceUrls?: boolean
+    tags?: boolean
+    status?: boolean
+    relevanceScore?: boolean
+    publishedAt?: boolean
+    sourceUpdatedAt?: boolean
+    rawData?: boolean
+    createdAt?: boolean
+  }
+
+  export type OpenclawRiskIssueOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "snapshotId" | "canonicalId" | "issueId" | "title" | "summary" | "description" | "sourcePrimary" | "sourceType" | "sourceSearch" | "sourceLabels" | "sources" | "githubIds" | "cveIds" | "projectScope" | "venue" | "authors" | "severity" | "score" | "cvssVector" | "cwes" | "affectedRange" | "fixedVersion" | "latestStableVersion" | "fixStatus" | "fixLabel" | "fixReason" | "issueUrl" | "repoUrl" | "referenceUrls" | "tags" | "status" | "relevanceScore" | "publishedAt" | "sourceUpdatedAt" | "rawData" | "createdAt", ExtArgs["result"]["openclawRiskIssue"]>
+  export type OpenclawRiskIssueInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    snapshot?: boolean | OpenclawRiskSnapshotDefaultArgs<ExtArgs>
+  }
+
+  export type $OpenclawRiskIssuePayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "OpenclawRiskIssue"
+    objects: {
+      snapshot: Prisma.$OpenclawRiskSnapshotPayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: bigint
+      snapshotId: number
+      canonicalId: string
+      issueId: string
+      title: string
+      summary: string
+      description: string
+      sourcePrimary: string
+      sourceType: string
+      sourceSearch: string
+      sourceLabels: Prisma.JsonValue
+      sources: Prisma.JsonValue
+      githubIds: Prisma.JsonValue
+      cveIds: Prisma.JsonValue
+      projectScope: string
+      venue: string | null
+      authors: Prisma.JsonValue
+      severity: string
+      score: number | null
+      cvssVector: string | null
+      cwes: Prisma.JsonValue
+      affectedRange: string | null
+      fixedVersion: string | null
+      latestStableVersion: string | null
+      fixStatus: string
+      fixLabel: string
+      fixReason: string
+      issueUrl: string | null
+      repoUrl: string | null
+      referenceUrls: Prisma.JsonValue
+      tags: Prisma.JsonValue
+      status: string
+      relevanceScore: number | null
+      publishedAt: Date | null
+      sourceUpdatedAt: Date | null
+      rawData: Prisma.JsonValue
+      createdAt: Date
+    }, ExtArgs["result"]["openclawRiskIssue"]>
+    composites: {}
+  }
+
+  type OpenclawRiskIssueGetPayload<S extends boolean | null | undefined | OpenclawRiskIssueDefaultArgs> = $Result.GetResult<Prisma.$OpenclawRiskIssuePayload, S>
+
+  type OpenclawRiskIssueCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<OpenclawRiskIssueFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: OpenclawRiskIssueCountAggregateInputType | true
+    }
+
+  export interface OpenclawRiskIssueDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['OpenclawRiskIssue'], meta: { name: 'OpenclawRiskIssue' } }
+    /**
+     * Find zero or one OpenclawRiskIssue that matches the filter.
+     * @param {OpenclawRiskIssueFindUniqueArgs} args - Arguments to find a OpenclawRiskIssue
+     * @example
+     * // Get one OpenclawRiskIssue
+     * const openclawRiskIssue = await prisma.openclawRiskIssue.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends OpenclawRiskIssueFindUniqueArgs>(args: SelectSubset<T, OpenclawRiskIssueFindUniqueArgs<ExtArgs>>): Prisma__OpenclawRiskIssueClient<$Result.GetResult<Prisma.$OpenclawRiskIssuePayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one OpenclawRiskIssue that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {OpenclawRiskIssueFindUniqueOrThrowArgs} args - Arguments to find a OpenclawRiskIssue
+     * @example
+     * // Get one OpenclawRiskIssue
+     * const openclawRiskIssue = await prisma.openclawRiskIssue.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends OpenclawRiskIssueFindUniqueOrThrowArgs>(args: SelectSubset<T, OpenclawRiskIssueFindUniqueOrThrowArgs<ExtArgs>>): Prisma__OpenclawRiskIssueClient<$Result.GetResult<Prisma.$OpenclawRiskIssuePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first OpenclawRiskIssue that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {OpenclawRiskIssueFindFirstArgs} args - Arguments to find a OpenclawRiskIssue
+     * @example
+     * // Get one OpenclawRiskIssue
+     * const openclawRiskIssue = await prisma.openclawRiskIssue.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends OpenclawRiskIssueFindFirstArgs>(args?: SelectSubset<T, OpenclawRiskIssueFindFirstArgs<ExtArgs>>): Prisma__OpenclawRiskIssueClient<$Result.GetResult<Prisma.$OpenclawRiskIssuePayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first OpenclawRiskIssue that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {OpenclawRiskIssueFindFirstOrThrowArgs} args - Arguments to find a OpenclawRiskIssue
+     * @example
+     * // Get one OpenclawRiskIssue
+     * const openclawRiskIssue = await prisma.openclawRiskIssue.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends OpenclawRiskIssueFindFirstOrThrowArgs>(args?: SelectSubset<T, OpenclawRiskIssueFindFirstOrThrowArgs<ExtArgs>>): Prisma__OpenclawRiskIssueClient<$Result.GetResult<Prisma.$OpenclawRiskIssuePayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more OpenclawRiskIssues that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {OpenclawRiskIssueFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all OpenclawRiskIssues
+     * const openclawRiskIssues = await prisma.openclawRiskIssue.findMany()
+     * 
+     * // Get first 10 OpenclawRiskIssues
+     * const openclawRiskIssues = await prisma.openclawRiskIssue.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const openclawRiskIssueWithIdOnly = await prisma.openclawRiskIssue.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends OpenclawRiskIssueFindManyArgs>(args?: SelectSubset<T, OpenclawRiskIssueFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$OpenclawRiskIssuePayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a OpenclawRiskIssue.
+     * @param {OpenclawRiskIssueCreateArgs} args - Arguments to create a OpenclawRiskIssue.
+     * @example
+     * // Create one OpenclawRiskIssue
+     * const OpenclawRiskIssue = await prisma.openclawRiskIssue.create({
+     *   data: {
+     *     // ... data to create a OpenclawRiskIssue
+     *   }
+     * })
+     * 
+     */
+    create<T extends OpenclawRiskIssueCreateArgs>(args: SelectSubset<T, OpenclawRiskIssueCreateArgs<ExtArgs>>): Prisma__OpenclawRiskIssueClient<$Result.GetResult<Prisma.$OpenclawRiskIssuePayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many OpenclawRiskIssues.
+     * @param {OpenclawRiskIssueCreateManyArgs} args - Arguments to create many OpenclawRiskIssues.
+     * @example
+     * // Create many OpenclawRiskIssues
+     * const openclawRiskIssue = await prisma.openclawRiskIssue.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends OpenclawRiskIssueCreateManyArgs>(args?: SelectSubset<T, OpenclawRiskIssueCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Delete a OpenclawRiskIssue.
+     * @param {OpenclawRiskIssueDeleteArgs} args - Arguments to delete one OpenclawRiskIssue.
+     * @example
+     * // Delete one OpenclawRiskIssue
+     * const OpenclawRiskIssue = await prisma.openclawRiskIssue.delete({
+     *   where: {
+     *     // ... filter to delete one OpenclawRiskIssue
+     *   }
+     * })
+     * 
+     */
+    delete<T extends OpenclawRiskIssueDeleteArgs>(args: SelectSubset<T, OpenclawRiskIssueDeleteArgs<ExtArgs>>): Prisma__OpenclawRiskIssueClient<$Result.GetResult<Prisma.$OpenclawRiskIssuePayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one OpenclawRiskIssue.
+     * @param {OpenclawRiskIssueUpdateArgs} args - Arguments to update one OpenclawRiskIssue.
+     * @example
+     * // Update one OpenclawRiskIssue
+     * const openclawRiskIssue = await prisma.openclawRiskIssue.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends OpenclawRiskIssueUpdateArgs>(args: SelectSubset<T, OpenclawRiskIssueUpdateArgs<ExtArgs>>): Prisma__OpenclawRiskIssueClient<$Result.GetResult<Prisma.$OpenclawRiskIssuePayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more OpenclawRiskIssues.
+     * @param {OpenclawRiskIssueDeleteManyArgs} args - Arguments to filter OpenclawRiskIssues to delete.
+     * @example
+     * // Delete a few OpenclawRiskIssues
+     * const { count } = await prisma.openclawRiskIssue.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends OpenclawRiskIssueDeleteManyArgs>(args?: SelectSubset<T, OpenclawRiskIssueDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more OpenclawRiskIssues.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {OpenclawRiskIssueUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many OpenclawRiskIssues
+     * const openclawRiskIssue = await prisma.openclawRiskIssue.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends OpenclawRiskIssueUpdateManyArgs>(args: SelectSubset<T, OpenclawRiskIssueUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create or update one OpenclawRiskIssue.
+     * @param {OpenclawRiskIssueUpsertArgs} args - Arguments to update or create a OpenclawRiskIssue.
+     * @example
+     * // Update or create a OpenclawRiskIssue
+     * const openclawRiskIssue = await prisma.openclawRiskIssue.upsert({
+     *   create: {
+     *     // ... data to create a OpenclawRiskIssue
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the OpenclawRiskIssue we want to update
+     *   }
+     * })
+     */
+    upsert<T extends OpenclawRiskIssueUpsertArgs>(args: SelectSubset<T, OpenclawRiskIssueUpsertArgs<ExtArgs>>): Prisma__OpenclawRiskIssueClient<$Result.GetResult<Prisma.$OpenclawRiskIssuePayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of OpenclawRiskIssues.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {OpenclawRiskIssueCountArgs} args - Arguments to filter OpenclawRiskIssues to count.
+     * @example
+     * // Count the number of OpenclawRiskIssues
+     * const count = await prisma.openclawRiskIssue.count({
+     *   where: {
+     *     // ... the filter for the OpenclawRiskIssues we want to count
+     *   }
+     * })
+    **/
+    count<T extends OpenclawRiskIssueCountArgs>(
+      args?: Subset<T, OpenclawRiskIssueCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], OpenclawRiskIssueCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a OpenclawRiskIssue.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {OpenclawRiskIssueAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends OpenclawRiskIssueAggregateArgs>(args: Subset<T, OpenclawRiskIssueAggregateArgs>): Prisma.PrismaPromise<GetOpenclawRiskIssueAggregateType<T>>
+
+    /**
+     * Group by OpenclawRiskIssue.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {OpenclawRiskIssueGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends OpenclawRiskIssueGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: OpenclawRiskIssueGroupByArgs['orderBy'] }
+        : { orderBy?: OpenclawRiskIssueGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, OpenclawRiskIssueGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetOpenclawRiskIssueGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the OpenclawRiskIssue model
+   */
+  readonly fields: OpenclawRiskIssueFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for OpenclawRiskIssue.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__OpenclawRiskIssueClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    snapshot<T extends OpenclawRiskSnapshotDefaultArgs<ExtArgs> = {}>(args?: Subset<T, OpenclawRiskSnapshotDefaultArgs<ExtArgs>>): Prisma__OpenclawRiskSnapshotClient<$Result.GetResult<Prisma.$OpenclawRiskSnapshotPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the OpenclawRiskIssue model
+   */
+  interface OpenclawRiskIssueFieldRefs {
+    readonly id: FieldRef<"OpenclawRiskIssue", 'BigInt'>
+    readonly snapshotId: FieldRef<"OpenclawRiskIssue", 'Int'>
+    readonly canonicalId: FieldRef<"OpenclawRiskIssue", 'String'>
+    readonly issueId: FieldRef<"OpenclawRiskIssue", 'String'>
+    readonly title: FieldRef<"OpenclawRiskIssue", 'String'>
+    readonly summary: FieldRef<"OpenclawRiskIssue", 'String'>
+    readonly description: FieldRef<"OpenclawRiskIssue", 'String'>
+    readonly sourcePrimary: FieldRef<"OpenclawRiskIssue", 'String'>
+    readonly sourceType: FieldRef<"OpenclawRiskIssue", 'String'>
+    readonly sourceSearch: FieldRef<"OpenclawRiskIssue", 'String'>
+    readonly sourceLabels: FieldRef<"OpenclawRiskIssue", 'Json'>
+    readonly sources: FieldRef<"OpenclawRiskIssue", 'Json'>
+    readonly githubIds: FieldRef<"OpenclawRiskIssue", 'Json'>
+    readonly cveIds: FieldRef<"OpenclawRiskIssue", 'Json'>
+    readonly projectScope: FieldRef<"OpenclawRiskIssue", 'String'>
+    readonly venue: FieldRef<"OpenclawRiskIssue", 'String'>
+    readonly authors: FieldRef<"OpenclawRiskIssue", 'Json'>
+    readonly severity: FieldRef<"OpenclawRiskIssue", 'String'>
+    readonly score: FieldRef<"OpenclawRiskIssue", 'Float'>
+    readonly cvssVector: FieldRef<"OpenclawRiskIssue", 'String'>
+    readonly cwes: FieldRef<"OpenclawRiskIssue", 'Json'>
+    readonly affectedRange: FieldRef<"OpenclawRiskIssue", 'String'>
+    readonly fixedVersion: FieldRef<"OpenclawRiskIssue", 'String'>
+    readonly latestStableVersion: FieldRef<"OpenclawRiskIssue", 'String'>
+    readonly fixStatus: FieldRef<"OpenclawRiskIssue", 'String'>
+    readonly fixLabel: FieldRef<"OpenclawRiskIssue", 'String'>
+    readonly fixReason: FieldRef<"OpenclawRiskIssue", 'String'>
+    readonly issueUrl: FieldRef<"OpenclawRiskIssue", 'String'>
+    readonly repoUrl: FieldRef<"OpenclawRiskIssue", 'String'>
+    readonly referenceUrls: FieldRef<"OpenclawRiskIssue", 'Json'>
+    readonly tags: FieldRef<"OpenclawRiskIssue", 'Json'>
+    readonly status: FieldRef<"OpenclawRiskIssue", 'String'>
+    readonly relevanceScore: FieldRef<"OpenclawRiskIssue", 'Float'>
+    readonly publishedAt: FieldRef<"OpenclawRiskIssue", 'DateTime'>
+    readonly sourceUpdatedAt: FieldRef<"OpenclawRiskIssue", 'DateTime'>
+    readonly rawData: FieldRef<"OpenclawRiskIssue", 'Json'>
+    readonly createdAt: FieldRef<"OpenclawRiskIssue", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * OpenclawRiskIssue findUnique
+   */
+  export type OpenclawRiskIssueFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OpenclawRiskIssue
+     */
+    select?: OpenclawRiskIssueSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OpenclawRiskIssue
+     */
+    omit?: OpenclawRiskIssueOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: OpenclawRiskIssueInclude<ExtArgs> | null
+    /**
+     * Filter, which OpenclawRiskIssue to fetch.
+     */
+    where: OpenclawRiskIssueWhereUniqueInput
+  }
+
+  /**
+   * OpenclawRiskIssue findUniqueOrThrow
+   */
+  export type OpenclawRiskIssueFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OpenclawRiskIssue
+     */
+    select?: OpenclawRiskIssueSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OpenclawRiskIssue
+     */
+    omit?: OpenclawRiskIssueOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: OpenclawRiskIssueInclude<ExtArgs> | null
+    /**
+     * Filter, which OpenclawRiskIssue to fetch.
+     */
+    where: OpenclawRiskIssueWhereUniqueInput
+  }
+
+  /**
+   * OpenclawRiskIssue findFirst
+   */
+  export type OpenclawRiskIssueFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OpenclawRiskIssue
+     */
+    select?: OpenclawRiskIssueSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OpenclawRiskIssue
+     */
+    omit?: OpenclawRiskIssueOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: OpenclawRiskIssueInclude<ExtArgs> | null
+    /**
+     * Filter, which OpenclawRiskIssue to fetch.
+     */
+    where?: OpenclawRiskIssueWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of OpenclawRiskIssues to fetch.
+     */
+    orderBy?: OpenclawRiskIssueOrderByWithRelationInput | OpenclawRiskIssueOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for OpenclawRiskIssues.
+     */
+    cursor?: OpenclawRiskIssueWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` OpenclawRiskIssues from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` OpenclawRiskIssues.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of OpenclawRiskIssues.
+     */
+    distinct?: OpenclawRiskIssueScalarFieldEnum | OpenclawRiskIssueScalarFieldEnum[]
+  }
+
+  /**
+   * OpenclawRiskIssue findFirstOrThrow
+   */
+  export type OpenclawRiskIssueFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OpenclawRiskIssue
+     */
+    select?: OpenclawRiskIssueSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OpenclawRiskIssue
+     */
+    omit?: OpenclawRiskIssueOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: OpenclawRiskIssueInclude<ExtArgs> | null
+    /**
+     * Filter, which OpenclawRiskIssue to fetch.
+     */
+    where?: OpenclawRiskIssueWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of OpenclawRiskIssues to fetch.
+     */
+    orderBy?: OpenclawRiskIssueOrderByWithRelationInput | OpenclawRiskIssueOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for OpenclawRiskIssues.
+     */
+    cursor?: OpenclawRiskIssueWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` OpenclawRiskIssues from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` OpenclawRiskIssues.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of OpenclawRiskIssues.
+     */
+    distinct?: OpenclawRiskIssueScalarFieldEnum | OpenclawRiskIssueScalarFieldEnum[]
+  }
+
+  /**
+   * OpenclawRiskIssue findMany
+   */
+  export type OpenclawRiskIssueFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OpenclawRiskIssue
+     */
+    select?: OpenclawRiskIssueSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OpenclawRiskIssue
+     */
+    omit?: OpenclawRiskIssueOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: OpenclawRiskIssueInclude<ExtArgs> | null
+    /**
+     * Filter, which OpenclawRiskIssues to fetch.
+     */
+    where?: OpenclawRiskIssueWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of OpenclawRiskIssues to fetch.
+     */
+    orderBy?: OpenclawRiskIssueOrderByWithRelationInput | OpenclawRiskIssueOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing OpenclawRiskIssues.
+     */
+    cursor?: OpenclawRiskIssueWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` OpenclawRiskIssues from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` OpenclawRiskIssues.
+     */
+    skip?: number
+    distinct?: OpenclawRiskIssueScalarFieldEnum | OpenclawRiskIssueScalarFieldEnum[]
+  }
+
+  /**
+   * OpenclawRiskIssue create
+   */
+  export type OpenclawRiskIssueCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OpenclawRiskIssue
+     */
+    select?: OpenclawRiskIssueSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OpenclawRiskIssue
+     */
+    omit?: OpenclawRiskIssueOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: OpenclawRiskIssueInclude<ExtArgs> | null
+    /**
+     * The data needed to create a OpenclawRiskIssue.
+     */
+    data: XOR<OpenclawRiskIssueCreateInput, OpenclawRiskIssueUncheckedCreateInput>
+  }
+
+  /**
+   * OpenclawRiskIssue createMany
+   */
+  export type OpenclawRiskIssueCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many OpenclawRiskIssues.
+     */
+    data: OpenclawRiskIssueCreateManyInput | OpenclawRiskIssueCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * OpenclawRiskIssue update
+   */
+  export type OpenclawRiskIssueUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OpenclawRiskIssue
+     */
+    select?: OpenclawRiskIssueSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OpenclawRiskIssue
+     */
+    omit?: OpenclawRiskIssueOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: OpenclawRiskIssueInclude<ExtArgs> | null
+    /**
+     * The data needed to update a OpenclawRiskIssue.
+     */
+    data: XOR<OpenclawRiskIssueUpdateInput, OpenclawRiskIssueUncheckedUpdateInput>
+    /**
+     * Choose, which OpenclawRiskIssue to update.
+     */
+    where: OpenclawRiskIssueWhereUniqueInput
+  }
+
+  /**
+   * OpenclawRiskIssue updateMany
+   */
+  export type OpenclawRiskIssueUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update OpenclawRiskIssues.
+     */
+    data: XOR<OpenclawRiskIssueUpdateManyMutationInput, OpenclawRiskIssueUncheckedUpdateManyInput>
+    /**
+     * Filter which OpenclawRiskIssues to update
+     */
+    where?: OpenclawRiskIssueWhereInput
+    /**
+     * Limit how many OpenclawRiskIssues to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * OpenclawRiskIssue upsert
+   */
+  export type OpenclawRiskIssueUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OpenclawRiskIssue
+     */
+    select?: OpenclawRiskIssueSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OpenclawRiskIssue
+     */
+    omit?: OpenclawRiskIssueOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: OpenclawRiskIssueInclude<ExtArgs> | null
+    /**
+     * The filter to search for the OpenclawRiskIssue to update in case it exists.
+     */
+    where: OpenclawRiskIssueWhereUniqueInput
+    /**
+     * In case the OpenclawRiskIssue found by the `where` argument doesn't exist, create a new OpenclawRiskIssue with this data.
+     */
+    create: XOR<OpenclawRiskIssueCreateInput, OpenclawRiskIssueUncheckedCreateInput>
+    /**
+     * In case the OpenclawRiskIssue was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<OpenclawRiskIssueUpdateInput, OpenclawRiskIssueUncheckedUpdateInput>
+  }
+
+  /**
+   * OpenclawRiskIssue delete
+   */
+  export type OpenclawRiskIssueDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OpenclawRiskIssue
+     */
+    select?: OpenclawRiskIssueSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OpenclawRiskIssue
+     */
+    omit?: OpenclawRiskIssueOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: OpenclawRiskIssueInclude<ExtArgs> | null
+    /**
+     * Filter which OpenclawRiskIssue to delete.
+     */
+    where: OpenclawRiskIssueWhereUniqueInput
+  }
+
+  /**
+   * OpenclawRiskIssue deleteMany
+   */
+  export type OpenclawRiskIssueDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which OpenclawRiskIssues to delete
+     */
+    where?: OpenclawRiskIssueWhereInput
+    /**
+     * Limit how many OpenclawRiskIssues to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * OpenclawRiskIssue without action
+   */
+  export type OpenclawRiskIssueDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OpenclawRiskIssue
+     */
+    select?: OpenclawRiskIssueSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OpenclawRiskIssue
+     */
+    omit?: OpenclawRiskIssueOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: OpenclawRiskIssueInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model SecurityResearchSnapshot
+   */
+
+  export type AggregateSecurityResearchSnapshot = {
+    _count: SecurityResearchSnapshotCountAggregateOutputType | null
+    _avg: SecurityResearchSnapshotAvgAggregateOutputType | null
+    _sum: SecurityResearchSnapshotSumAggregateOutputType | null
+    _min: SecurityResearchSnapshotMinAggregateOutputType | null
+    _max: SecurityResearchSnapshotMaxAggregateOutputType | null
+  }
+
+  export type SecurityResearchSnapshotAvgAggregateOutputType = {
+    id: number | null
+    totalPapers: number | null
+    conferencePaperCount: number | null
+    preprintCount: number | null
+    openclawCount: number | null
+    clawCount: number | null
+    skillCount: number | null
+    agentCount: number | null
+    pluginCount: number | null
+  }
+
+  export type SecurityResearchSnapshotSumAggregateOutputType = {
+    id: number | null
+    totalPapers: number | null
+    conferencePaperCount: number | null
+    preprintCount: number | null
+    openclawCount: number | null
+    clawCount: number | null
+    skillCount: number | null
+    agentCount: number | null
+    pluginCount: number | null
+  }
+
+  export type SecurityResearchSnapshotMinAggregateOutputType = {
+    id: number | null
+    snapshotKey: string | null
+    triggerSource: string | null
+    status: string | null
+    totalPapers: number | null
+    conferencePaperCount: number | null
+    preprintCount: number | null
+    openclawCount: number | null
+    clawCount: number | null
+    skillCount: number | null
+    agentCount: number | null
+    pluginCount: number | null
+    cacheDir: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type SecurityResearchSnapshotMaxAggregateOutputType = {
+    id: number | null
+    snapshotKey: string | null
+    triggerSource: string | null
+    status: string | null
+    totalPapers: number | null
+    conferencePaperCount: number | null
+    preprintCount: number | null
+    openclawCount: number | null
+    clawCount: number | null
+    skillCount: number | null
+    agentCount: number | null
+    pluginCount: number | null
+    cacheDir: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type SecurityResearchSnapshotCountAggregateOutputType = {
+    id: number
+    snapshotKey: number
+    triggerSource: number
+    status: number
+    totalPapers: number
+    conferencePaperCount: number
+    preprintCount: number
+    openclawCount: number
+    clawCount: number
+    skillCount: number
+    agentCount: number
+    pluginCount: number
+    sourceMeta: number
+    cacheDir: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type SecurityResearchSnapshotAvgAggregateInputType = {
+    id?: true
+    totalPapers?: true
+    conferencePaperCount?: true
+    preprintCount?: true
+    openclawCount?: true
+    clawCount?: true
+    skillCount?: true
+    agentCount?: true
+    pluginCount?: true
+  }
+
+  export type SecurityResearchSnapshotSumAggregateInputType = {
+    id?: true
+    totalPapers?: true
+    conferencePaperCount?: true
+    preprintCount?: true
+    openclawCount?: true
+    clawCount?: true
+    skillCount?: true
+    agentCount?: true
+    pluginCount?: true
+  }
+
+  export type SecurityResearchSnapshotMinAggregateInputType = {
+    id?: true
+    snapshotKey?: true
+    triggerSource?: true
+    status?: true
+    totalPapers?: true
+    conferencePaperCount?: true
+    preprintCount?: true
+    openclawCount?: true
+    clawCount?: true
+    skillCount?: true
+    agentCount?: true
+    pluginCount?: true
+    cacheDir?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type SecurityResearchSnapshotMaxAggregateInputType = {
+    id?: true
+    snapshotKey?: true
+    triggerSource?: true
+    status?: true
+    totalPapers?: true
+    conferencePaperCount?: true
+    preprintCount?: true
+    openclawCount?: true
+    clawCount?: true
+    skillCount?: true
+    agentCount?: true
+    pluginCount?: true
+    cacheDir?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type SecurityResearchSnapshotCountAggregateInputType = {
+    id?: true
+    snapshotKey?: true
+    triggerSource?: true
+    status?: true
+    totalPapers?: true
+    conferencePaperCount?: true
+    preprintCount?: true
+    openclawCount?: true
+    clawCount?: true
+    skillCount?: true
+    agentCount?: true
+    pluginCount?: true
+    sourceMeta?: true
+    cacheDir?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type SecurityResearchSnapshotAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which SecurityResearchSnapshot to aggregate.
+     */
+    where?: SecurityResearchSnapshotWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of SecurityResearchSnapshots to fetch.
+     */
+    orderBy?: SecurityResearchSnapshotOrderByWithRelationInput | SecurityResearchSnapshotOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: SecurityResearchSnapshotWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` SecurityResearchSnapshots from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` SecurityResearchSnapshots.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned SecurityResearchSnapshots
+    **/
+    _count?: true | SecurityResearchSnapshotCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: SecurityResearchSnapshotAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: SecurityResearchSnapshotSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: SecurityResearchSnapshotMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: SecurityResearchSnapshotMaxAggregateInputType
+  }
+
+  export type GetSecurityResearchSnapshotAggregateType<T extends SecurityResearchSnapshotAggregateArgs> = {
+        [P in keyof T & keyof AggregateSecurityResearchSnapshot]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateSecurityResearchSnapshot[P]>
+      : GetScalarType<T[P], AggregateSecurityResearchSnapshot[P]>
+  }
+
+
+
+
+  export type SecurityResearchSnapshotGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: SecurityResearchSnapshotWhereInput
+    orderBy?: SecurityResearchSnapshotOrderByWithAggregationInput | SecurityResearchSnapshotOrderByWithAggregationInput[]
+    by: SecurityResearchSnapshotScalarFieldEnum[] | SecurityResearchSnapshotScalarFieldEnum
+    having?: SecurityResearchSnapshotScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: SecurityResearchSnapshotCountAggregateInputType | true
+    _avg?: SecurityResearchSnapshotAvgAggregateInputType
+    _sum?: SecurityResearchSnapshotSumAggregateInputType
+    _min?: SecurityResearchSnapshotMinAggregateInputType
+    _max?: SecurityResearchSnapshotMaxAggregateInputType
+  }
+
+  export type SecurityResearchSnapshotGroupByOutputType = {
+    id: number
+    snapshotKey: string
+    triggerSource: string
+    status: string
+    totalPapers: number
+    conferencePaperCount: number
+    preprintCount: number
+    openclawCount: number
+    clawCount: number
+    skillCount: number
+    agentCount: number
+    pluginCount: number
+    sourceMeta: JsonValue
+    cacheDir: string | null
+    createdAt: Date
+    updatedAt: Date
+    _count: SecurityResearchSnapshotCountAggregateOutputType | null
+    _avg: SecurityResearchSnapshotAvgAggregateOutputType | null
+    _sum: SecurityResearchSnapshotSumAggregateOutputType | null
+    _min: SecurityResearchSnapshotMinAggregateOutputType | null
+    _max: SecurityResearchSnapshotMaxAggregateOutputType | null
+  }
+
+  type GetSecurityResearchSnapshotGroupByPayload<T extends SecurityResearchSnapshotGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<SecurityResearchSnapshotGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof SecurityResearchSnapshotGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], SecurityResearchSnapshotGroupByOutputType[P]>
+            : GetScalarType<T[P], SecurityResearchSnapshotGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type SecurityResearchSnapshotSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    snapshotKey?: boolean
+    triggerSource?: boolean
+    status?: boolean
+    totalPapers?: boolean
+    conferencePaperCount?: boolean
+    preprintCount?: boolean
+    openclawCount?: boolean
+    clawCount?: boolean
+    skillCount?: boolean
+    agentCount?: boolean
+    pluginCount?: boolean
+    sourceMeta?: boolean
+    cacheDir?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    papers?: boolean | SecurityResearchSnapshot$papersArgs<ExtArgs>
+    _count?: boolean | SecurityResearchSnapshotCountOutputTypeDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["securityResearchSnapshot"]>
+
+
+
+  export type SecurityResearchSnapshotSelectScalar = {
+    id?: boolean
+    snapshotKey?: boolean
+    triggerSource?: boolean
+    status?: boolean
+    totalPapers?: boolean
+    conferencePaperCount?: boolean
+    preprintCount?: boolean
+    openclawCount?: boolean
+    clawCount?: boolean
+    skillCount?: boolean
+    agentCount?: boolean
+    pluginCount?: boolean
+    sourceMeta?: boolean
+    cacheDir?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type SecurityResearchSnapshotOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "snapshotKey" | "triggerSource" | "status" | "totalPapers" | "conferencePaperCount" | "preprintCount" | "openclawCount" | "clawCount" | "skillCount" | "agentCount" | "pluginCount" | "sourceMeta" | "cacheDir" | "createdAt" | "updatedAt", ExtArgs["result"]["securityResearchSnapshot"]>
+  export type SecurityResearchSnapshotInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    papers?: boolean | SecurityResearchSnapshot$papersArgs<ExtArgs>
+    _count?: boolean | SecurityResearchSnapshotCountOutputTypeDefaultArgs<ExtArgs>
+  }
+
+  export type $SecurityResearchSnapshotPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "SecurityResearchSnapshot"
+    objects: {
+      papers: Prisma.$SecurityResearchPaperPayload<ExtArgs>[]
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: number
+      snapshotKey: string
+      triggerSource: string
+      status: string
+      totalPapers: number
+      conferencePaperCount: number
+      preprintCount: number
+      openclawCount: number
+      clawCount: number
+      skillCount: number
+      agentCount: number
+      pluginCount: number
+      sourceMeta: Prisma.JsonValue
+      cacheDir: string | null
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["securityResearchSnapshot"]>
+    composites: {}
+  }
+
+  type SecurityResearchSnapshotGetPayload<S extends boolean | null | undefined | SecurityResearchSnapshotDefaultArgs> = $Result.GetResult<Prisma.$SecurityResearchSnapshotPayload, S>
+
+  type SecurityResearchSnapshotCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<SecurityResearchSnapshotFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: SecurityResearchSnapshotCountAggregateInputType | true
+    }
+
+  export interface SecurityResearchSnapshotDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['SecurityResearchSnapshot'], meta: { name: 'SecurityResearchSnapshot' } }
+    /**
+     * Find zero or one SecurityResearchSnapshot that matches the filter.
+     * @param {SecurityResearchSnapshotFindUniqueArgs} args - Arguments to find a SecurityResearchSnapshot
+     * @example
+     * // Get one SecurityResearchSnapshot
+     * const securityResearchSnapshot = await prisma.securityResearchSnapshot.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends SecurityResearchSnapshotFindUniqueArgs>(args: SelectSubset<T, SecurityResearchSnapshotFindUniqueArgs<ExtArgs>>): Prisma__SecurityResearchSnapshotClient<$Result.GetResult<Prisma.$SecurityResearchSnapshotPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one SecurityResearchSnapshot that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {SecurityResearchSnapshotFindUniqueOrThrowArgs} args - Arguments to find a SecurityResearchSnapshot
+     * @example
+     * // Get one SecurityResearchSnapshot
+     * const securityResearchSnapshot = await prisma.securityResearchSnapshot.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends SecurityResearchSnapshotFindUniqueOrThrowArgs>(args: SelectSubset<T, SecurityResearchSnapshotFindUniqueOrThrowArgs<ExtArgs>>): Prisma__SecurityResearchSnapshotClient<$Result.GetResult<Prisma.$SecurityResearchSnapshotPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first SecurityResearchSnapshot that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {SecurityResearchSnapshotFindFirstArgs} args - Arguments to find a SecurityResearchSnapshot
+     * @example
+     * // Get one SecurityResearchSnapshot
+     * const securityResearchSnapshot = await prisma.securityResearchSnapshot.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends SecurityResearchSnapshotFindFirstArgs>(args?: SelectSubset<T, SecurityResearchSnapshotFindFirstArgs<ExtArgs>>): Prisma__SecurityResearchSnapshotClient<$Result.GetResult<Prisma.$SecurityResearchSnapshotPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first SecurityResearchSnapshot that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {SecurityResearchSnapshotFindFirstOrThrowArgs} args - Arguments to find a SecurityResearchSnapshot
+     * @example
+     * // Get one SecurityResearchSnapshot
+     * const securityResearchSnapshot = await prisma.securityResearchSnapshot.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends SecurityResearchSnapshotFindFirstOrThrowArgs>(args?: SelectSubset<T, SecurityResearchSnapshotFindFirstOrThrowArgs<ExtArgs>>): Prisma__SecurityResearchSnapshotClient<$Result.GetResult<Prisma.$SecurityResearchSnapshotPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more SecurityResearchSnapshots that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {SecurityResearchSnapshotFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all SecurityResearchSnapshots
+     * const securityResearchSnapshots = await prisma.securityResearchSnapshot.findMany()
+     * 
+     * // Get first 10 SecurityResearchSnapshots
+     * const securityResearchSnapshots = await prisma.securityResearchSnapshot.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const securityResearchSnapshotWithIdOnly = await prisma.securityResearchSnapshot.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends SecurityResearchSnapshotFindManyArgs>(args?: SelectSubset<T, SecurityResearchSnapshotFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$SecurityResearchSnapshotPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a SecurityResearchSnapshot.
+     * @param {SecurityResearchSnapshotCreateArgs} args - Arguments to create a SecurityResearchSnapshot.
+     * @example
+     * // Create one SecurityResearchSnapshot
+     * const SecurityResearchSnapshot = await prisma.securityResearchSnapshot.create({
+     *   data: {
+     *     // ... data to create a SecurityResearchSnapshot
+     *   }
+     * })
+     * 
+     */
+    create<T extends SecurityResearchSnapshotCreateArgs>(args: SelectSubset<T, SecurityResearchSnapshotCreateArgs<ExtArgs>>): Prisma__SecurityResearchSnapshotClient<$Result.GetResult<Prisma.$SecurityResearchSnapshotPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many SecurityResearchSnapshots.
+     * @param {SecurityResearchSnapshotCreateManyArgs} args - Arguments to create many SecurityResearchSnapshots.
+     * @example
+     * // Create many SecurityResearchSnapshots
+     * const securityResearchSnapshot = await prisma.securityResearchSnapshot.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends SecurityResearchSnapshotCreateManyArgs>(args?: SelectSubset<T, SecurityResearchSnapshotCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Delete a SecurityResearchSnapshot.
+     * @param {SecurityResearchSnapshotDeleteArgs} args - Arguments to delete one SecurityResearchSnapshot.
+     * @example
+     * // Delete one SecurityResearchSnapshot
+     * const SecurityResearchSnapshot = await prisma.securityResearchSnapshot.delete({
+     *   where: {
+     *     // ... filter to delete one SecurityResearchSnapshot
+     *   }
+     * })
+     * 
+     */
+    delete<T extends SecurityResearchSnapshotDeleteArgs>(args: SelectSubset<T, SecurityResearchSnapshotDeleteArgs<ExtArgs>>): Prisma__SecurityResearchSnapshotClient<$Result.GetResult<Prisma.$SecurityResearchSnapshotPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one SecurityResearchSnapshot.
+     * @param {SecurityResearchSnapshotUpdateArgs} args - Arguments to update one SecurityResearchSnapshot.
+     * @example
+     * // Update one SecurityResearchSnapshot
+     * const securityResearchSnapshot = await prisma.securityResearchSnapshot.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends SecurityResearchSnapshotUpdateArgs>(args: SelectSubset<T, SecurityResearchSnapshotUpdateArgs<ExtArgs>>): Prisma__SecurityResearchSnapshotClient<$Result.GetResult<Prisma.$SecurityResearchSnapshotPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more SecurityResearchSnapshots.
+     * @param {SecurityResearchSnapshotDeleteManyArgs} args - Arguments to filter SecurityResearchSnapshots to delete.
+     * @example
+     * // Delete a few SecurityResearchSnapshots
+     * const { count } = await prisma.securityResearchSnapshot.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends SecurityResearchSnapshotDeleteManyArgs>(args?: SelectSubset<T, SecurityResearchSnapshotDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more SecurityResearchSnapshots.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {SecurityResearchSnapshotUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many SecurityResearchSnapshots
+     * const securityResearchSnapshot = await prisma.securityResearchSnapshot.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends SecurityResearchSnapshotUpdateManyArgs>(args: SelectSubset<T, SecurityResearchSnapshotUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create or update one SecurityResearchSnapshot.
+     * @param {SecurityResearchSnapshotUpsertArgs} args - Arguments to update or create a SecurityResearchSnapshot.
+     * @example
+     * // Update or create a SecurityResearchSnapshot
+     * const securityResearchSnapshot = await prisma.securityResearchSnapshot.upsert({
+     *   create: {
+     *     // ... data to create a SecurityResearchSnapshot
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the SecurityResearchSnapshot we want to update
+     *   }
+     * })
+     */
+    upsert<T extends SecurityResearchSnapshotUpsertArgs>(args: SelectSubset<T, SecurityResearchSnapshotUpsertArgs<ExtArgs>>): Prisma__SecurityResearchSnapshotClient<$Result.GetResult<Prisma.$SecurityResearchSnapshotPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of SecurityResearchSnapshots.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {SecurityResearchSnapshotCountArgs} args - Arguments to filter SecurityResearchSnapshots to count.
+     * @example
+     * // Count the number of SecurityResearchSnapshots
+     * const count = await prisma.securityResearchSnapshot.count({
+     *   where: {
+     *     // ... the filter for the SecurityResearchSnapshots we want to count
+     *   }
+     * })
+    **/
+    count<T extends SecurityResearchSnapshotCountArgs>(
+      args?: Subset<T, SecurityResearchSnapshotCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], SecurityResearchSnapshotCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a SecurityResearchSnapshot.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {SecurityResearchSnapshotAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends SecurityResearchSnapshotAggregateArgs>(args: Subset<T, SecurityResearchSnapshotAggregateArgs>): Prisma.PrismaPromise<GetSecurityResearchSnapshotAggregateType<T>>
+
+    /**
+     * Group by SecurityResearchSnapshot.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {SecurityResearchSnapshotGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends SecurityResearchSnapshotGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: SecurityResearchSnapshotGroupByArgs['orderBy'] }
+        : { orderBy?: SecurityResearchSnapshotGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, SecurityResearchSnapshotGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetSecurityResearchSnapshotGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the SecurityResearchSnapshot model
+   */
+  readonly fields: SecurityResearchSnapshotFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for SecurityResearchSnapshot.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__SecurityResearchSnapshotClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    papers<T extends SecurityResearchSnapshot$papersArgs<ExtArgs> = {}>(args?: Subset<T, SecurityResearchSnapshot$papersArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$SecurityResearchPaperPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the SecurityResearchSnapshot model
+   */
+  interface SecurityResearchSnapshotFieldRefs {
+    readonly id: FieldRef<"SecurityResearchSnapshot", 'Int'>
+    readonly snapshotKey: FieldRef<"SecurityResearchSnapshot", 'String'>
+    readonly triggerSource: FieldRef<"SecurityResearchSnapshot", 'String'>
+    readonly status: FieldRef<"SecurityResearchSnapshot", 'String'>
+    readonly totalPapers: FieldRef<"SecurityResearchSnapshot", 'Int'>
+    readonly conferencePaperCount: FieldRef<"SecurityResearchSnapshot", 'Int'>
+    readonly preprintCount: FieldRef<"SecurityResearchSnapshot", 'Int'>
+    readonly openclawCount: FieldRef<"SecurityResearchSnapshot", 'Int'>
+    readonly clawCount: FieldRef<"SecurityResearchSnapshot", 'Int'>
+    readonly skillCount: FieldRef<"SecurityResearchSnapshot", 'Int'>
+    readonly agentCount: FieldRef<"SecurityResearchSnapshot", 'Int'>
+    readonly pluginCount: FieldRef<"SecurityResearchSnapshot", 'Int'>
+    readonly sourceMeta: FieldRef<"SecurityResearchSnapshot", 'Json'>
+    readonly cacheDir: FieldRef<"SecurityResearchSnapshot", 'String'>
+    readonly createdAt: FieldRef<"SecurityResearchSnapshot", 'DateTime'>
+    readonly updatedAt: FieldRef<"SecurityResearchSnapshot", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * SecurityResearchSnapshot findUnique
+   */
+  export type SecurityResearchSnapshotFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SecurityResearchSnapshot
+     */
+    select?: SecurityResearchSnapshotSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SecurityResearchSnapshot
+     */
+    omit?: SecurityResearchSnapshotOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SecurityResearchSnapshotInclude<ExtArgs> | null
+    /**
+     * Filter, which SecurityResearchSnapshot to fetch.
+     */
+    where: SecurityResearchSnapshotWhereUniqueInput
+  }
+
+  /**
+   * SecurityResearchSnapshot findUniqueOrThrow
+   */
+  export type SecurityResearchSnapshotFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SecurityResearchSnapshot
+     */
+    select?: SecurityResearchSnapshotSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SecurityResearchSnapshot
+     */
+    omit?: SecurityResearchSnapshotOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SecurityResearchSnapshotInclude<ExtArgs> | null
+    /**
+     * Filter, which SecurityResearchSnapshot to fetch.
+     */
+    where: SecurityResearchSnapshotWhereUniqueInput
+  }
+
+  /**
+   * SecurityResearchSnapshot findFirst
+   */
+  export type SecurityResearchSnapshotFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SecurityResearchSnapshot
+     */
+    select?: SecurityResearchSnapshotSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SecurityResearchSnapshot
+     */
+    omit?: SecurityResearchSnapshotOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SecurityResearchSnapshotInclude<ExtArgs> | null
+    /**
+     * Filter, which SecurityResearchSnapshot to fetch.
+     */
+    where?: SecurityResearchSnapshotWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of SecurityResearchSnapshots to fetch.
+     */
+    orderBy?: SecurityResearchSnapshotOrderByWithRelationInput | SecurityResearchSnapshotOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for SecurityResearchSnapshots.
+     */
+    cursor?: SecurityResearchSnapshotWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` SecurityResearchSnapshots from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` SecurityResearchSnapshots.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of SecurityResearchSnapshots.
+     */
+    distinct?: SecurityResearchSnapshotScalarFieldEnum | SecurityResearchSnapshotScalarFieldEnum[]
+  }
+
+  /**
+   * SecurityResearchSnapshot findFirstOrThrow
+   */
+  export type SecurityResearchSnapshotFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SecurityResearchSnapshot
+     */
+    select?: SecurityResearchSnapshotSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SecurityResearchSnapshot
+     */
+    omit?: SecurityResearchSnapshotOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SecurityResearchSnapshotInclude<ExtArgs> | null
+    /**
+     * Filter, which SecurityResearchSnapshot to fetch.
+     */
+    where?: SecurityResearchSnapshotWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of SecurityResearchSnapshots to fetch.
+     */
+    orderBy?: SecurityResearchSnapshotOrderByWithRelationInput | SecurityResearchSnapshotOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for SecurityResearchSnapshots.
+     */
+    cursor?: SecurityResearchSnapshotWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` SecurityResearchSnapshots from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` SecurityResearchSnapshots.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of SecurityResearchSnapshots.
+     */
+    distinct?: SecurityResearchSnapshotScalarFieldEnum | SecurityResearchSnapshotScalarFieldEnum[]
+  }
+
+  /**
+   * SecurityResearchSnapshot findMany
+   */
+  export type SecurityResearchSnapshotFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SecurityResearchSnapshot
+     */
+    select?: SecurityResearchSnapshotSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SecurityResearchSnapshot
+     */
+    omit?: SecurityResearchSnapshotOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SecurityResearchSnapshotInclude<ExtArgs> | null
+    /**
+     * Filter, which SecurityResearchSnapshots to fetch.
+     */
+    where?: SecurityResearchSnapshotWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of SecurityResearchSnapshots to fetch.
+     */
+    orderBy?: SecurityResearchSnapshotOrderByWithRelationInput | SecurityResearchSnapshotOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing SecurityResearchSnapshots.
+     */
+    cursor?: SecurityResearchSnapshotWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` SecurityResearchSnapshots from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` SecurityResearchSnapshots.
+     */
+    skip?: number
+    distinct?: SecurityResearchSnapshotScalarFieldEnum | SecurityResearchSnapshotScalarFieldEnum[]
+  }
+
+  /**
+   * SecurityResearchSnapshot create
+   */
+  export type SecurityResearchSnapshotCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SecurityResearchSnapshot
+     */
+    select?: SecurityResearchSnapshotSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SecurityResearchSnapshot
+     */
+    omit?: SecurityResearchSnapshotOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SecurityResearchSnapshotInclude<ExtArgs> | null
+    /**
+     * The data needed to create a SecurityResearchSnapshot.
+     */
+    data: XOR<SecurityResearchSnapshotCreateInput, SecurityResearchSnapshotUncheckedCreateInput>
+  }
+
+  /**
+   * SecurityResearchSnapshot createMany
+   */
+  export type SecurityResearchSnapshotCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many SecurityResearchSnapshots.
+     */
+    data: SecurityResearchSnapshotCreateManyInput | SecurityResearchSnapshotCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * SecurityResearchSnapshot update
+   */
+  export type SecurityResearchSnapshotUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SecurityResearchSnapshot
+     */
+    select?: SecurityResearchSnapshotSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SecurityResearchSnapshot
+     */
+    omit?: SecurityResearchSnapshotOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SecurityResearchSnapshotInclude<ExtArgs> | null
+    /**
+     * The data needed to update a SecurityResearchSnapshot.
+     */
+    data: XOR<SecurityResearchSnapshotUpdateInput, SecurityResearchSnapshotUncheckedUpdateInput>
+    /**
+     * Choose, which SecurityResearchSnapshot to update.
+     */
+    where: SecurityResearchSnapshotWhereUniqueInput
+  }
+
+  /**
+   * SecurityResearchSnapshot updateMany
+   */
+  export type SecurityResearchSnapshotUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update SecurityResearchSnapshots.
+     */
+    data: XOR<SecurityResearchSnapshotUpdateManyMutationInput, SecurityResearchSnapshotUncheckedUpdateManyInput>
+    /**
+     * Filter which SecurityResearchSnapshots to update
+     */
+    where?: SecurityResearchSnapshotWhereInput
+    /**
+     * Limit how many SecurityResearchSnapshots to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * SecurityResearchSnapshot upsert
+   */
+  export type SecurityResearchSnapshotUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SecurityResearchSnapshot
+     */
+    select?: SecurityResearchSnapshotSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SecurityResearchSnapshot
+     */
+    omit?: SecurityResearchSnapshotOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SecurityResearchSnapshotInclude<ExtArgs> | null
+    /**
+     * The filter to search for the SecurityResearchSnapshot to update in case it exists.
+     */
+    where: SecurityResearchSnapshotWhereUniqueInput
+    /**
+     * In case the SecurityResearchSnapshot found by the `where` argument doesn't exist, create a new SecurityResearchSnapshot with this data.
+     */
+    create: XOR<SecurityResearchSnapshotCreateInput, SecurityResearchSnapshotUncheckedCreateInput>
+    /**
+     * In case the SecurityResearchSnapshot was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<SecurityResearchSnapshotUpdateInput, SecurityResearchSnapshotUncheckedUpdateInput>
+  }
+
+  /**
+   * SecurityResearchSnapshot delete
+   */
+  export type SecurityResearchSnapshotDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SecurityResearchSnapshot
+     */
+    select?: SecurityResearchSnapshotSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SecurityResearchSnapshot
+     */
+    omit?: SecurityResearchSnapshotOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SecurityResearchSnapshotInclude<ExtArgs> | null
+    /**
+     * Filter which SecurityResearchSnapshot to delete.
+     */
+    where: SecurityResearchSnapshotWhereUniqueInput
+  }
+
+  /**
+   * SecurityResearchSnapshot deleteMany
+   */
+  export type SecurityResearchSnapshotDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which SecurityResearchSnapshots to delete
+     */
+    where?: SecurityResearchSnapshotWhereInput
+    /**
+     * Limit how many SecurityResearchSnapshots to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * SecurityResearchSnapshot.papers
+   */
+  export type SecurityResearchSnapshot$papersArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SecurityResearchPaper
+     */
+    select?: SecurityResearchPaperSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SecurityResearchPaper
+     */
+    omit?: SecurityResearchPaperOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SecurityResearchPaperInclude<ExtArgs> | null
+    where?: SecurityResearchPaperWhereInput
+    orderBy?: SecurityResearchPaperOrderByWithRelationInput | SecurityResearchPaperOrderByWithRelationInput[]
+    cursor?: SecurityResearchPaperWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: SecurityResearchPaperScalarFieldEnum | SecurityResearchPaperScalarFieldEnum[]
+  }
+
+  /**
+   * SecurityResearchSnapshot without action
+   */
+  export type SecurityResearchSnapshotDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SecurityResearchSnapshot
+     */
+    select?: SecurityResearchSnapshotSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SecurityResearchSnapshot
+     */
+    omit?: SecurityResearchSnapshotOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SecurityResearchSnapshotInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model SecurityResearchPaper
+   */
+
+  export type AggregateSecurityResearchPaper = {
+    _count: SecurityResearchPaperCountAggregateOutputType | null
+    _avg: SecurityResearchPaperAvgAggregateOutputType | null
+    _sum: SecurityResearchPaperSumAggregateOutputType | null
+    _min: SecurityResearchPaperMinAggregateOutputType | null
+    _max: SecurityResearchPaperMaxAggregateOutputType | null
+  }
+
+  export type SecurityResearchPaperAvgAggregateOutputType = {
+    id: number | null
+    snapshotId: number | null
+    relevanceScore: number | null
+  }
+
+  export type SecurityResearchPaperSumAggregateOutputType = {
+    id: bigint | null
+    snapshotId: number | null
+    relevanceScore: number | null
+  }
+
+  export type SecurityResearchPaperMinAggregateOutputType = {
+    id: bigint | null
+    snapshotId: number | null
+    canonicalId: string | null
+    title: string | null
+    normalizedTitle: string | null
+    sourceType: string | null
+    projectScope: string | null
+    venue: string | null
+    sourcePrimary: string | null
+    sourceSearch: string | null
+    abstractOrSummary: string | null
+    sourceUrl: string | null
+    relevanceScore: number | null
+    isTopVenue: boolean | null
+    publishedAt: Date | null
+    status: string | null
+    createdAt: Date | null
+  }
+
+  export type SecurityResearchPaperMaxAggregateOutputType = {
+    id: bigint | null
+    snapshotId: number | null
+    canonicalId: string | null
+    title: string | null
+    normalizedTitle: string | null
+    sourceType: string | null
+    projectScope: string | null
+    venue: string | null
+    sourcePrimary: string | null
+    sourceSearch: string | null
+    abstractOrSummary: string | null
+    sourceUrl: string | null
+    relevanceScore: number | null
+    isTopVenue: boolean | null
+    publishedAt: Date | null
+    status: string | null
+    createdAt: Date | null
+  }
+
+  export type SecurityResearchPaperCountAggregateOutputType = {
+    id: number
+    snapshotId: number
+    canonicalId: number
+    title: number
+    normalizedTitle: number
+    sourceType: number
+    projectScope: number
+    venue: number
+    sourcePrimary: number
+    sourceSearch: number
+    abstractOrSummary: number
+    tags: number
+    sourceUrl: number
+    authors: number
+    externalIds: number
+    relevanceScore: number
+    isTopVenue: number
+    publishedAt: number
+    status: number
+    rawData: number
+    createdAt: number
+    _all: number
+  }
+
+
+  export type SecurityResearchPaperAvgAggregateInputType = {
+    id?: true
+    snapshotId?: true
+    relevanceScore?: true
+  }
+
+  export type SecurityResearchPaperSumAggregateInputType = {
+    id?: true
+    snapshotId?: true
+    relevanceScore?: true
+  }
+
+  export type SecurityResearchPaperMinAggregateInputType = {
+    id?: true
+    snapshotId?: true
+    canonicalId?: true
+    title?: true
+    normalizedTitle?: true
+    sourceType?: true
+    projectScope?: true
+    venue?: true
+    sourcePrimary?: true
+    sourceSearch?: true
+    abstractOrSummary?: true
+    sourceUrl?: true
+    relevanceScore?: true
+    isTopVenue?: true
+    publishedAt?: true
+    status?: true
+    createdAt?: true
+  }
+
+  export type SecurityResearchPaperMaxAggregateInputType = {
+    id?: true
+    snapshotId?: true
+    canonicalId?: true
+    title?: true
+    normalizedTitle?: true
+    sourceType?: true
+    projectScope?: true
+    venue?: true
+    sourcePrimary?: true
+    sourceSearch?: true
+    abstractOrSummary?: true
+    sourceUrl?: true
+    relevanceScore?: true
+    isTopVenue?: true
+    publishedAt?: true
+    status?: true
+    createdAt?: true
+  }
+
+  export type SecurityResearchPaperCountAggregateInputType = {
+    id?: true
+    snapshotId?: true
+    canonicalId?: true
+    title?: true
+    normalizedTitle?: true
+    sourceType?: true
+    projectScope?: true
+    venue?: true
+    sourcePrimary?: true
+    sourceSearch?: true
+    abstractOrSummary?: true
+    tags?: true
+    sourceUrl?: true
+    authors?: true
+    externalIds?: true
+    relevanceScore?: true
+    isTopVenue?: true
+    publishedAt?: true
+    status?: true
+    rawData?: true
+    createdAt?: true
+    _all?: true
+  }
+
+  export type SecurityResearchPaperAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which SecurityResearchPaper to aggregate.
+     */
+    where?: SecurityResearchPaperWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of SecurityResearchPapers to fetch.
+     */
+    orderBy?: SecurityResearchPaperOrderByWithRelationInput | SecurityResearchPaperOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: SecurityResearchPaperWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` SecurityResearchPapers from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` SecurityResearchPapers.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned SecurityResearchPapers
+    **/
+    _count?: true | SecurityResearchPaperCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: SecurityResearchPaperAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: SecurityResearchPaperSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: SecurityResearchPaperMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: SecurityResearchPaperMaxAggregateInputType
+  }
+
+  export type GetSecurityResearchPaperAggregateType<T extends SecurityResearchPaperAggregateArgs> = {
+        [P in keyof T & keyof AggregateSecurityResearchPaper]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateSecurityResearchPaper[P]>
+      : GetScalarType<T[P], AggregateSecurityResearchPaper[P]>
+  }
+
+
+
+
+  export type SecurityResearchPaperGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: SecurityResearchPaperWhereInput
+    orderBy?: SecurityResearchPaperOrderByWithAggregationInput | SecurityResearchPaperOrderByWithAggregationInput[]
+    by: SecurityResearchPaperScalarFieldEnum[] | SecurityResearchPaperScalarFieldEnum
+    having?: SecurityResearchPaperScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: SecurityResearchPaperCountAggregateInputType | true
+    _avg?: SecurityResearchPaperAvgAggregateInputType
+    _sum?: SecurityResearchPaperSumAggregateInputType
+    _min?: SecurityResearchPaperMinAggregateInputType
+    _max?: SecurityResearchPaperMaxAggregateInputType
+  }
+
+  export type SecurityResearchPaperGroupByOutputType = {
+    id: bigint
+    snapshotId: number
+    canonicalId: string
+    title: string
+    normalizedTitle: string
+    sourceType: string
+    projectScope: string
+    venue: string
+    sourcePrimary: string
+    sourceSearch: string
+    abstractOrSummary: string
+    tags: JsonValue
+    sourceUrl: string | null
+    authors: JsonValue
+    externalIds: JsonValue
+    relevanceScore: number
+    isTopVenue: boolean
+    publishedAt: Date | null
+    status: string
+    rawData: JsonValue
+    createdAt: Date
+    _count: SecurityResearchPaperCountAggregateOutputType | null
+    _avg: SecurityResearchPaperAvgAggregateOutputType | null
+    _sum: SecurityResearchPaperSumAggregateOutputType | null
+    _min: SecurityResearchPaperMinAggregateOutputType | null
+    _max: SecurityResearchPaperMaxAggregateOutputType | null
+  }
+
+  type GetSecurityResearchPaperGroupByPayload<T extends SecurityResearchPaperGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<SecurityResearchPaperGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof SecurityResearchPaperGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], SecurityResearchPaperGroupByOutputType[P]>
+            : GetScalarType<T[P], SecurityResearchPaperGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type SecurityResearchPaperSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    snapshotId?: boolean
+    canonicalId?: boolean
+    title?: boolean
+    normalizedTitle?: boolean
+    sourceType?: boolean
+    projectScope?: boolean
+    venue?: boolean
+    sourcePrimary?: boolean
+    sourceSearch?: boolean
+    abstractOrSummary?: boolean
+    tags?: boolean
+    sourceUrl?: boolean
+    authors?: boolean
+    externalIds?: boolean
+    relevanceScore?: boolean
+    isTopVenue?: boolean
+    publishedAt?: boolean
+    status?: boolean
+    rawData?: boolean
+    createdAt?: boolean
+    snapshot?: boolean | SecurityResearchSnapshotDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["securityResearchPaper"]>
+
+
+
+  export type SecurityResearchPaperSelectScalar = {
+    id?: boolean
+    snapshotId?: boolean
+    canonicalId?: boolean
+    title?: boolean
+    normalizedTitle?: boolean
+    sourceType?: boolean
+    projectScope?: boolean
+    venue?: boolean
+    sourcePrimary?: boolean
+    sourceSearch?: boolean
+    abstractOrSummary?: boolean
+    tags?: boolean
+    sourceUrl?: boolean
+    authors?: boolean
+    externalIds?: boolean
+    relevanceScore?: boolean
+    isTopVenue?: boolean
+    publishedAt?: boolean
+    status?: boolean
+    rawData?: boolean
+    createdAt?: boolean
+  }
+
+  export type SecurityResearchPaperOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "snapshotId" | "canonicalId" | "title" | "normalizedTitle" | "sourceType" | "projectScope" | "venue" | "sourcePrimary" | "sourceSearch" | "abstractOrSummary" | "tags" | "sourceUrl" | "authors" | "externalIds" | "relevanceScore" | "isTopVenue" | "publishedAt" | "status" | "rawData" | "createdAt", ExtArgs["result"]["securityResearchPaper"]>
+  export type SecurityResearchPaperInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    snapshot?: boolean | SecurityResearchSnapshotDefaultArgs<ExtArgs>
+  }
+
+  export type $SecurityResearchPaperPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "SecurityResearchPaper"
+    objects: {
+      snapshot: Prisma.$SecurityResearchSnapshotPayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: bigint
+      snapshotId: number
+      canonicalId: string
+      title: string
+      normalizedTitle: string
+      sourceType: string
+      projectScope: string
+      venue: string
+      sourcePrimary: string
+      sourceSearch: string
+      abstractOrSummary: string
+      tags: Prisma.JsonValue
+      sourceUrl: string | null
+      authors: Prisma.JsonValue
+      externalIds: Prisma.JsonValue
+      relevanceScore: number
+      isTopVenue: boolean
+      publishedAt: Date | null
+      status: string
+      rawData: Prisma.JsonValue
+      createdAt: Date
+    }, ExtArgs["result"]["securityResearchPaper"]>
+    composites: {}
+  }
+
+  type SecurityResearchPaperGetPayload<S extends boolean | null | undefined | SecurityResearchPaperDefaultArgs> = $Result.GetResult<Prisma.$SecurityResearchPaperPayload, S>
+
+  type SecurityResearchPaperCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<SecurityResearchPaperFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: SecurityResearchPaperCountAggregateInputType | true
+    }
+
+  export interface SecurityResearchPaperDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['SecurityResearchPaper'], meta: { name: 'SecurityResearchPaper' } }
+    /**
+     * Find zero or one SecurityResearchPaper that matches the filter.
+     * @param {SecurityResearchPaperFindUniqueArgs} args - Arguments to find a SecurityResearchPaper
+     * @example
+     * // Get one SecurityResearchPaper
+     * const securityResearchPaper = await prisma.securityResearchPaper.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends SecurityResearchPaperFindUniqueArgs>(args: SelectSubset<T, SecurityResearchPaperFindUniqueArgs<ExtArgs>>): Prisma__SecurityResearchPaperClient<$Result.GetResult<Prisma.$SecurityResearchPaperPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one SecurityResearchPaper that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {SecurityResearchPaperFindUniqueOrThrowArgs} args - Arguments to find a SecurityResearchPaper
+     * @example
+     * // Get one SecurityResearchPaper
+     * const securityResearchPaper = await prisma.securityResearchPaper.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends SecurityResearchPaperFindUniqueOrThrowArgs>(args: SelectSubset<T, SecurityResearchPaperFindUniqueOrThrowArgs<ExtArgs>>): Prisma__SecurityResearchPaperClient<$Result.GetResult<Prisma.$SecurityResearchPaperPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first SecurityResearchPaper that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {SecurityResearchPaperFindFirstArgs} args - Arguments to find a SecurityResearchPaper
+     * @example
+     * // Get one SecurityResearchPaper
+     * const securityResearchPaper = await prisma.securityResearchPaper.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends SecurityResearchPaperFindFirstArgs>(args?: SelectSubset<T, SecurityResearchPaperFindFirstArgs<ExtArgs>>): Prisma__SecurityResearchPaperClient<$Result.GetResult<Prisma.$SecurityResearchPaperPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first SecurityResearchPaper that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {SecurityResearchPaperFindFirstOrThrowArgs} args - Arguments to find a SecurityResearchPaper
+     * @example
+     * // Get one SecurityResearchPaper
+     * const securityResearchPaper = await prisma.securityResearchPaper.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends SecurityResearchPaperFindFirstOrThrowArgs>(args?: SelectSubset<T, SecurityResearchPaperFindFirstOrThrowArgs<ExtArgs>>): Prisma__SecurityResearchPaperClient<$Result.GetResult<Prisma.$SecurityResearchPaperPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more SecurityResearchPapers that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {SecurityResearchPaperFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all SecurityResearchPapers
+     * const securityResearchPapers = await prisma.securityResearchPaper.findMany()
+     * 
+     * // Get first 10 SecurityResearchPapers
+     * const securityResearchPapers = await prisma.securityResearchPaper.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const securityResearchPaperWithIdOnly = await prisma.securityResearchPaper.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends SecurityResearchPaperFindManyArgs>(args?: SelectSubset<T, SecurityResearchPaperFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$SecurityResearchPaperPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a SecurityResearchPaper.
+     * @param {SecurityResearchPaperCreateArgs} args - Arguments to create a SecurityResearchPaper.
+     * @example
+     * // Create one SecurityResearchPaper
+     * const SecurityResearchPaper = await prisma.securityResearchPaper.create({
+     *   data: {
+     *     // ... data to create a SecurityResearchPaper
+     *   }
+     * })
+     * 
+     */
+    create<T extends SecurityResearchPaperCreateArgs>(args: SelectSubset<T, SecurityResearchPaperCreateArgs<ExtArgs>>): Prisma__SecurityResearchPaperClient<$Result.GetResult<Prisma.$SecurityResearchPaperPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many SecurityResearchPapers.
+     * @param {SecurityResearchPaperCreateManyArgs} args - Arguments to create many SecurityResearchPapers.
+     * @example
+     * // Create many SecurityResearchPapers
+     * const securityResearchPaper = await prisma.securityResearchPaper.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends SecurityResearchPaperCreateManyArgs>(args?: SelectSubset<T, SecurityResearchPaperCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Delete a SecurityResearchPaper.
+     * @param {SecurityResearchPaperDeleteArgs} args - Arguments to delete one SecurityResearchPaper.
+     * @example
+     * // Delete one SecurityResearchPaper
+     * const SecurityResearchPaper = await prisma.securityResearchPaper.delete({
+     *   where: {
+     *     // ... filter to delete one SecurityResearchPaper
+     *   }
+     * })
+     * 
+     */
+    delete<T extends SecurityResearchPaperDeleteArgs>(args: SelectSubset<T, SecurityResearchPaperDeleteArgs<ExtArgs>>): Prisma__SecurityResearchPaperClient<$Result.GetResult<Prisma.$SecurityResearchPaperPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one SecurityResearchPaper.
+     * @param {SecurityResearchPaperUpdateArgs} args - Arguments to update one SecurityResearchPaper.
+     * @example
+     * // Update one SecurityResearchPaper
+     * const securityResearchPaper = await prisma.securityResearchPaper.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends SecurityResearchPaperUpdateArgs>(args: SelectSubset<T, SecurityResearchPaperUpdateArgs<ExtArgs>>): Prisma__SecurityResearchPaperClient<$Result.GetResult<Prisma.$SecurityResearchPaperPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more SecurityResearchPapers.
+     * @param {SecurityResearchPaperDeleteManyArgs} args - Arguments to filter SecurityResearchPapers to delete.
+     * @example
+     * // Delete a few SecurityResearchPapers
+     * const { count } = await prisma.securityResearchPaper.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends SecurityResearchPaperDeleteManyArgs>(args?: SelectSubset<T, SecurityResearchPaperDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more SecurityResearchPapers.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {SecurityResearchPaperUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many SecurityResearchPapers
+     * const securityResearchPaper = await prisma.securityResearchPaper.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends SecurityResearchPaperUpdateManyArgs>(args: SelectSubset<T, SecurityResearchPaperUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create or update one SecurityResearchPaper.
+     * @param {SecurityResearchPaperUpsertArgs} args - Arguments to update or create a SecurityResearchPaper.
+     * @example
+     * // Update or create a SecurityResearchPaper
+     * const securityResearchPaper = await prisma.securityResearchPaper.upsert({
+     *   create: {
+     *     // ... data to create a SecurityResearchPaper
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the SecurityResearchPaper we want to update
+     *   }
+     * })
+     */
+    upsert<T extends SecurityResearchPaperUpsertArgs>(args: SelectSubset<T, SecurityResearchPaperUpsertArgs<ExtArgs>>): Prisma__SecurityResearchPaperClient<$Result.GetResult<Prisma.$SecurityResearchPaperPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of SecurityResearchPapers.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {SecurityResearchPaperCountArgs} args - Arguments to filter SecurityResearchPapers to count.
+     * @example
+     * // Count the number of SecurityResearchPapers
+     * const count = await prisma.securityResearchPaper.count({
+     *   where: {
+     *     // ... the filter for the SecurityResearchPapers we want to count
+     *   }
+     * })
+    **/
+    count<T extends SecurityResearchPaperCountArgs>(
+      args?: Subset<T, SecurityResearchPaperCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], SecurityResearchPaperCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a SecurityResearchPaper.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {SecurityResearchPaperAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends SecurityResearchPaperAggregateArgs>(args: Subset<T, SecurityResearchPaperAggregateArgs>): Prisma.PrismaPromise<GetSecurityResearchPaperAggregateType<T>>
+
+    /**
+     * Group by SecurityResearchPaper.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {SecurityResearchPaperGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends SecurityResearchPaperGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: SecurityResearchPaperGroupByArgs['orderBy'] }
+        : { orderBy?: SecurityResearchPaperGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, SecurityResearchPaperGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetSecurityResearchPaperGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the SecurityResearchPaper model
+   */
+  readonly fields: SecurityResearchPaperFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for SecurityResearchPaper.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__SecurityResearchPaperClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    snapshot<T extends SecurityResearchSnapshotDefaultArgs<ExtArgs> = {}>(args?: Subset<T, SecurityResearchSnapshotDefaultArgs<ExtArgs>>): Prisma__SecurityResearchSnapshotClient<$Result.GetResult<Prisma.$SecurityResearchSnapshotPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the SecurityResearchPaper model
+   */
+  interface SecurityResearchPaperFieldRefs {
+    readonly id: FieldRef<"SecurityResearchPaper", 'BigInt'>
+    readonly snapshotId: FieldRef<"SecurityResearchPaper", 'Int'>
+    readonly canonicalId: FieldRef<"SecurityResearchPaper", 'String'>
+    readonly title: FieldRef<"SecurityResearchPaper", 'String'>
+    readonly normalizedTitle: FieldRef<"SecurityResearchPaper", 'String'>
+    readonly sourceType: FieldRef<"SecurityResearchPaper", 'String'>
+    readonly projectScope: FieldRef<"SecurityResearchPaper", 'String'>
+    readonly venue: FieldRef<"SecurityResearchPaper", 'String'>
+    readonly sourcePrimary: FieldRef<"SecurityResearchPaper", 'String'>
+    readonly sourceSearch: FieldRef<"SecurityResearchPaper", 'String'>
+    readonly abstractOrSummary: FieldRef<"SecurityResearchPaper", 'String'>
+    readonly tags: FieldRef<"SecurityResearchPaper", 'Json'>
+    readonly sourceUrl: FieldRef<"SecurityResearchPaper", 'String'>
+    readonly authors: FieldRef<"SecurityResearchPaper", 'Json'>
+    readonly externalIds: FieldRef<"SecurityResearchPaper", 'Json'>
+    readonly relevanceScore: FieldRef<"SecurityResearchPaper", 'Float'>
+    readonly isTopVenue: FieldRef<"SecurityResearchPaper", 'Boolean'>
+    readonly publishedAt: FieldRef<"SecurityResearchPaper", 'DateTime'>
+    readonly status: FieldRef<"SecurityResearchPaper", 'String'>
+    readonly rawData: FieldRef<"SecurityResearchPaper", 'Json'>
+    readonly createdAt: FieldRef<"SecurityResearchPaper", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * SecurityResearchPaper findUnique
+   */
+  export type SecurityResearchPaperFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SecurityResearchPaper
+     */
+    select?: SecurityResearchPaperSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SecurityResearchPaper
+     */
+    omit?: SecurityResearchPaperOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SecurityResearchPaperInclude<ExtArgs> | null
+    /**
+     * Filter, which SecurityResearchPaper to fetch.
+     */
+    where: SecurityResearchPaperWhereUniqueInput
+  }
+
+  /**
+   * SecurityResearchPaper findUniqueOrThrow
+   */
+  export type SecurityResearchPaperFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SecurityResearchPaper
+     */
+    select?: SecurityResearchPaperSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SecurityResearchPaper
+     */
+    omit?: SecurityResearchPaperOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SecurityResearchPaperInclude<ExtArgs> | null
+    /**
+     * Filter, which SecurityResearchPaper to fetch.
+     */
+    where: SecurityResearchPaperWhereUniqueInput
+  }
+
+  /**
+   * SecurityResearchPaper findFirst
+   */
+  export type SecurityResearchPaperFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SecurityResearchPaper
+     */
+    select?: SecurityResearchPaperSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SecurityResearchPaper
+     */
+    omit?: SecurityResearchPaperOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SecurityResearchPaperInclude<ExtArgs> | null
+    /**
+     * Filter, which SecurityResearchPaper to fetch.
+     */
+    where?: SecurityResearchPaperWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of SecurityResearchPapers to fetch.
+     */
+    orderBy?: SecurityResearchPaperOrderByWithRelationInput | SecurityResearchPaperOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for SecurityResearchPapers.
+     */
+    cursor?: SecurityResearchPaperWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` SecurityResearchPapers from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` SecurityResearchPapers.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of SecurityResearchPapers.
+     */
+    distinct?: SecurityResearchPaperScalarFieldEnum | SecurityResearchPaperScalarFieldEnum[]
+  }
+
+  /**
+   * SecurityResearchPaper findFirstOrThrow
+   */
+  export type SecurityResearchPaperFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SecurityResearchPaper
+     */
+    select?: SecurityResearchPaperSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SecurityResearchPaper
+     */
+    omit?: SecurityResearchPaperOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SecurityResearchPaperInclude<ExtArgs> | null
+    /**
+     * Filter, which SecurityResearchPaper to fetch.
+     */
+    where?: SecurityResearchPaperWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of SecurityResearchPapers to fetch.
+     */
+    orderBy?: SecurityResearchPaperOrderByWithRelationInput | SecurityResearchPaperOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for SecurityResearchPapers.
+     */
+    cursor?: SecurityResearchPaperWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` SecurityResearchPapers from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` SecurityResearchPapers.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of SecurityResearchPapers.
+     */
+    distinct?: SecurityResearchPaperScalarFieldEnum | SecurityResearchPaperScalarFieldEnum[]
+  }
+
+  /**
+   * SecurityResearchPaper findMany
+   */
+  export type SecurityResearchPaperFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SecurityResearchPaper
+     */
+    select?: SecurityResearchPaperSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SecurityResearchPaper
+     */
+    omit?: SecurityResearchPaperOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SecurityResearchPaperInclude<ExtArgs> | null
+    /**
+     * Filter, which SecurityResearchPapers to fetch.
+     */
+    where?: SecurityResearchPaperWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of SecurityResearchPapers to fetch.
+     */
+    orderBy?: SecurityResearchPaperOrderByWithRelationInput | SecurityResearchPaperOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing SecurityResearchPapers.
+     */
+    cursor?: SecurityResearchPaperWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` SecurityResearchPapers from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` SecurityResearchPapers.
+     */
+    skip?: number
+    distinct?: SecurityResearchPaperScalarFieldEnum | SecurityResearchPaperScalarFieldEnum[]
+  }
+
+  /**
+   * SecurityResearchPaper create
+   */
+  export type SecurityResearchPaperCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SecurityResearchPaper
+     */
+    select?: SecurityResearchPaperSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SecurityResearchPaper
+     */
+    omit?: SecurityResearchPaperOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SecurityResearchPaperInclude<ExtArgs> | null
+    /**
+     * The data needed to create a SecurityResearchPaper.
+     */
+    data: XOR<SecurityResearchPaperCreateInput, SecurityResearchPaperUncheckedCreateInput>
+  }
+
+  /**
+   * SecurityResearchPaper createMany
+   */
+  export type SecurityResearchPaperCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many SecurityResearchPapers.
+     */
+    data: SecurityResearchPaperCreateManyInput | SecurityResearchPaperCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * SecurityResearchPaper update
+   */
+  export type SecurityResearchPaperUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SecurityResearchPaper
+     */
+    select?: SecurityResearchPaperSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SecurityResearchPaper
+     */
+    omit?: SecurityResearchPaperOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SecurityResearchPaperInclude<ExtArgs> | null
+    /**
+     * The data needed to update a SecurityResearchPaper.
+     */
+    data: XOR<SecurityResearchPaperUpdateInput, SecurityResearchPaperUncheckedUpdateInput>
+    /**
+     * Choose, which SecurityResearchPaper to update.
+     */
+    where: SecurityResearchPaperWhereUniqueInput
+  }
+
+  /**
+   * SecurityResearchPaper updateMany
+   */
+  export type SecurityResearchPaperUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update SecurityResearchPapers.
+     */
+    data: XOR<SecurityResearchPaperUpdateManyMutationInput, SecurityResearchPaperUncheckedUpdateManyInput>
+    /**
+     * Filter which SecurityResearchPapers to update
+     */
+    where?: SecurityResearchPaperWhereInput
+    /**
+     * Limit how many SecurityResearchPapers to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * SecurityResearchPaper upsert
+   */
+  export type SecurityResearchPaperUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SecurityResearchPaper
+     */
+    select?: SecurityResearchPaperSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SecurityResearchPaper
+     */
+    omit?: SecurityResearchPaperOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SecurityResearchPaperInclude<ExtArgs> | null
+    /**
+     * The filter to search for the SecurityResearchPaper to update in case it exists.
+     */
+    where: SecurityResearchPaperWhereUniqueInput
+    /**
+     * In case the SecurityResearchPaper found by the `where` argument doesn't exist, create a new SecurityResearchPaper with this data.
+     */
+    create: XOR<SecurityResearchPaperCreateInput, SecurityResearchPaperUncheckedCreateInput>
+    /**
+     * In case the SecurityResearchPaper was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<SecurityResearchPaperUpdateInput, SecurityResearchPaperUncheckedUpdateInput>
+  }
+
+  /**
+   * SecurityResearchPaper delete
+   */
+  export type SecurityResearchPaperDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SecurityResearchPaper
+     */
+    select?: SecurityResearchPaperSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SecurityResearchPaper
+     */
+    omit?: SecurityResearchPaperOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SecurityResearchPaperInclude<ExtArgs> | null
+    /**
+     * Filter which SecurityResearchPaper to delete.
+     */
+    where: SecurityResearchPaperWhereUniqueInput
+  }
+
+  /**
+   * SecurityResearchPaper deleteMany
+   */
+  export type SecurityResearchPaperDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which SecurityResearchPapers to delete
+     */
+    where?: SecurityResearchPaperWhereInput
+    /**
+     * Limit how many SecurityResearchPapers to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * SecurityResearchPaper without action
+   */
+  export type SecurityResearchPaperDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SecurityResearchPaper
+     */
+    select?: SecurityResearchPaperSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SecurityResearchPaper
+     */
+    omit?: SecurityResearchPaperOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SecurityResearchPaperInclude<ExtArgs> | null
+  }
+
+
+  /**
    * Enums
    */
 
@@ -5342,12 +10583,144 @@ export namespace Prisma {
   export type ExposureVersionDailyAggScalarFieldEnum = (typeof ExposureVersionDailyAggScalarFieldEnum)[keyof typeof ExposureVersionDailyAggScalarFieldEnum]
 
 
+  export const OpenclawRiskSnapshotScalarFieldEnum: {
+    id: 'id',
+    snapshotKey: 'snapshotKey',
+    triggerSource: 'triggerSource',
+    status: 'status',
+    latestStableTag: 'latestStableTag',
+    latestStableVersion: 'latestStableVersion',
+    latestStableUrl: 'latestStableUrl',
+    latestStablePublishedAt: 'latestStablePublishedAt',
+    totalIssues: 'totalIssues',
+    githubAdvisories: 'githubAdvisories',
+    nvdCves: 'nvdCves',
+    officialAdvisoryCount: 'officialAdvisoryCount',
+    cveRecordCount: 'cveRecordCount',
+    conferencePaperCount: 'conferencePaperCount',
+    preprintCount: 'preprintCount',
+    researchCount: 'researchCount',
+    newsCount: 'newsCount',
+    criticalCount: 'criticalCount',
+    highRiskCount: 'highRiskCount',
+    fixedCount: 'fixedCount',
+    unfixedCount: 'unfixedCount',
+    unknownCount: 'unknownCount',
+    fixProgressPercent: 'fixProgressPercent',
+    sourceMeta: 'sourceMeta',
+    cacheDir: 'cacheDir',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type OpenclawRiskSnapshotScalarFieldEnum = (typeof OpenclawRiskSnapshotScalarFieldEnum)[keyof typeof OpenclawRiskSnapshotScalarFieldEnum]
+
+
+  export const OpenclawRiskIssueScalarFieldEnum: {
+    id: 'id',
+    snapshotId: 'snapshotId',
+    canonicalId: 'canonicalId',
+    issueId: 'issueId',
+    title: 'title',
+    summary: 'summary',
+    description: 'description',
+    sourcePrimary: 'sourcePrimary',
+    sourceType: 'sourceType',
+    sourceSearch: 'sourceSearch',
+    sourceLabels: 'sourceLabels',
+    sources: 'sources',
+    githubIds: 'githubIds',
+    cveIds: 'cveIds',
+    projectScope: 'projectScope',
+    venue: 'venue',
+    authors: 'authors',
+    severity: 'severity',
+    score: 'score',
+    cvssVector: 'cvssVector',
+    cwes: 'cwes',
+    affectedRange: 'affectedRange',
+    fixedVersion: 'fixedVersion',
+    latestStableVersion: 'latestStableVersion',
+    fixStatus: 'fixStatus',
+    fixLabel: 'fixLabel',
+    fixReason: 'fixReason',
+    issueUrl: 'issueUrl',
+    repoUrl: 'repoUrl',
+    referenceUrls: 'referenceUrls',
+    tags: 'tags',
+    status: 'status',
+    relevanceScore: 'relevanceScore',
+    publishedAt: 'publishedAt',
+    sourceUpdatedAt: 'sourceUpdatedAt',
+    rawData: 'rawData',
+    createdAt: 'createdAt'
+  };
+
+  export type OpenclawRiskIssueScalarFieldEnum = (typeof OpenclawRiskIssueScalarFieldEnum)[keyof typeof OpenclawRiskIssueScalarFieldEnum]
+
+
+  export const SecurityResearchSnapshotScalarFieldEnum: {
+    id: 'id',
+    snapshotKey: 'snapshotKey',
+    triggerSource: 'triggerSource',
+    status: 'status',
+    totalPapers: 'totalPapers',
+    conferencePaperCount: 'conferencePaperCount',
+    preprintCount: 'preprintCount',
+    openclawCount: 'openclawCount',
+    clawCount: 'clawCount',
+    skillCount: 'skillCount',
+    agentCount: 'agentCount',
+    pluginCount: 'pluginCount',
+    sourceMeta: 'sourceMeta',
+    cacheDir: 'cacheDir',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type SecurityResearchSnapshotScalarFieldEnum = (typeof SecurityResearchSnapshotScalarFieldEnum)[keyof typeof SecurityResearchSnapshotScalarFieldEnum]
+
+
+  export const SecurityResearchPaperScalarFieldEnum: {
+    id: 'id',
+    snapshotId: 'snapshotId',
+    canonicalId: 'canonicalId',
+    title: 'title',
+    normalizedTitle: 'normalizedTitle',
+    sourceType: 'sourceType',
+    projectScope: 'projectScope',
+    venue: 'venue',
+    sourcePrimary: 'sourcePrimary',
+    sourceSearch: 'sourceSearch',
+    abstractOrSummary: 'abstractOrSummary',
+    tags: 'tags',
+    sourceUrl: 'sourceUrl',
+    authors: 'authors',
+    externalIds: 'externalIds',
+    relevanceScore: 'relevanceScore',
+    isTopVenue: 'isTopVenue',
+    publishedAt: 'publishedAt',
+    status: 'status',
+    rawData: 'rawData',
+    createdAt: 'createdAt'
+  };
+
+  export type SecurityResearchPaperScalarFieldEnum = (typeof SecurityResearchPaperScalarFieldEnum)[keyof typeof SecurityResearchPaperScalarFieldEnum]
+
+
   export const SortOrder: {
     asc: 'asc',
     desc: 'desc'
   };
 
   export type SortOrder = (typeof SortOrder)[keyof typeof SortOrder]
+
+
+  export const JsonNullValueInput: {
+    JsonNull: typeof JsonNull
+  };
+
+  export type JsonNullValueInput = (typeof JsonNullValueInput)[keyof typeof JsonNullValueInput]
 
 
   export const ExposureSnapshotOrderByRelevanceFieldEnum: {
@@ -5395,6 +10768,90 @@ export namespace Prisma {
   export type ExposureVersionDailyAggOrderByRelevanceFieldEnum = (typeof ExposureVersionDailyAggOrderByRelevanceFieldEnum)[keyof typeof ExposureVersionDailyAggOrderByRelevanceFieldEnum]
 
 
+  export const JsonNullValueFilter: {
+    DbNull: typeof DbNull,
+    JsonNull: typeof JsonNull,
+    AnyNull: typeof AnyNull
+  };
+
+  export type JsonNullValueFilter = (typeof JsonNullValueFilter)[keyof typeof JsonNullValueFilter]
+
+
+  export const QueryMode: {
+    default: 'default',
+    insensitive: 'insensitive'
+  };
+
+  export type QueryMode = (typeof QueryMode)[keyof typeof QueryMode]
+
+
+  export const OpenclawRiskSnapshotOrderByRelevanceFieldEnum: {
+    snapshotKey: 'snapshotKey',
+    triggerSource: 'triggerSource',
+    status: 'status',
+    latestStableTag: 'latestStableTag',
+    latestStableVersion: 'latestStableVersion',
+    latestStableUrl: 'latestStableUrl',
+    cacheDir: 'cacheDir'
+  };
+
+  export type OpenclawRiskSnapshotOrderByRelevanceFieldEnum = (typeof OpenclawRiskSnapshotOrderByRelevanceFieldEnum)[keyof typeof OpenclawRiskSnapshotOrderByRelevanceFieldEnum]
+
+
+  export const OpenclawRiskIssueOrderByRelevanceFieldEnum: {
+    canonicalId: 'canonicalId',
+    issueId: 'issueId',
+    title: 'title',
+    summary: 'summary',
+    description: 'description',
+    sourcePrimary: 'sourcePrimary',
+    sourceType: 'sourceType',
+    sourceSearch: 'sourceSearch',
+    projectScope: 'projectScope',
+    venue: 'venue',
+    severity: 'severity',
+    cvssVector: 'cvssVector',
+    affectedRange: 'affectedRange',
+    fixedVersion: 'fixedVersion',
+    latestStableVersion: 'latestStableVersion',
+    fixStatus: 'fixStatus',
+    fixLabel: 'fixLabel',
+    fixReason: 'fixReason',
+    issueUrl: 'issueUrl',
+    repoUrl: 'repoUrl',
+    status: 'status'
+  };
+
+  export type OpenclawRiskIssueOrderByRelevanceFieldEnum = (typeof OpenclawRiskIssueOrderByRelevanceFieldEnum)[keyof typeof OpenclawRiskIssueOrderByRelevanceFieldEnum]
+
+
+  export const SecurityResearchSnapshotOrderByRelevanceFieldEnum: {
+    snapshotKey: 'snapshotKey',
+    triggerSource: 'triggerSource',
+    status: 'status',
+    cacheDir: 'cacheDir'
+  };
+
+  export type SecurityResearchSnapshotOrderByRelevanceFieldEnum = (typeof SecurityResearchSnapshotOrderByRelevanceFieldEnum)[keyof typeof SecurityResearchSnapshotOrderByRelevanceFieldEnum]
+
+
+  export const SecurityResearchPaperOrderByRelevanceFieldEnum: {
+    canonicalId: 'canonicalId',
+    title: 'title',
+    normalizedTitle: 'normalizedTitle',
+    sourceType: 'sourceType',
+    projectScope: 'projectScope',
+    venue: 'venue',
+    sourcePrimary: 'sourcePrimary',
+    sourceSearch: 'sourceSearch',
+    abstractOrSummary: 'abstractOrSummary',
+    sourceUrl: 'sourceUrl',
+    status: 'status'
+  };
+
+  export type SecurityResearchPaperOrderByRelevanceFieldEnum = (typeof SecurityResearchPaperOrderByRelevanceFieldEnum)[keyof typeof SecurityResearchPaperOrderByRelevanceFieldEnum]
+
+
   /**
    * Field references
    */
@@ -5429,9 +10886,30 @@ export namespace Prisma {
 
 
   /**
+   * Reference to a field of type 'Json'
+   */
+  export type JsonFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Json'>
+    
+
+
+  /**
+   * Reference to a field of type 'QueryMode'
+   */
+  export type EnumQueryModeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'QueryMode'>
+    
+
+
+  /**
    * Reference to a field of type 'Float'
    */
   export type FloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float'>
+    
+
+
+  /**
+   * Reference to a field of type 'Boolean'
+   */
+  export type BooleanFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Boolean'>
     
   /**
    * Deep Input Types
@@ -5774,6 +11252,645 @@ export namespace Prisma {
     version?: StringWithAggregatesFilter<"ExposureVersionDailyAgg"> | string
     count?: IntWithAggregatesFilter<"ExposureVersionDailyAgg"> | number
     createdAt?: DateTimeWithAggregatesFilter<"ExposureVersionDailyAgg"> | Date | string
+  }
+
+  export type OpenclawRiskSnapshotWhereInput = {
+    AND?: OpenclawRiskSnapshotWhereInput | OpenclawRiskSnapshotWhereInput[]
+    OR?: OpenclawRiskSnapshotWhereInput[]
+    NOT?: OpenclawRiskSnapshotWhereInput | OpenclawRiskSnapshotWhereInput[]
+    id?: IntFilter<"OpenclawRiskSnapshot"> | number
+    snapshotKey?: StringFilter<"OpenclawRiskSnapshot"> | string
+    triggerSource?: StringFilter<"OpenclawRiskSnapshot"> | string
+    status?: StringFilter<"OpenclawRiskSnapshot"> | string
+    latestStableTag?: StringNullableFilter<"OpenclawRiskSnapshot"> | string | null
+    latestStableVersion?: StringNullableFilter<"OpenclawRiskSnapshot"> | string | null
+    latestStableUrl?: StringNullableFilter<"OpenclawRiskSnapshot"> | string | null
+    latestStablePublishedAt?: DateTimeNullableFilter<"OpenclawRiskSnapshot"> | Date | string | null
+    totalIssues?: IntFilter<"OpenclawRiskSnapshot"> | number
+    githubAdvisories?: IntFilter<"OpenclawRiskSnapshot"> | number
+    nvdCves?: IntFilter<"OpenclawRiskSnapshot"> | number
+    officialAdvisoryCount?: IntFilter<"OpenclawRiskSnapshot"> | number
+    cveRecordCount?: IntFilter<"OpenclawRiskSnapshot"> | number
+    conferencePaperCount?: IntFilter<"OpenclawRiskSnapshot"> | number
+    preprintCount?: IntFilter<"OpenclawRiskSnapshot"> | number
+    researchCount?: IntFilter<"OpenclawRiskSnapshot"> | number
+    newsCount?: IntFilter<"OpenclawRiskSnapshot"> | number
+    criticalCount?: IntFilter<"OpenclawRiskSnapshot"> | number
+    highRiskCount?: IntFilter<"OpenclawRiskSnapshot"> | number
+    fixedCount?: IntFilter<"OpenclawRiskSnapshot"> | number
+    unfixedCount?: IntFilter<"OpenclawRiskSnapshot"> | number
+    unknownCount?: IntFilter<"OpenclawRiskSnapshot"> | number
+    fixProgressPercent?: IntFilter<"OpenclawRiskSnapshot"> | number
+    sourceMeta?: JsonFilter<"OpenclawRiskSnapshot">
+    cacheDir?: StringNullableFilter<"OpenclawRiskSnapshot"> | string | null
+    createdAt?: DateTimeFilter<"OpenclawRiskSnapshot"> | Date | string
+    updatedAt?: DateTimeFilter<"OpenclawRiskSnapshot"> | Date | string
+    issues?: OpenclawRiskIssueListRelationFilter
+  }
+
+  export type OpenclawRiskSnapshotOrderByWithRelationInput = {
+    id?: SortOrder
+    snapshotKey?: SortOrder
+    triggerSource?: SortOrder
+    status?: SortOrder
+    latestStableTag?: SortOrderInput | SortOrder
+    latestStableVersion?: SortOrderInput | SortOrder
+    latestStableUrl?: SortOrderInput | SortOrder
+    latestStablePublishedAt?: SortOrderInput | SortOrder
+    totalIssues?: SortOrder
+    githubAdvisories?: SortOrder
+    nvdCves?: SortOrder
+    officialAdvisoryCount?: SortOrder
+    cveRecordCount?: SortOrder
+    conferencePaperCount?: SortOrder
+    preprintCount?: SortOrder
+    researchCount?: SortOrder
+    newsCount?: SortOrder
+    criticalCount?: SortOrder
+    highRiskCount?: SortOrder
+    fixedCount?: SortOrder
+    unfixedCount?: SortOrder
+    unknownCount?: SortOrder
+    fixProgressPercent?: SortOrder
+    sourceMeta?: SortOrder
+    cacheDir?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    issues?: OpenclawRiskIssueOrderByRelationAggregateInput
+    _relevance?: OpenclawRiskSnapshotOrderByRelevanceInput
+  }
+
+  export type OpenclawRiskSnapshotWhereUniqueInput = Prisma.AtLeast<{
+    id?: number
+    snapshotKey?: string
+    AND?: OpenclawRiskSnapshotWhereInput | OpenclawRiskSnapshotWhereInput[]
+    OR?: OpenclawRiskSnapshotWhereInput[]
+    NOT?: OpenclawRiskSnapshotWhereInput | OpenclawRiskSnapshotWhereInput[]
+    triggerSource?: StringFilter<"OpenclawRiskSnapshot"> | string
+    status?: StringFilter<"OpenclawRiskSnapshot"> | string
+    latestStableTag?: StringNullableFilter<"OpenclawRiskSnapshot"> | string | null
+    latestStableVersion?: StringNullableFilter<"OpenclawRiskSnapshot"> | string | null
+    latestStableUrl?: StringNullableFilter<"OpenclawRiskSnapshot"> | string | null
+    latestStablePublishedAt?: DateTimeNullableFilter<"OpenclawRiskSnapshot"> | Date | string | null
+    totalIssues?: IntFilter<"OpenclawRiskSnapshot"> | number
+    githubAdvisories?: IntFilter<"OpenclawRiskSnapshot"> | number
+    nvdCves?: IntFilter<"OpenclawRiskSnapshot"> | number
+    officialAdvisoryCount?: IntFilter<"OpenclawRiskSnapshot"> | number
+    cveRecordCount?: IntFilter<"OpenclawRiskSnapshot"> | number
+    conferencePaperCount?: IntFilter<"OpenclawRiskSnapshot"> | number
+    preprintCount?: IntFilter<"OpenclawRiskSnapshot"> | number
+    researchCount?: IntFilter<"OpenclawRiskSnapshot"> | number
+    newsCount?: IntFilter<"OpenclawRiskSnapshot"> | number
+    criticalCount?: IntFilter<"OpenclawRiskSnapshot"> | number
+    highRiskCount?: IntFilter<"OpenclawRiskSnapshot"> | number
+    fixedCount?: IntFilter<"OpenclawRiskSnapshot"> | number
+    unfixedCount?: IntFilter<"OpenclawRiskSnapshot"> | number
+    unknownCount?: IntFilter<"OpenclawRiskSnapshot"> | number
+    fixProgressPercent?: IntFilter<"OpenclawRiskSnapshot"> | number
+    sourceMeta?: JsonFilter<"OpenclawRiskSnapshot">
+    cacheDir?: StringNullableFilter<"OpenclawRiskSnapshot"> | string | null
+    createdAt?: DateTimeFilter<"OpenclawRiskSnapshot"> | Date | string
+    updatedAt?: DateTimeFilter<"OpenclawRiskSnapshot"> | Date | string
+    issues?: OpenclawRiskIssueListRelationFilter
+  }, "id" | "snapshotKey">
+
+  export type OpenclawRiskSnapshotOrderByWithAggregationInput = {
+    id?: SortOrder
+    snapshotKey?: SortOrder
+    triggerSource?: SortOrder
+    status?: SortOrder
+    latestStableTag?: SortOrderInput | SortOrder
+    latestStableVersion?: SortOrderInput | SortOrder
+    latestStableUrl?: SortOrderInput | SortOrder
+    latestStablePublishedAt?: SortOrderInput | SortOrder
+    totalIssues?: SortOrder
+    githubAdvisories?: SortOrder
+    nvdCves?: SortOrder
+    officialAdvisoryCount?: SortOrder
+    cveRecordCount?: SortOrder
+    conferencePaperCount?: SortOrder
+    preprintCount?: SortOrder
+    researchCount?: SortOrder
+    newsCount?: SortOrder
+    criticalCount?: SortOrder
+    highRiskCount?: SortOrder
+    fixedCount?: SortOrder
+    unfixedCount?: SortOrder
+    unknownCount?: SortOrder
+    fixProgressPercent?: SortOrder
+    sourceMeta?: SortOrder
+    cacheDir?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: OpenclawRiskSnapshotCountOrderByAggregateInput
+    _avg?: OpenclawRiskSnapshotAvgOrderByAggregateInput
+    _max?: OpenclawRiskSnapshotMaxOrderByAggregateInput
+    _min?: OpenclawRiskSnapshotMinOrderByAggregateInput
+    _sum?: OpenclawRiskSnapshotSumOrderByAggregateInput
+  }
+
+  export type OpenclawRiskSnapshotScalarWhereWithAggregatesInput = {
+    AND?: OpenclawRiskSnapshotScalarWhereWithAggregatesInput | OpenclawRiskSnapshotScalarWhereWithAggregatesInput[]
+    OR?: OpenclawRiskSnapshotScalarWhereWithAggregatesInput[]
+    NOT?: OpenclawRiskSnapshotScalarWhereWithAggregatesInput | OpenclawRiskSnapshotScalarWhereWithAggregatesInput[]
+    id?: IntWithAggregatesFilter<"OpenclawRiskSnapshot"> | number
+    snapshotKey?: StringWithAggregatesFilter<"OpenclawRiskSnapshot"> | string
+    triggerSource?: StringWithAggregatesFilter<"OpenclawRiskSnapshot"> | string
+    status?: StringWithAggregatesFilter<"OpenclawRiskSnapshot"> | string
+    latestStableTag?: StringNullableWithAggregatesFilter<"OpenclawRiskSnapshot"> | string | null
+    latestStableVersion?: StringNullableWithAggregatesFilter<"OpenclawRiskSnapshot"> | string | null
+    latestStableUrl?: StringNullableWithAggregatesFilter<"OpenclawRiskSnapshot"> | string | null
+    latestStablePublishedAt?: DateTimeNullableWithAggregatesFilter<"OpenclawRiskSnapshot"> | Date | string | null
+    totalIssues?: IntWithAggregatesFilter<"OpenclawRiskSnapshot"> | number
+    githubAdvisories?: IntWithAggregatesFilter<"OpenclawRiskSnapshot"> | number
+    nvdCves?: IntWithAggregatesFilter<"OpenclawRiskSnapshot"> | number
+    officialAdvisoryCount?: IntWithAggregatesFilter<"OpenclawRiskSnapshot"> | number
+    cveRecordCount?: IntWithAggregatesFilter<"OpenclawRiskSnapshot"> | number
+    conferencePaperCount?: IntWithAggregatesFilter<"OpenclawRiskSnapshot"> | number
+    preprintCount?: IntWithAggregatesFilter<"OpenclawRiskSnapshot"> | number
+    researchCount?: IntWithAggregatesFilter<"OpenclawRiskSnapshot"> | number
+    newsCount?: IntWithAggregatesFilter<"OpenclawRiskSnapshot"> | number
+    criticalCount?: IntWithAggregatesFilter<"OpenclawRiskSnapshot"> | number
+    highRiskCount?: IntWithAggregatesFilter<"OpenclawRiskSnapshot"> | number
+    fixedCount?: IntWithAggregatesFilter<"OpenclawRiskSnapshot"> | number
+    unfixedCount?: IntWithAggregatesFilter<"OpenclawRiskSnapshot"> | number
+    unknownCount?: IntWithAggregatesFilter<"OpenclawRiskSnapshot"> | number
+    fixProgressPercent?: IntWithAggregatesFilter<"OpenclawRiskSnapshot"> | number
+    sourceMeta?: JsonWithAggregatesFilter<"OpenclawRiskSnapshot">
+    cacheDir?: StringNullableWithAggregatesFilter<"OpenclawRiskSnapshot"> | string | null
+    createdAt?: DateTimeWithAggregatesFilter<"OpenclawRiskSnapshot"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"OpenclawRiskSnapshot"> | Date | string
+  }
+
+  export type OpenclawRiskIssueWhereInput = {
+    AND?: OpenclawRiskIssueWhereInput | OpenclawRiskIssueWhereInput[]
+    OR?: OpenclawRiskIssueWhereInput[]
+    NOT?: OpenclawRiskIssueWhereInput | OpenclawRiskIssueWhereInput[]
+    id?: BigIntFilter<"OpenclawRiskIssue"> | bigint | number
+    snapshotId?: IntFilter<"OpenclawRiskIssue"> | number
+    canonicalId?: StringFilter<"OpenclawRiskIssue"> | string
+    issueId?: StringFilter<"OpenclawRiskIssue"> | string
+    title?: StringFilter<"OpenclawRiskIssue"> | string
+    summary?: StringFilter<"OpenclawRiskIssue"> | string
+    description?: StringFilter<"OpenclawRiskIssue"> | string
+    sourcePrimary?: StringFilter<"OpenclawRiskIssue"> | string
+    sourceType?: StringFilter<"OpenclawRiskIssue"> | string
+    sourceSearch?: StringFilter<"OpenclawRiskIssue"> | string
+    sourceLabels?: JsonFilter<"OpenclawRiskIssue">
+    sources?: JsonFilter<"OpenclawRiskIssue">
+    githubIds?: JsonFilter<"OpenclawRiskIssue">
+    cveIds?: JsonFilter<"OpenclawRiskIssue">
+    projectScope?: StringFilter<"OpenclawRiskIssue"> | string
+    venue?: StringNullableFilter<"OpenclawRiskIssue"> | string | null
+    authors?: JsonFilter<"OpenclawRiskIssue">
+    severity?: StringFilter<"OpenclawRiskIssue"> | string
+    score?: FloatNullableFilter<"OpenclawRiskIssue"> | number | null
+    cvssVector?: StringNullableFilter<"OpenclawRiskIssue"> | string | null
+    cwes?: JsonFilter<"OpenclawRiskIssue">
+    affectedRange?: StringNullableFilter<"OpenclawRiskIssue"> | string | null
+    fixedVersion?: StringNullableFilter<"OpenclawRiskIssue"> | string | null
+    latestStableVersion?: StringNullableFilter<"OpenclawRiskIssue"> | string | null
+    fixStatus?: StringFilter<"OpenclawRiskIssue"> | string
+    fixLabel?: StringFilter<"OpenclawRiskIssue"> | string
+    fixReason?: StringFilter<"OpenclawRiskIssue"> | string
+    issueUrl?: StringNullableFilter<"OpenclawRiskIssue"> | string | null
+    repoUrl?: StringNullableFilter<"OpenclawRiskIssue"> | string | null
+    referenceUrls?: JsonFilter<"OpenclawRiskIssue">
+    tags?: JsonFilter<"OpenclawRiskIssue">
+    status?: StringFilter<"OpenclawRiskIssue"> | string
+    relevanceScore?: FloatNullableFilter<"OpenclawRiskIssue"> | number | null
+    publishedAt?: DateTimeNullableFilter<"OpenclawRiskIssue"> | Date | string | null
+    sourceUpdatedAt?: DateTimeNullableFilter<"OpenclawRiskIssue"> | Date | string | null
+    rawData?: JsonFilter<"OpenclawRiskIssue">
+    createdAt?: DateTimeFilter<"OpenclawRiskIssue"> | Date | string
+    snapshot?: XOR<OpenclawRiskSnapshotScalarRelationFilter, OpenclawRiskSnapshotWhereInput>
+  }
+
+  export type OpenclawRiskIssueOrderByWithRelationInput = {
+    id?: SortOrder
+    snapshotId?: SortOrder
+    canonicalId?: SortOrder
+    issueId?: SortOrder
+    title?: SortOrder
+    summary?: SortOrder
+    description?: SortOrder
+    sourcePrimary?: SortOrder
+    sourceType?: SortOrder
+    sourceSearch?: SortOrder
+    sourceLabels?: SortOrder
+    sources?: SortOrder
+    githubIds?: SortOrder
+    cveIds?: SortOrder
+    projectScope?: SortOrder
+    venue?: SortOrderInput | SortOrder
+    authors?: SortOrder
+    severity?: SortOrder
+    score?: SortOrderInput | SortOrder
+    cvssVector?: SortOrderInput | SortOrder
+    cwes?: SortOrder
+    affectedRange?: SortOrderInput | SortOrder
+    fixedVersion?: SortOrderInput | SortOrder
+    latestStableVersion?: SortOrderInput | SortOrder
+    fixStatus?: SortOrder
+    fixLabel?: SortOrder
+    fixReason?: SortOrder
+    issueUrl?: SortOrderInput | SortOrder
+    repoUrl?: SortOrderInput | SortOrder
+    referenceUrls?: SortOrder
+    tags?: SortOrder
+    status?: SortOrder
+    relevanceScore?: SortOrderInput | SortOrder
+    publishedAt?: SortOrderInput | SortOrder
+    sourceUpdatedAt?: SortOrderInput | SortOrder
+    rawData?: SortOrder
+    createdAt?: SortOrder
+    snapshot?: OpenclawRiskSnapshotOrderByWithRelationInput
+    _relevance?: OpenclawRiskIssueOrderByRelevanceInput
+  }
+
+  export type OpenclawRiskIssueWhereUniqueInput = Prisma.AtLeast<{
+    id?: bigint | number
+    snapshotId_canonicalId?: OpenclawRiskIssueSnapshotIdCanonicalIdCompoundUniqueInput
+    AND?: OpenclawRiskIssueWhereInput | OpenclawRiskIssueWhereInput[]
+    OR?: OpenclawRiskIssueWhereInput[]
+    NOT?: OpenclawRiskIssueWhereInput | OpenclawRiskIssueWhereInput[]
+    snapshotId?: IntFilter<"OpenclawRiskIssue"> | number
+    canonicalId?: StringFilter<"OpenclawRiskIssue"> | string
+    issueId?: StringFilter<"OpenclawRiskIssue"> | string
+    title?: StringFilter<"OpenclawRiskIssue"> | string
+    summary?: StringFilter<"OpenclawRiskIssue"> | string
+    description?: StringFilter<"OpenclawRiskIssue"> | string
+    sourcePrimary?: StringFilter<"OpenclawRiskIssue"> | string
+    sourceType?: StringFilter<"OpenclawRiskIssue"> | string
+    sourceSearch?: StringFilter<"OpenclawRiskIssue"> | string
+    sourceLabels?: JsonFilter<"OpenclawRiskIssue">
+    sources?: JsonFilter<"OpenclawRiskIssue">
+    githubIds?: JsonFilter<"OpenclawRiskIssue">
+    cveIds?: JsonFilter<"OpenclawRiskIssue">
+    projectScope?: StringFilter<"OpenclawRiskIssue"> | string
+    venue?: StringNullableFilter<"OpenclawRiskIssue"> | string | null
+    authors?: JsonFilter<"OpenclawRiskIssue">
+    severity?: StringFilter<"OpenclawRiskIssue"> | string
+    score?: FloatNullableFilter<"OpenclawRiskIssue"> | number | null
+    cvssVector?: StringNullableFilter<"OpenclawRiskIssue"> | string | null
+    cwes?: JsonFilter<"OpenclawRiskIssue">
+    affectedRange?: StringNullableFilter<"OpenclawRiskIssue"> | string | null
+    fixedVersion?: StringNullableFilter<"OpenclawRiskIssue"> | string | null
+    latestStableVersion?: StringNullableFilter<"OpenclawRiskIssue"> | string | null
+    fixStatus?: StringFilter<"OpenclawRiskIssue"> | string
+    fixLabel?: StringFilter<"OpenclawRiskIssue"> | string
+    fixReason?: StringFilter<"OpenclawRiskIssue"> | string
+    issueUrl?: StringNullableFilter<"OpenclawRiskIssue"> | string | null
+    repoUrl?: StringNullableFilter<"OpenclawRiskIssue"> | string | null
+    referenceUrls?: JsonFilter<"OpenclawRiskIssue">
+    tags?: JsonFilter<"OpenclawRiskIssue">
+    status?: StringFilter<"OpenclawRiskIssue"> | string
+    relevanceScore?: FloatNullableFilter<"OpenclawRiskIssue"> | number | null
+    publishedAt?: DateTimeNullableFilter<"OpenclawRiskIssue"> | Date | string | null
+    sourceUpdatedAt?: DateTimeNullableFilter<"OpenclawRiskIssue"> | Date | string | null
+    rawData?: JsonFilter<"OpenclawRiskIssue">
+    createdAt?: DateTimeFilter<"OpenclawRiskIssue"> | Date | string
+    snapshot?: XOR<OpenclawRiskSnapshotScalarRelationFilter, OpenclawRiskSnapshotWhereInput>
+  }, "id" | "snapshotId_canonicalId">
+
+  export type OpenclawRiskIssueOrderByWithAggregationInput = {
+    id?: SortOrder
+    snapshotId?: SortOrder
+    canonicalId?: SortOrder
+    issueId?: SortOrder
+    title?: SortOrder
+    summary?: SortOrder
+    description?: SortOrder
+    sourcePrimary?: SortOrder
+    sourceType?: SortOrder
+    sourceSearch?: SortOrder
+    sourceLabels?: SortOrder
+    sources?: SortOrder
+    githubIds?: SortOrder
+    cveIds?: SortOrder
+    projectScope?: SortOrder
+    venue?: SortOrderInput | SortOrder
+    authors?: SortOrder
+    severity?: SortOrder
+    score?: SortOrderInput | SortOrder
+    cvssVector?: SortOrderInput | SortOrder
+    cwes?: SortOrder
+    affectedRange?: SortOrderInput | SortOrder
+    fixedVersion?: SortOrderInput | SortOrder
+    latestStableVersion?: SortOrderInput | SortOrder
+    fixStatus?: SortOrder
+    fixLabel?: SortOrder
+    fixReason?: SortOrder
+    issueUrl?: SortOrderInput | SortOrder
+    repoUrl?: SortOrderInput | SortOrder
+    referenceUrls?: SortOrder
+    tags?: SortOrder
+    status?: SortOrder
+    relevanceScore?: SortOrderInput | SortOrder
+    publishedAt?: SortOrderInput | SortOrder
+    sourceUpdatedAt?: SortOrderInput | SortOrder
+    rawData?: SortOrder
+    createdAt?: SortOrder
+    _count?: OpenclawRiskIssueCountOrderByAggregateInput
+    _avg?: OpenclawRiskIssueAvgOrderByAggregateInput
+    _max?: OpenclawRiskIssueMaxOrderByAggregateInput
+    _min?: OpenclawRiskIssueMinOrderByAggregateInput
+    _sum?: OpenclawRiskIssueSumOrderByAggregateInput
+  }
+
+  export type OpenclawRiskIssueScalarWhereWithAggregatesInput = {
+    AND?: OpenclawRiskIssueScalarWhereWithAggregatesInput | OpenclawRiskIssueScalarWhereWithAggregatesInput[]
+    OR?: OpenclawRiskIssueScalarWhereWithAggregatesInput[]
+    NOT?: OpenclawRiskIssueScalarWhereWithAggregatesInput | OpenclawRiskIssueScalarWhereWithAggregatesInput[]
+    id?: BigIntWithAggregatesFilter<"OpenclawRiskIssue"> | bigint | number
+    snapshotId?: IntWithAggregatesFilter<"OpenclawRiskIssue"> | number
+    canonicalId?: StringWithAggregatesFilter<"OpenclawRiskIssue"> | string
+    issueId?: StringWithAggregatesFilter<"OpenclawRiskIssue"> | string
+    title?: StringWithAggregatesFilter<"OpenclawRiskIssue"> | string
+    summary?: StringWithAggregatesFilter<"OpenclawRiskIssue"> | string
+    description?: StringWithAggregatesFilter<"OpenclawRiskIssue"> | string
+    sourcePrimary?: StringWithAggregatesFilter<"OpenclawRiskIssue"> | string
+    sourceType?: StringWithAggregatesFilter<"OpenclawRiskIssue"> | string
+    sourceSearch?: StringWithAggregatesFilter<"OpenclawRiskIssue"> | string
+    sourceLabels?: JsonWithAggregatesFilter<"OpenclawRiskIssue">
+    sources?: JsonWithAggregatesFilter<"OpenclawRiskIssue">
+    githubIds?: JsonWithAggregatesFilter<"OpenclawRiskIssue">
+    cveIds?: JsonWithAggregatesFilter<"OpenclawRiskIssue">
+    projectScope?: StringWithAggregatesFilter<"OpenclawRiskIssue"> | string
+    venue?: StringNullableWithAggregatesFilter<"OpenclawRiskIssue"> | string | null
+    authors?: JsonWithAggregatesFilter<"OpenclawRiskIssue">
+    severity?: StringWithAggregatesFilter<"OpenclawRiskIssue"> | string
+    score?: FloatNullableWithAggregatesFilter<"OpenclawRiskIssue"> | number | null
+    cvssVector?: StringNullableWithAggregatesFilter<"OpenclawRiskIssue"> | string | null
+    cwes?: JsonWithAggregatesFilter<"OpenclawRiskIssue">
+    affectedRange?: StringNullableWithAggregatesFilter<"OpenclawRiskIssue"> | string | null
+    fixedVersion?: StringNullableWithAggregatesFilter<"OpenclawRiskIssue"> | string | null
+    latestStableVersion?: StringNullableWithAggregatesFilter<"OpenclawRiskIssue"> | string | null
+    fixStatus?: StringWithAggregatesFilter<"OpenclawRiskIssue"> | string
+    fixLabel?: StringWithAggregatesFilter<"OpenclawRiskIssue"> | string
+    fixReason?: StringWithAggregatesFilter<"OpenclawRiskIssue"> | string
+    issueUrl?: StringNullableWithAggregatesFilter<"OpenclawRiskIssue"> | string | null
+    repoUrl?: StringNullableWithAggregatesFilter<"OpenclawRiskIssue"> | string | null
+    referenceUrls?: JsonWithAggregatesFilter<"OpenclawRiskIssue">
+    tags?: JsonWithAggregatesFilter<"OpenclawRiskIssue">
+    status?: StringWithAggregatesFilter<"OpenclawRiskIssue"> | string
+    relevanceScore?: FloatNullableWithAggregatesFilter<"OpenclawRiskIssue"> | number | null
+    publishedAt?: DateTimeNullableWithAggregatesFilter<"OpenclawRiskIssue"> | Date | string | null
+    sourceUpdatedAt?: DateTimeNullableWithAggregatesFilter<"OpenclawRiskIssue"> | Date | string | null
+    rawData?: JsonWithAggregatesFilter<"OpenclawRiskIssue">
+    createdAt?: DateTimeWithAggregatesFilter<"OpenclawRiskIssue"> | Date | string
+  }
+
+  export type SecurityResearchSnapshotWhereInput = {
+    AND?: SecurityResearchSnapshotWhereInput | SecurityResearchSnapshotWhereInput[]
+    OR?: SecurityResearchSnapshotWhereInput[]
+    NOT?: SecurityResearchSnapshotWhereInput | SecurityResearchSnapshotWhereInput[]
+    id?: IntFilter<"SecurityResearchSnapshot"> | number
+    snapshotKey?: StringFilter<"SecurityResearchSnapshot"> | string
+    triggerSource?: StringFilter<"SecurityResearchSnapshot"> | string
+    status?: StringFilter<"SecurityResearchSnapshot"> | string
+    totalPapers?: IntFilter<"SecurityResearchSnapshot"> | number
+    conferencePaperCount?: IntFilter<"SecurityResearchSnapshot"> | number
+    preprintCount?: IntFilter<"SecurityResearchSnapshot"> | number
+    openclawCount?: IntFilter<"SecurityResearchSnapshot"> | number
+    clawCount?: IntFilter<"SecurityResearchSnapshot"> | number
+    skillCount?: IntFilter<"SecurityResearchSnapshot"> | number
+    agentCount?: IntFilter<"SecurityResearchSnapshot"> | number
+    pluginCount?: IntFilter<"SecurityResearchSnapshot"> | number
+    sourceMeta?: JsonFilter<"SecurityResearchSnapshot">
+    cacheDir?: StringNullableFilter<"SecurityResearchSnapshot"> | string | null
+    createdAt?: DateTimeFilter<"SecurityResearchSnapshot"> | Date | string
+    updatedAt?: DateTimeFilter<"SecurityResearchSnapshot"> | Date | string
+    papers?: SecurityResearchPaperListRelationFilter
+  }
+
+  export type SecurityResearchSnapshotOrderByWithRelationInput = {
+    id?: SortOrder
+    snapshotKey?: SortOrder
+    triggerSource?: SortOrder
+    status?: SortOrder
+    totalPapers?: SortOrder
+    conferencePaperCount?: SortOrder
+    preprintCount?: SortOrder
+    openclawCount?: SortOrder
+    clawCount?: SortOrder
+    skillCount?: SortOrder
+    agentCount?: SortOrder
+    pluginCount?: SortOrder
+    sourceMeta?: SortOrder
+    cacheDir?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    papers?: SecurityResearchPaperOrderByRelationAggregateInput
+    _relevance?: SecurityResearchSnapshotOrderByRelevanceInput
+  }
+
+  export type SecurityResearchSnapshotWhereUniqueInput = Prisma.AtLeast<{
+    id?: number
+    snapshotKey?: string
+    AND?: SecurityResearchSnapshotWhereInput | SecurityResearchSnapshotWhereInput[]
+    OR?: SecurityResearchSnapshotWhereInput[]
+    NOT?: SecurityResearchSnapshotWhereInput | SecurityResearchSnapshotWhereInput[]
+    triggerSource?: StringFilter<"SecurityResearchSnapshot"> | string
+    status?: StringFilter<"SecurityResearchSnapshot"> | string
+    totalPapers?: IntFilter<"SecurityResearchSnapshot"> | number
+    conferencePaperCount?: IntFilter<"SecurityResearchSnapshot"> | number
+    preprintCount?: IntFilter<"SecurityResearchSnapshot"> | number
+    openclawCount?: IntFilter<"SecurityResearchSnapshot"> | number
+    clawCount?: IntFilter<"SecurityResearchSnapshot"> | number
+    skillCount?: IntFilter<"SecurityResearchSnapshot"> | number
+    agentCount?: IntFilter<"SecurityResearchSnapshot"> | number
+    pluginCount?: IntFilter<"SecurityResearchSnapshot"> | number
+    sourceMeta?: JsonFilter<"SecurityResearchSnapshot">
+    cacheDir?: StringNullableFilter<"SecurityResearchSnapshot"> | string | null
+    createdAt?: DateTimeFilter<"SecurityResearchSnapshot"> | Date | string
+    updatedAt?: DateTimeFilter<"SecurityResearchSnapshot"> | Date | string
+    papers?: SecurityResearchPaperListRelationFilter
+  }, "id" | "snapshotKey">
+
+  export type SecurityResearchSnapshotOrderByWithAggregationInput = {
+    id?: SortOrder
+    snapshotKey?: SortOrder
+    triggerSource?: SortOrder
+    status?: SortOrder
+    totalPapers?: SortOrder
+    conferencePaperCount?: SortOrder
+    preprintCount?: SortOrder
+    openclawCount?: SortOrder
+    clawCount?: SortOrder
+    skillCount?: SortOrder
+    agentCount?: SortOrder
+    pluginCount?: SortOrder
+    sourceMeta?: SortOrder
+    cacheDir?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: SecurityResearchSnapshotCountOrderByAggregateInput
+    _avg?: SecurityResearchSnapshotAvgOrderByAggregateInput
+    _max?: SecurityResearchSnapshotMaxOrderByAggregateInput
+    _min?: SecurityResearchSnapshotMinOrderByAggregateInput
+    _sum?: SecurityResearchSnapshotSumOrderByAggregateInput
+  }
+
+  export type SecurityResearchSnapshotScalarWhereWithAggregatesInput = {
+    AND?: SecurityResearchSnapshotScalarWhereWithAggregatesInput | SecurityResearchSnapshotScalarWhereWithAggregatesInput[]
+    OR?: SecurityResearchSnapshotScalarWhereWithAggregatesInput[]
+    NOT?: SecurityResearchSnapshotScalarWhereWithAggregatesInput | SecurityResearchSnapshotScalarWhereWithAggregatesInput[]
+    id?: IntWithAggregatesFilter<"SecurityResearchSnapshot"> | number
+    snapshotKey?: StringWithAggregatesFilter<"SecurityResearchSnapshot"> | string
+    triggerSource?: StringWithAggregatesFilter<"SecurityResearchSnapshot"> | string
+    status?: StringWithAggregatesFilter<"SecurityResearchSnapshot"> | string
+    totalPapers?: IntWithAggregatesFilter<"SecurityResearchSnapshot"> | number
+    conferencePaperCount?: IntWithAggregatesFilter<"SecurityResearchSnapshot"> | number
+    preprintCount?: IntWithAggregatesFilter<"SecurityResearchSnapshot"> | number
+    openclawCount?: IntWithAggregatesFilter<"SecurityResearchSnapshot"> | number
+    clawCount?: IntWithAggregatesFilter<"SecurityResearchSnapshot"> | number
+    skillCount?: IntWithAggregatesFilter<"SecurityResearchSnapshot"> | number
+    agentCount?: IntWithAggregatesFilter<"SecurityResearchSnapshot"> | number
+    pluginCount?: IntWithAggregatesFilter<"SecurityResearchSnapshot"> | number
+    sourceMeta?: JsonWithAggregatesFilter<"SecurityResearchSnapshot">
+    cacheDir?: StringNullableWithAggregatesFilter<"SecurityResearchSnapshot"> | string | null
+    createdAt?: DateTimeWithAggregatesFilter<"SecurityResearchSnapshot"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"SecurityResearchSnapshot"> | Date | string
+  }
+
+  export type SecurityResearchPaperWhereInput = {
+    AND?: SecurityResearchPaperWhereInput | SecurityResearchPaperWhereInput[]
+    OR?: SecurityResearchPaperWhereInput[]
+    NOT?: SecurityResearchPaperWhereInput | SecurityResearchPaperWhereInput[]
+    id?: BigIntFilter<"SecurityResearchPaper"> | bigint | number
+    snapshotId?: IntFilter<"SecurityResearchPaper"> | number
+    canonicalId?: StringFilter<"SecurityResearchPaper"> | string
+    title?: StringFilter<"SecurityResearchPaper"> | string
+    normalizedTitle?: StringFilter<"SecurityResearchPaper"> | string
+    sourceType?: StringFilter<"SecurityResearchPaper"> | string
+    projectScope?: StringFilter<"SecurityResearchPaper"> | string
+    venue?: StringFilter<"SecurityResearchPaper"> | string
+    sourcePrimary?: StringFilter<"SecurityResearchPaper"> | string
+    sourceSearch?: StringFilter<"SecurityResearchPaper"> | string
+    abstractOrSummary?: StringFilter<"SecurityResearchPaper"> | string
+    tags?: JsonFilter<"SecurityResearchPaper">
+    sourceUrl?: StringNullableFilter<"SecurityResearchPaper"> | string | null
+    authors?: JsonFilter<"SecurityResearchPaper">
+    externalIds?: JsonFilter<"SecurityResearchPaper">
+    relevanceScore?: FloatFilter<"SecurityResearchPaper"> | number
+    isTopVenue?: BoolFilter<"SecurityResearchPaper"> | boolean
+    publishedAt?: DateTimeNullableFilter<"SecurityResearchPaper"> | Date | string | null
+    status?: StringFilter<"SecurityResearchPaper"> | string
+    rawData?: JsonFilter<"SecurityResearchPaper">
+    createdAt?: DateTimeFilter<"SecurityResearchPaper"> | Date | string
+    snapshot?: XOR<SecurityResearchSnapshotScalarRelationFilter, SecurityResearchSnapshotWhereInput>
+  }
+
+  export type SecurityResearchPaperOrderByWithRelationInput = {
+    id?: SortOrder
+    snapshotId?: SortOrder
+    canonicalId?: SortOrder
+    title?: SortOrder
+    normalizedTitle?: SortOrder
+    sourceType?: SortOrder
+    projectScope?: SortOrder
+    venue?: SortOrder
+    sourcePrimary?: SortOrder
+    sourceSearch?: SortOrder
+    abstractOrSummary?: SortOrder
+    tags?: SortOrder
+    sourceUrl?: SortOrderInput | SortOrder
+    authors?: SortOrder
+    externalIds?: SortOrder
+    relevanceScore?: SortOrder
+    isTopVenue?: SortOrder
+    publishedAt?: SortOrderInput | SortOrder
+    status?: SortOrder
+    rawData?: SortOrder
+    createdAt?: SortOrder
+    snapshot?: SecurityResearchSnapshotOrderByWithRelationInput
+    _relevance?: SecurityResearchPaperOrderByRelevanceInput
+  }
+
+  export type SecurityResearchPaperWhereUniqueInput = Prisma.AtLeast<{
+    id?: bigint | number
+    snapshotId_canonicalId?: SecurityResearchPaperSnapshotIdCanonicalIdCompoundUniqueInput
+    AND?: SecurityResearchPaperWhereInput | SecurityResearchPaperWhereInput[]
+    OR?: SecurityResearchPaperWhereInput[]
+    NOT?: SecurityResearchPaperWhereInput | SecurityResearchPaperWhereInput[]
+    snapshotId?: IntFilter<"SecurityResearchPaper"> | number
+    canonicalId?: StringFilter<"SecurityResearchPaper"> | string
+    title?: StringFilter<"SecurityResearchPaper"> | string
+    normalizedTitle?: StringFilter<"SecurityResearchPaper"> | string
+    sourceType?: StringFilter<"SecurityResearchPaper"> | string
+    projectScope?: StringFilter<"SecurityResearchPaper"> | string
+    venue?: StringFilter<"SecurityResearchPaper"> | string
+    sourcePrimary?: StringFilter<"SecurityResearchPaper"> | string
+    sourceSearch?: StringFilter<"SecurityResearchPaper"> | string
+    abstractOrSummary?: StringFilter<"SecurityResearchPaper"> | string
+    tags?: JsonFilter<"SecurityResearchPaper">
+    sourceUrl?: StringNullableFilter<"SecurityResearchPaper"> | string | null
+    authors?: JsonFilter<"SecurityResearchPaper">
+    externalIds?: JsonFilter<"SecurityResearchPaper">
+    relevanceScore?: FloatFilter<"SecurityResearchPaper"> | number
+    isTopVenue?: BoolFilter<"SecurityResearchPaper"> | boolean
+    publishedAt?: DateTimeNullableFilter<"SecurityResearchPaper"> | Date | string | null
+    status?: StringFilter<"SecurityResearchPaper"> | string
+    rawData?: JsonFilter<"SecurityResearchPaper">
+    createdAt?: DateTimeFilter<"SecurityResearchPaper"> | Date | string
+    snapshot?: XOR<SecurityResearchSnapshotScalarRelationFilter, SecurityResearchSnapshotWhereInput>
+  }, "id" | "snapshotId_canonicalId">
+
+  export type SecurityResearchPaperOrderByWithAggregationInput = {
+    id?: SortOrder
+    snapshotId?: SortOrder
+    canonicalId?: SortOrder
+    title?: SortOrder
+    normalizedTitle?: SortOrder
+    sourceType?: SortOrder
+    projectScope?: SortOrder
+    venue?: SortOrder
+    sourcePrimary?: SortOrder
+    sourceSearch?: SortOrder
+    abstractOrSummary?: SortOrder
+    tags?: SortOrder
+    sourceUrl?: SortOrderInput | SortOrder
+    authors?: SortOrder
+    externalIds?: SortOrder
+    relevanceScore?: SortOrder
+    isTopVenue?: SortOrder
+    publishedAt?: SortOrderInput | SortOrder
+    status?: SortOrder
+    rawData?: SortOrder
+    createdAt?: SortOrder
+    _count?: SecurityResearchPaperCountOrderByAggregateInput
+    _avg?: SecurityResearchPaperAvgOrderByAggregateInput
+    _max?: SecurityResearchPaperMaxOrderByAggregateInput
+    _min?: SecurityResearchPaperMinOrderByAggregateInput
+    _sum?: SecurityResearchPaperSumOrderByAggregateInput
+  }
+
+  export type SecurityResearchPaperScalarWhereWithAggregatesInput = {
+    AND?: SecurityResearchPaperScalarWhereWithAggregatesInput | SecurityResearchPaperScalarWhereWithAggregatesInput[]
+    OR?: SecurityResearchPaperScalarWhereWithAggregatesInput[]
+    NOT?: SecurityResearchPaperScalarWhereWithAggregatesInput | SecurityResearchPaperScalarWhereWithAggregatesInput[]
+    id?: BigIntWithAggregatesFilter<"SecurityResearchPaper"> | bigint | number
+    snapshotId?: IntWithAggregatesFilter<"SecurityResearchPaper"> | number
+    canonicalId?: StringWithAggregatesFilter<"SecurityResearchPaper"> | string
+    title?: StringWithAggregatesFilter<"SecurityResearchPaper"> | string
+    normalizedTitle?: StringWithAggregatesFilter<"SecurityResearchPaper"> | string
+    sourceType?: StringWithAggregatesFilter<"SecurityResearchPaper"> | string
+    projectScope?: StringWithAggregatesFilter<"SecurityResearchPaper"> | string
+    venue?: StringWithAggregatesFilter<"SecurityResearchPaper"> | string
+    sourcePrimary?: StringWithAggregatesFilter<"SecurityResearchPaper"> | string
+    sourceSearch?: StringWithAggregatesFilter<"SecurityResearchPaper"> | string
+    abstractOrSummary?: StringWithAggregatesFilter<"SecurityResearchPaper"> | string
+    tags?: JsonWithAggregatesFilter<"SecurityResearchPaper">
+    sourceUrl?: StringNullableWithAggregatesFilter<"SecurityResearchPaper"> | string | null
+    authors?: JsonWithAggregatesFilter<"SecurityResearchPaper">
+    externalIds?: JsonWithAggregatesFilter<"SecurityResearchPaper">
+    relevanceScore?: FloatWithAggregatesFilter<"SecurityResearchPaper"> | number
+    isTopVenue?: BoolWithAggregatesFilter<"SecurityResearchPaper"> | boolean
+    publishedAt?: DateTimeNullableWithAggregatesFilter<"SecurityResearchPaper"> | Date | string | null
+    status?: StringWithAggregatesFilter<"SecurityResearchPaper"> | string
+    rawData?: JsonWithAggregatesFilter<"SecurityResearchPaper">
+    createdAt?: DateTimeWithAggregatesFilter<"SecurityResearchPaper"> | Date | string
   }
 
   export type ExposureSnapshotCreateInput = {
@@ -6147,6 +12264,797 @@ export namespace Prisma {
     snapshotDate?: DateTimeFieldUpdateOperationsInput | Date | string
     version?: StringFieldUpdateOperationsInput | string
     count?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type OpenclawRiskSnapshotCreateInput = {
+    snapshotKey: string
+    triggerSource?: string
+    status?: string
+    latestStableTag?: string | null
+    latestStableVersion?: string | null
+    latestStableUrl?: string | null
+    latestStablePublishedAt?: Date | string | null
+    totalIssues?: number
+    githubAdvisories?: number
+    nvdCves?: number
+    officialAdvisoryCount?: number
+    cveRecordCount?: number
+    conferencePaperCount?: number
+    preprintCount?: number
+    researchCount?: number
+    newsCount?: number
+    criticalCount?: number
+    highRiskCount?: number
+    fixedCount?: number
+    unfixedCount?: number
+    unknownCount?: number
+    fixProgressPercent?: number
+    sourceMeta: JsonNullValueInput | InputJsonValue
+    cacheDir?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    issues?: OpenclawRiskIssueCreateNestedManyWithoutSnapshotInput
+  }
+
+  export type OpenclawRiskSnapshotUncheckedCreateInput = {
+    id?: number
+    snapshotKey: string
+    triggerSource?: string
+    status?: string
+    latestStableTag?: string | null
+    latestStableVersion?: string | null
+    latestStableUrl?: string | null
+    latestStablePublishedAt?: Date | string | null
+    totalIssues?: number
+    githubAdvisories?: number
+    nvdCves?: number
+    officialAdvisoryCount?: number
+    cveRecordCount?: number
+    conferencePaperCount?: number
+    preprintCount?: number
+    researchCount?: number
+    newsCount?: number
+    criticalCount?: number
+    highRiskCount?: number
+    fixedCount?: number
+    unfixedCount?: number
+    unknownCount?: number
+    fixProgressPercent?: number
+    sourceMeta: JsonNullValueInput | InputJsonValue
+    cacheDir?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    issues?: OpenclawRiskIssueUncheckedCreateNestedManyWithoutSnapshotInput
+  }
+
+  export type OpenclawRiskSnapshotUpdateInput = {
+    snapshotKey?: StringFieldUpdateOperationsInput | string
+    triggerSource?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    latestStableTag?: NullableStringFieldUpdateOperationsInput | string | null
+    latestStableVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    latestStableUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    latestStablePublishedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    totalIssues?: IntFieldUpdateOperationsInput | number
+    githubAdvisories?: IntFieldUpdateOperationsInput | number
+    nvdCves?: IntFieldUpdateOperationsInput | number
+    officialAdvisoryCount?: IntFieldUpdateOperationsInput | number
+    cveRecordCount?: IntFieldUpdateOperationsInput | number
+    conferencePaperCount?: IntFieldUpdateOperationsInput | number
+    preprintCount?: IntFieldUpdateOperationsInput | number
+    researchCount?: IntFieldUpdateOperationsInput | number
+    newsCount?: IntFieldUpdateOperationsInput | number
+    criticalCount?: IntFieldUpdateOperationsInput | number
+    highRiskCount?: IntFieldUpdateOperationsInput | number
+    fixedCount?: IntFieldUpdateOperationsInput | number
+    unfixedCount?: IntFieldUpdateOperationsInput | number
+    unknownCount?: IntFieldUpdateOperationsInput | number
+    fixProgressPercent?: IntFieldUpdateOperationsInput | number
+    sourceMeta?: JsonNullValueInput | InputJsonValue
+    cacheDir?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    issues?: OpenclawRiskIssueUpdateManyWithoutSnapshotNestedInput
+  }
+
+  export type OpenclawRiskSnapshotUncheckedUpdateInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    snapshotKey?: StringFieldUpdateOperationsInput | string
+    triggerSource?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    latestStableTag?: NullableStringFieldUpdateOperationsInput | string | null
+    latestStableVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    latestStableUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    latestStablePublishedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    totalIssues?: IntFieldUpdateOperationsInput | number
+    githubAdvisories?: IntFieldUpdateOperationsInput | number
+    nvdCves?: IntFieldUpdateOperationsInput | number
+    officialAdvisoryCount?: IntFieldUpdateOperationsInput | number
+    cveRecordCount?: IntFieldUpdateOperationsInput | number
+    conferencePaperCount?: IntFieldUpdateOperationsInput | number
+    preprintCount?: IntFieldUpdateOperationsInput | number
+    researchCount?: IntFieldUpdateOperationsInput | number
+    newsCount?: IntFieldUpdateOperationsInput | number
+    criticalCount?: IntFieldUpdateOperationsInput | number
+    highRiskCount?: IntFieldUpdateOperationsInput | number
+    fixedCount?: IntFieldUpdateOperationsInput | number
+    unfixedCount?: IntFieldUpdateOperationsInput | number
+    unknownCount?: IntFieldUpdateOperationsInput | number
+    fixProgressPercent?: IntFieldUpdateOperationsInput | number
+    sourceMeta?: JsonNullValueInput | InputJsonValue
+    cacheDir?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    issues?: OpenclawRiskIssueUncheckedUpdateManyWithoutSnapshotNestedInput
+  }
+
+  export type OpenclawRiskSnapshotCreateManyInput = {
+    id?: number
+    snapshotKey: string
+    triggerSource?: string
+    status?: string
+    latestStableTag?: string | null
+    latestStableVersion?: string | null
+    latestStableUrl?: string | null
+    latestStablePublishedAt?: Date | string | null
+    totalIssues?: number
+    githubAdvisories?: number
+    nvdCves?: number
+    officialAdvisoryCount?: number
+    cveRecordCount?: number
+    conferencePaperCount?: number
+    preprintCount?: number
+    researchCount?: number
+    newsCount?: number
+    criticalCount?: number
+    highRiskCount?: number
+    fixedCount?: number
+    unfixedCount?: number
+    unknownCount?: number
+    fixProgressPercent?: number
+    sourceMeta: JsonNullValueInput | InputJsonValue
+    cacheDir?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type OpenclawRiskSnapshotUpdateManyMutationInput = {
+    snapshotKey?: StringFieldUpdateOperationsInput | string
+    triggerSource?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    latestStableTag?: NullableStringFieldUpdateOperationsInput | string | null
+    latestStableVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    latestStableUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    latestStablePublishedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    totalIssues?: IntFieldUpdateOperationsInput | number
+    githubAdvisories?: IntFieldUpdateOperationsInput | number
+    nvdCves?: IntFieldUpdateOperationsInput | number
+    officialAdvisoryCount?: IntFieldUpdateOperationsInput | number
+    cveRecordCount?: IntFieldUpdateOperationsInput | number
+    conferencePaperCount?: IntFieldUpdateOperationsInput | number
+    preprintCount?: IntFieldUpdateOperationsInput | number
+    researchCount?: IntFieldUpdateOperationsInput | number
+    newsCount?: IntFieldUpdateOperationsInput | number
+    criticalCount?: IntFieldUpdateOperationsInput | number
+    highRiskCount?: IntFieldUpdateOperationsInput | number
+    fixedCount?: IntFieldUpdateOperationsInput | number
+    unfixedCount?: IntFieldUpdateOperationsInput | number
+    unknownCount?: IntFieldUpdateOperationsInput | number
+    fixProgressPercent?: IntFieldUpdateOperationsInput | number
+    sourceMeta?: JsonNullValueInput | InputJsonValue
+    cacheDir?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type OpenclawRiskSnapshotUncheckedUpdateManyInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    snapshotKey?: StringFieldUpdateOperationsInput | string
+    triggerSource?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    latestStableTag?: NullableStringFieldUpdateOperationsInput | string | null
+    latestStableVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    latestStableUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    latestStablePublishedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    totalIssues?: IntFieldUpdateOperationsInput | number
+    githubAdvisories?: IntFieldUpdateOperationsInput | number
+    nvdCves?: IntFieldUpdateOperationsInput | number
+    officialAdvisoryCount?: IntFieldUpdateOperationsInput | number
+    cveRecordCount?: IntFieldUpdateOperationsInput | number
+    conferencePaperCount?: IntFieldUpdateOperationsInput | number
+    preprintCount?: IntFieldUpdateOperationsInput | number
+    researchCount?: IntFieldUpdateOperationsInput | number
+    newsCount?: IntFieldUpdateOperationsInput | number
+    criticalCount?: IntFieldUpdateOperationsInput | number
+    highRiskCount?: IntFieldUpdateOperationsInput | number
+    fixedCount?: IntFieldUpdateOperationsInput | number
+    unfixedCount?: IntFieldUpdateOperationsInput | number
+    unknownCount?: IntFieldUpdateOperationsInput | number
+    fixProgressPercent?: IntFieldUpdateOperationsInput | number
+    sourceMeta?: JsonNullValueInput | InputJsonValue
+    cacheDir?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type OpenclawRiskIssueCreateInput = {
+    id?: bigint | number
+    canonicalId: string
+    issueId: string
+    title: string
+    summary: string
+    description: string
+    sourcePrimary: string
+    sourceType?: string
+    sourceSearch: string
+    sourceLabels: JsonNullValueInput | InputJsonValue
+    sources: JsonNullValueInput | InputJsonValue
+    githubIds: JsonNullValueInput | InputJsonValue
+    cveIds: JsonNullValueInput | InputJsonValue
+    projectScope?: string
+    venue?: string | null
+    authors: JsonNullValueInput | InputJsonValue
+    severity: string
+    score?: number | null
+    cvssVector?: string | null
+    cwes: JsonNullValueInput | InputJsonValue
+    affectedRange?: string | null
+    fixedVersion?: string | null
+    latestStableVersion?: string | null
+    fixStatus: string
+    fixLabel: string
+    fixReason: string
+    issueUrl?: string | null
+    repoUrl?: string | null
+    referenceUrls: JsonNullValueInput | InputJsonValue
+    tags: JsonNullValueInput | InputJsonValue
+    status?: string
+    relevanceScore?: number | null
+    publishedAt?: Date | string | null
+    sourceUpdatedAt?: Date | string | null
+    rawData: JsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    snapshot: OpenclawRiskSnapshotCreateNestedOneWithoutIssuesInput
+  }
+
+  export type OpenclawRiskIssueUncheckedCreateInput = {
+    id?: bigint | number
+    snapshotId: number
+    canonicalId: string
+    issueId: string
+    title: string
+    summary: string
+    description: string
+    sourcePrimary: string
+    sourceType?: string
+    sourceSearch: string
+    sourceLabels: JsonNullValueInput | InputJsonValue
+    sources: JsonNullValueInput | InputJsonValue
+    githubIds: JsonNullValueInput | InputJsonValue
+    cveIds: JsonNullValueInput | InputJsonValue
+    projectScope?: string
+    venue?: string | null
+    authors: JsonNullValueInput | InputJsonValue
+    severity: string
+    score?: number | null
+    cvssVector?: string | null
+    cwes: JsonNullValueInput | InputJsonValue
+    affectedRange?: string | null
+    fixedVersion?: string | null
+    latestStableVersion?: string | null
+    fixStatus: string
+    fixLabel: string
+    fixReason: string
+    issueUrl?: string | null
+    repoUrl?: string | null
+    referenceUrls: JsonNullValueInput | InputJsonValue
+    tags: JsonNullValueInput | InputJsonValue
+    status?: string
+    relevanceScore?: number | null
+    publishedAt?: Date | string | null
+    sourceUpdatedAt?: Date | string | null
+    rawData: JsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+  }
+
+  export type OpenclawRiskIssueUpdateInput = {
+    id?: BigIntFieldUpdateOperationsInput | bigint | number
+    canonicalId?: StringFieldUpdateOperationsInput | string
+    issueId?: StringFieldUpdateOperationsInput | string
+    title?: StringFieldUpdateOperationsInput | string
+    summary?: StringFieldUpdateOperationsInput | string
+    description?: StringFieldUpdateOperationsInput | string
+    sourcePrimary?: StringFieldUpdateOperationsInput | string
+    sourceType?: StringFieldUpdateOperationsInput | string
+    sourceSearch?: StringFieldUpdateOperationsInput | string
+    sourceLabels?: JsonNullValueInput | InputJsonValue
+    sources?: JsonNullValueInput | InputJsonValue
+    githubIds?: JsonNullValueInput | InputJsonValue
+    cveIds?: JsonNullValueInput | InputJsonValue
+    projectScope?: StringFieldUpdateOperationsInput | string
+    venue?: NullableStringFieldUpdateOperationsInput | string | null
+    authors?: JsonNullValueInput | InputJsonValue
+    severity?: StringFieldUpdateOperationsInput | string
+    score?: NullableFloatFieldUpdateOperationsInput | number | null
+    cvssVector?: NullableStringFieldUpdateOperationsInput | string | null
+    cwes?: JsonNullValueInput | InputJsonValue
+    affectedRange?: NullableStringFieldUpdateOperationsInput | string | null
+    fixedVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    latestStableVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    fixStatus?: StringFieldUpdateOperationsInput | string
+    fixLabel?: StringFieldUpdateOperationsInput | string
+    fixReason?: StringFieldUpdateOperationsInput | string
+    issueUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    repoUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    referenceUrls?: JsonNullValueInput | InputJsonValue
+    tags?: JsonNullValueInput | InputJsonValue
+    status?: StringFieldUpdateOperationsInput | string
+    relevanceScore?: NullableFloatFieldUpdateOperationsInput | number | null
+    publishedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    sourceUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    rawData?: JsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    snapshot?: OpenclawRiskSnapshotUpdateOneRequiredWithoutIssuesNestedInput
+  }
+
+  export type OpenclawRiskIssueUncheckedUpdateInput = {
+    id?: BigIntFieldUpdateOperationsInput | bigint | number
+    snapshotId?: IntFieldUpdateOperationsInput | number
+    canonicalId?: StringFieldUpdateOperationsInput | string
+    issueId?: StringFieldUpdateOperationsInput | string
+    title?: StringFieldUpdateOperationsInput | string
+    summary?: StringFieldUpdateOperationsInput | string
+    description?: StringFieldUpdateOperationsInput | string
+    sourcePrimary?: StringFieldUpdateOperationsInput | string
+    sourceType?: StringFieldUpdateOperationsInput | string
+    sourceSearch?: StringFieldUpdateOperationsInput | string
+    sourceLabels?: JsonNullValueInput | InputJsonValue
+    sources?: JsonNullValueInput | InputJsonValue
+    githubIds?: JsonNullValueInput | InputJsonValue
+    cveIds?: JsonNullValueInput | InputJsonValue
+    projectScope?: StringFieldUpdateOperationsInput | string
+    venue?: NullableStringFieldUpdateOperationsInput | string | null
+    authors?: JsonNullValueInput | InputJsonValue
+    severity?: StringFieldUpdateOperationsInput | string
+    score?: NullableFloatFieldUpdateOperationsInput | number | null
+    cvssVector?: NullableStringFieldUpdateOperationsInput | string | null
+    cwes?: JsonNullValueInput | InputJsonValue
+    affectedRange?: NullableStringFieldUpdateOperationsInput | string | null
+    fixedVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    latestStableVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    fixStatus?: StringFieldUpdateOperationsInput | string
+    fixLabel?: StringFieldUpdateOperationsInput | string
+    fixReason?: StringFieldUpdateOperationsInput | string
+    issueUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    repoUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    referenceUrls?: JsonNullValueInput | InputJsonValue
+    tags?: JsonNullValueInput | InputJsonValue
+    status?: StringFieldUpdateOperationsInput | string
+    relevanceScore?: NullableFloatFieldUpdateOperationsInput | number | null
+    publishedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    sourceUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    rawData?: JsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type OpenclawRiskIssueCreateManyInput = {
+    id?: bigint | number
+    snapshotId: number
+    canonicalId: string
+    issueId: string
+    title: string
+    summary: string
+    description: string
+    sourcePrimary: string
+    sourceType?: string
+    sourceSearch: string
+    sourceLabels: JsonNullValueInput | InputJsonValue
+    sources: JsonNullValueInput | InputJsonValue
+    githubIds: JsonNullValueInput | InputJsonValue
+    cveIds: JsonNullValueInput | InputJsonValue
+    projectScope?: string
+    venue?: string | null
+    authors: JsonNullValueInput | InputJsonValue
+    severity: string
+    score?: number | null
+    cvssVector?: string | null
+    cwes: JsonNullValueInput | InputJsonValue
+    affectedRange?: string | null
+    fixedVersion?: string | null
+    latestStableVersion?: string | null
+    fixStatus: string
+    fixLabel: string
+    fixReason: string
+    issueUrl?: string | null
+    repoUrl?: string | null
+    referenceUrls: JsonNullValueInput | InputJsonValue
+    tags: JsonNullValueInput | InputJsonValue
+    status?: string
+    relevanceScore?: number | null
+    publishedAt?: Date | string | null
+    sourceUpdatedAt?: Date | string | null
+    rawData: JsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+  }
+
+  export type OpenclawRiskIssueUpdateManyMutationInput = {
+    id?: BigIntFieldUpdateOperationsInput | bigint | number
+    canonicalId?: StringFieldUpdateOperationsInput | string
+    issueId?: StringFieldUpdateOperationsInput | string
+    title?: StringFieldUpdateOperationsInput | string
+    summary?: StringFieldUpdateOperationsInput | string
+    description?: StringFieldUpdateOperationsInput | string
+    sourcePrimary?: StringFieldUpdateOperationsInput | string
+    sourceType?: StringFieldUpdateOperationsInput | string
+    sourceSearch?: StringFieldUpdateOperationsInput | string
+    sourceLabels?: JsonNullValueInput | InputJsonValue
+    sources?: JsonNullValueInput | InputJsonValue
+    githubIds?: JsonNullValueInput | InputJsonValue
+    cveIds?: JsonNullValueInput | InputJsonValue
+    projectScope?: StringFieldUpdateOperationsInput | string
+    venue?: NullableStringFieldUpdateOperationsInput | string | null
+    authors?: JsonNullValueInput | InputJsonValue
+    severity?: StringFieldUpdateOperationsInput | string
+    score?: NullableFloatFieldUpdateOperationsInput | number | null
+    cvssVector?: NullableStringFieldUpdateOperationsInput | string | null
+    cwes?: JsonNullValueInput | InputJsonValue
+    affectedRange?: NullableStringFieldUpdateOperationsInput | string | null
+    fixedVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    latestStableVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    fixStatus?: StringFieldUpdateOperationsInput | string
+    fixLabel?: StringFieldUpdateOperationsInput | string
+    fixReason?: StringFieldUpdateOperationsInput | string
+    issueUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    repoUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    referenceUrls?: JsonNullValueInput | InputJsonValue
+    tags?: JsonNullValueInput | InputJsonValue
+    status?: StringFieldUpdateOperationsInput | string
+    relevanceScore?: NullableFloatFieldUpdateOperationsInput | number | null
+    publishedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    sourceUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    rawData?: JsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type OpenclawRiskIssueUncheckedUpdateManyInput = {
+    id?: BigIntFieldUpdateOperationsInput | bigint | number
+    snapshotId?: IntFieldUpdateOperationsInput | number
+    canonicalId?: StringFieldUpdateOperationsInput | string
+    issueId?: StringFieldUpdateOperationsInput | string
+    title?: StringFieldUpdateOperationsInput | string
+    summary?: StringFieldUpdateOperationsInput | string
+    description?: StringFieldUpdateOperationsInput | string
+    sourcePrimary?: StringFieldUpdateOperationsInput | string
+    sourceType?: StringFieldUpdateOperationsInput | string
+    sourceSearch?: StringFieldUpdateOperationsInput | string
+    sourceLabels?: JsonNullValueInput | InputJsonValue
+    sources?: JsonNullValueInput | InputJsonValue
+    githubIds?: JsonNullValueInput | InputJsonValue
+    cveIds?: JsonNullValueInput | InputJsonValue
+    projectScope?: StringFieldUpdateOperationsInput | string
+    venue?: NullableStringFieldUpdateOperationsInput | string | null
+    authors?: JsonNullValueInput | InputJsonValue
+    severity?: StringFieldUpdateOperationsInput | string
+    score?: NullableFloatFieldUpdateOperationsInput | number | null
+    cvssVector?: NullableStringFieldUpdateOperationsInput | string | null
+    cwes?: JsonNullValueInput | InputJsonValue
+    affectedRange?: NullableStringFieldUpdateOperationsInput | string | null
+    fixedVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    latestStableVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    fixStatus?: StringFieldUpdateOperationsInput | string
+    fixLabel?: StringFieldUpdateOperationsInput | string
+    fixReason?: StringFieldUpdateOperationsInput | string
+    issueUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    repoUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    referenceUrls?: JsonNullValueInput | InputJsonValue
+    tags?: JsonNullValueInput | InputJsonValue
+    status?: StringFieldUpdateOperationsInput | string
+    relevanceScore?: NullableFloatFieldUpdateOperationsInput | number | null
+    publishedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    sourceUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    rawData?: JsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type SecurityResearchSnapshotCreateInput = {
+    snapshotKey: string
+    triggerSource?: string
+    status?: string
+    totalPapers?: number
+    conferencePaperCount?: number
+    preprintCount?: number
+    openclawCount?: number
+    clawCount?: number
+    skillCount?: number
+    agentCount?: number
+    pluginCount?: number
+    sourceMeta: JsonNullValueInput | InputJsonValue
+    cacheDir?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    papers?: SecurityResearchPaperCreateNestedManyWithoutSnapshotInput
+  }
+
+  export type SecurityResearchSnapshotUncheckedCreateInput = {
+    id?: number
+    snapshotKey: string
+    triggerSource?: string
+    status?: string
+    totalPapers?: number
+    conferencePaperCount?: number
+    preprintCount?: number
+    openclawCount?: number
+    clawCount?: number
+    skillCount?: number
+    agentCount?: number
+    pluginCount?: number
+    sourceMeta: JsonNullValueInput | InputJsonValue
+    cacheDir?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    papers?: SecurityResearchPaperUncheckedCreateNestedManyWithoutSnapshotInput
+  }
+
+  export type SecurityResearchSnapshotUpdateInput = {
+    snapshotKey?: StringFieldUpdateOperationsInput | string
+    triggerSource?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    totalPapers?: IntFieldUpdateOperationsInput | number
+    conferencePaperCount?: IntFieldUpdateOperationsInput | number
+    preprintCount?: IntFieldUpdateOperationsInput | number
+    openclawCount?: IntFieldUpdateOperationsInput | number
+    clawCount?: IntFieldUpdateOperationsInput | number
+    skillCount?: IntFieldUpdateOperationsInput | number
+    agentCount?: IntFieldUpdateOperationsInput | number
+    pluginCount?: IntFieldUpdateOperationsInput | number
+    sourceMeta?: JsonNullValueInput | InputJsonValue
+    cacheDir?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    papers?: SecurityResearchPaperUpdateManyWithoutSnapshotNestedInput
+  }
+
+  export type SecurityResearchSnapshotUncheckedUpdateInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    snapshotKey?: StringFieldUpdateOperationsInput | string
+    triggerSource?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    totalPapers?: IntFieldUpdateOperationsInput | number
+    conferencePaperCount?: IntFieldUpdateOperationsInput | number
+    preprintCount?: IntFieldUpdateOperationsInput | number
+    openclawCount?: IntFieldUpdateOperationsInput | number
+    clawCount?: IntFieldUpdateOperationsInput | number
+    skillCount?: IntFieldUpdateOperationsInput | number
+    agentCount?: IntFieldUpdateOperationsInput | number
+    pluginCount?: IntFieldUpdateOperationsInput | number
+    sourceMeta?: JsonNullValueInput | InputJsonValue
+    cacheDir?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    papers?: SecurityResearchPaperUncheckedUpdateManyWithoutSnapshotNestedInput
+  }
+
+  export type SecurityResearchSnapshotCreateManyInput = {
+    id?: number
+    snapshotKey: string
+    triggerSource?: string
+    status?: string
+    totalPapers?: number
+    conferencePaperCount?: number
+    preprintCount?: number
+    openclawCount?: number
+    clawCount?: number
+    skillCount?: number
+    agentCount?: number
+    pluginCount?: number
+    sourceMeta: JsonNullValueInput | InputJsonValue
+    cacheDir?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type SecurityResearchSnapshotUpdateManyMutationInput = {
+    snapshotKey?: StringFieldUpdateOperationsInput | string
+    triggerSource?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    totalPapers?: IntFieldUpdateOperationsInput | number
+    conferencePaperCount?: IntFieldUpdateOperationsInput | number
+    preprintCount?: IntFieldUpdateOperationsInput | number
+    openclawCount?: IntFieldUpdateOperationsInput | number
+    clawCount?: IntFieldUpdateOperationsInput | number
+    skillCount?: IntFieldUpdateOperationsInput | number
+    agentCount?: IntFieldUpdateOperationsInput | number
+    pluginCount?: IntFieldUpdateOperationsInput | number
+    sourceMeta?: JsonNullValueInput | InputJsonValue
+    cacheDir?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type SecurityResearchSnapshotUncheckedUpdateManyInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    snapshotKey?: StringFieldUpdateOperationsInput | string
+    triggerSource?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    totalPapers?: IntFieldUpdateOperationsInput | number
+    conferencePaperCount?: IntFieldUpdateOperationsInput | number
+    preprintCount?: IntFieldUpdateOperationsInput | number
+    openclawCount?: IntFieldUpdateOperationsInput | number
+    clawCount?: IntFieldUpdateOperationsInput | number
+    skillCount?: IntFieldUpdateOperationsInput | number
+    agentCount?: IntFieldUpdateOperationsInput | number
+    pluginCount?: IntFieldUpdateOperationsInput | number
+    sourceMeta?: JsonNullValueInput | InputJsonValue
+    cacheDir?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type SecurityResearchPaperCreateInput = {
+    id?: bigint | number
+    canonicalId: string
+    title: string
+    normalizedTitle: string
+    sourceType: string
+    projectScope: string
+    venue: string
+    sourcePrimary: string
+    sourceSearch: string
+    abstractOrSummary: string
+    tags: JsonNullValueInput | InputJsonValue
+    sourceUrl?: string | null
+    authors: JsonNullValueInput | InputJsonValue
+    externalIds: JsonNullValueInput | InputJsonValue
+    relevanceScore?: number
+    isTopVenue?: boolean
+    publishedAt?: Date | string | null
+    status?: string
+    rawData: JsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    snapshot: SecurityResearchSnapshotCreateNestedOneWithoutPapersInput
+  }
+
+  export type SecurityResearchPaperUncheckedCreateInput = {
+    id?: bigint | number
+    snapshotId: number
+    canonicalId: string
+    title: string
+    normalizedTitle: string
+    sourceType: string
+    projectScope: string
+    venue: string
+    sourcePrimary: string
+    sourceSearch: string
+    abstractOrSummary: string
+    tags: JsonNullValueInput | InputJsonValue
+    sourceUrl?: string | null
+    authors: JsonNullValueInput | InputJsonValue
+    externalIds: JsonNullValueInput | InputJsonValue
+    relevanceScore?: number
+    isTopVenue?: boolean
+    publishedAt?: Date | string | null
+    status?: string
+    rawData: JsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+  }
+
+  export type SecurityResearchPaperUpdateInput = {
+    id?: BigIntFieldUpdateOperationsInput | bigint | number
+    canonicalId?: StringFieldUpdateOperationsInput | string
+    title?: StringFieldUpdateOperationsInput | string
+    normalizedTitle?: StringFieldUpdateOperationsInput | string
+    sourceType?: StringFieldUpdateOperationsInput | string
+    projectScope?: StringFieldUpdateOperationsInput | string
+    venue?: StringFieldUpdateOperationsInput | string
+    sourcePrimary?: StringFieldUpdateOperationsInput | string
+    sourceSearch?: StringFieldUpdateOperationsInput | string
+    abstractOrSummary?: StringFieldUpdateOperationsInput | string
+    tags?: JsonNullValueInput | InputJsonValue
+    sourceUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    authors?: JsonNullValueInput | InputJsonValue
+    externalIds?: JsonNullValueInput | InputJsonValue
+    relevanceScore?: FloatFieldUpdateOperationsInput | number
+    isTopVenue?: BoolFieldUpdateOperationsInput | boolean
+    publishedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    status?: StringFieldUpdateOperationsInput | string
+    rawData?: JsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    snapshot?: SecurityResearchSnapshotUpdateOneRequiredWithoutPapersNestedInput
+  }
+
+  export type SecurityResearchPaperUncheckedUpdateInput = {
+    id?: BigIntFieldUpdateOperationsInput | bigint | number
+    snapshotId?: IntFieldUpdateOperationsInput | number
+    canonicalId?: StringFieldUpdateOperationsInput | string
+    title?: StringFieldUpdateOperationsInput | string
+    normalizedTitle?: StringFieldUpdateOperationsInput | string
+    sourceType?: StringFieldUpdateOperationsInput | string
+    projectScope?: StringFieldUpdateOperationsInput | string
+    venue?: StringFieldUpdateOperationsInput | string
+    sourcePrimary?: StringFieldUpdateOperationsInput | string
+    sourceSearch?: StringFieldUpdateOperationsInput | string
+    abstractOrSummary?: StringFieldUpdateOperationsInput | string
+    tags?: JsonNullValueInput | InputJsonValue
+    sourceUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    authors?: JsonNullValueInput | InputJsonValue
+    externalIds?: JsonNullValueInput | InputJsonValue
+    relevanceScore?: FloatFieldUpdateOperationsInput | number
+    isTopVenue?: BoolFieldUpdateOperationsInput | boolean
+    publishedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    status?: StringFieldUpdateOperationsInput | string
+    rawData?: JsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type SecurityResearchPaperCreateManyInput = {
+    id?: bigint | number
+    snapshotId: number
+    canonicalId: string
+    title: string
+    normalizedTitle: string
+    sourceType: string
+    projectScope: string
+    venue: string
+    sourcePrimary: string
+    sourceSearch: string
+    abstractOrSummary: string
+    tags: JsonNullValueInput | InputJsonValue
+    sourceUrl?: string | null
+    authors: JsonNullValueInput | InputJsonValue
+    externalIds: JsonNullValueInput | InputJsonValue
+    relevanceScore?: number
+    isTopVenue?: boolean
+    publishedAt?: Date | string | null
+    status?: string
+    rawData: JsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+  }
+
+  export type SecurityResearchPaperUpdateManyMutationInput = {
+    id?: BigIntFieldUpdateOperationsInput | bigint | number
+    canonicalId?: StringFieldUpdateOperationsInput | string
+    title?: StringFieldUpdateOperationsInput | string
+    normalizedTitle?: StringFieldUpdateOperationsInput | string
+    sourceType?: StringFieldUpdateOperationsInput | string
+    projectScope?: StringFieldUpdateOperationsInput | string
+    venue?: StringFieldUpdateOperationsInput | string
+    sourcePrimary?: StringFieldUpdateOperationsInput | string
+    sourceSearch?: StringFieldUpdateOperationsInput | string
+    abstractOrSummary?: StringFieldUpdateOperationsInput | string
+    tags?: JsonNullValueInput | InputJsonValue
+    sourceUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    authors?: JsonNullValueInput | InputJsonValue
+    externalIds?: JsonNullValueInput | InputJsonValue
+    relevanceScore?: FloatFieldUpdateOperationsInput | number
+    isTopVenue?: BoolFieldUpdateOperationsInput | boolean
+    publishedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    status?: StringFieldUpdateOperationsInput | string
+    rawData?: JsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type SecurityResearchPaperUncheckedUpdateManyInput = {
+    id?: BigIntFieldUpdateOperationsInput | bigint | number
+    snapshotId?: IntFieldUpdateOperationsInput | number
+    canonicalId?: StringFieldUpdateOperationsInput | string
+    title?: StringFieldUpdateOperationsInput | string
+    normalizedTitle?: StringFieldUpdateOperationsInput | string
+    sourceType?: StringFieldUpdateOperationsInput | string
+    projectScope?: StringFieldUpdateOperationsInput | string
+    venue?: StringFieldUpdateOperationsInput | string
+    sourcePrimary?: StringFieldUpdateOperationsInput | string
+    sourceSearch?: StringFieldUpdateOperationsInput | string
+    abstractOrSummary?: StringFieldUpdateOperationsInput | string
+    tags?: JsonNullValueInput | InputJsonValue
+    sourceUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    authors?: JsonNullValueInput | InputJsonValue
+    externalIds?: JsonNullValueInput | InputJsonValue
+    relevanceScore?: FloatFieldUpdateOperationsInput | number
+    isTopVenue?: BoolFieldUpdateOperationsInput | boolean
+    publishedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    status?: StringFieldUpdateOperationsInput | string
+    rawData?: JsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
@@ -6552,6 +13460,641 @@ export namespace Prisma {
     count?: SortOrder
   }
 
+  export type StringNullableFilter<$PrismaModel = never> = {
+    equals?: string | StringFieldRefInput<$PrismaModel> | null
+    in?: string[] | null
+    notIn?: string[] | null
+    lt?: string | StringFieldRefInput<$PrismaModel>
+    lte?: string | StringFieldRefInput<$PrismaModel>
+    gt?: string | StringFieldRefInput<$PrismaModel>
+    gte?: string | StringFieldRefInput<$PrismaModel>
+    contains?: string | StringFieldRefInput<$PrismaModel>
+    startsWith?: string | StringFieldRefInput<$PrismaModel>
+    endsWith?: string | StringFieldRefInput<$PrismaModel>
+    search?: string
+    not?: NestedStringNullableFilter<$PrismaModel> | string | null
+  }
+
+  export type DateTimeNullableFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
+    in?: Date[] | string[] | null
+    notIn?: Date[] | string[] | null
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeNullableFilter<$PrismaModel> | Date | string | null
+  }
+  export type JsonFilter<$PrismaModel = never> =
+    | PatchUndefined<
+        Either<Required<JsonFilterBase<$PrismaModel>>, Exclude<keyof Required<JsonFilterBase<$PrismaModel>>, 'path'>>,
+        Required<JsonFilterBase<$PrismaModel>>
+      >
+    | OptionalFlat<Omit<Required<JsonFilterBase<$PrismaModel>>, 'path'>>
+
+  export type JsonFilterBase<$PrismaModel = never> = {
+    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    path?: string
+    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
+    string_contains?: string | StringFieldRefInput<$PrismaModel>
+    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
+    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
+    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    lt?: InputJsonValue
+    lte?: InputJsonValue
+    gt?: InputJsonValue
+    gte?: InputJsonValue
+    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+  }
+
+  export type OpenclawRiskIssueListRelationFilter = {
+    every?: OpenclawRiskIssueWhereInput
+    some?: OpenclawRiskIssueWhereInput
+    none?: OpenclawRiskIssueWhereInput
+  }
+
+  export type OpenclawRiskIssueOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type OpenclawRiskSnapshotOrderByRelevanceInput = {
+    fields: OpenclawRiskSnapshotOrderByRelevanceFieldEnum | OpenclawRiskSnapshotOrderByRelevanceFieldEnum[]
+    sort: SortOrder
+    search: string
+  }
+
+  export type OpenclawRiskSnapshotCountOrderByAggregateInput = {
+    id?: SortOrder
+    snapshotKey?: SortOrder
+    triggerSource?: SortOrder
+    status?: SortOrder
+    latestStableTag?: SortOrder
+    latestStableVersion?: SortOrder
+    latestStableUrl?: SortOrder
+    latestStablePublishedAt?: SortOrder
+    totalIssues?: SortOrder
+    githubAdvisories?: SortOrder
+    nvdCves?: SortOrder
+    officialAdvisoryCount?: SortOrder
+    cveRecordCount?: SortOrder
+    conferencePaperCount?: SortOrder
+    preprintCount?: SortOrder
+    researchCount?: SortOrder
+    newsCount?: SortOrder
+    criticalCount?: SortOrder
+    highRiskCount?: SortOrder
+    fixedCount?: SortOrder
+    unfixedCount?: SortOrder
+    unknownCount?: SortOrder
+    fixProgressPercent?: SortOrder
+    sourceMeta?: SortOrder
+    cacheDir?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type OpenclawRiskSnapshotAvgOrderByAggregateInput = {
+    id?: SortOrder
+    totalIssues?: SortOrder
+    githubAdvisories?: SortOrder
+    nvdCves?: SortOrder
+    officialAdvisoryCount?: SortOrder
+    cveRecordCount?: SortOrder
+    conferencePaperCount?: SortOrder
+    preprintCount?: SortOrder
+    researchCount?: SortOrder
+    newsCount?: SortOrder
+    criticalCount?: SortOrder
+    highRiskCount?: SortOrder
+    fixedCount?: SortOrder
+    unfixedCount?: SortOrder
+    unknownCount?: SortOrder
+    fixProgressPercent?: SortOrder
+  }
+
+  export type OpenclawRiskSnapshotMaxOrderByAggregateInput = {
+    id?: SortOrder
+    snapshotKey?: SortOrder
+    triggerSource?: SortOrder
+    status?: SortOrder
+    latestStableTag?: SortOrder
+    latestStableVersion?: SortOrder
+    latestStableUrl?: SortOrder
+    latestStablePublishedAt?: SortOrder
+    totalIssues?: SortOrder
+    githubAdvisories?: SortOrder
+    nvdCves?: SortOrder
+    officialAdvisoryCount?: SortOrder
+    cveRecordCount?: SortOrder
+    conferencePaperCount?: SortOrder
+    preprintCount?: SortOrder
+    researchCount?: SortOrder
+    newsCount?: SortOrder
+    criticalCount?: SortOrder
+    highRiskCount?: SortOrder
+    fixedCount?: SortOrder
+    unfixedCount?: SortOrder
+    unknownCount?: SortOrder
+    fixProgressPercent?: SortOrder
+    cacheDir?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type OpenclawRiskSnapshotMinOrderByAggregateInput = {
+    id?: SortOrder
+    snapshotKey?: SortOrder
+    triggerSource?: SortOrder
+    status?: SortOrder
+    latestStableTag?: SortOrder
+    latestStableVersion?: SortOrder
+    latestStableUrl?: SortOrder
+    latestStablePublishedAt?: SortOrder
+    totalIssues?: SortOrder
+    githubAdvisories?: SortOrder
+    nvdCves?: SortOrder
+    officialAdvisoryCount?: SortOrder
+    cveRecordCount?: SortOrder
+    conferencePaperCount?: SortOrder
+    preprintCount?: SortOrder
+    researchCount?: SortOrder
+    newsCount?: SortOrder
+    criticalCount?: SortOrder
+    highRiskCount?: SortOrder
+    fixedCount?: SortOrder
+    unfixedCount?: SortOrder
+    unknownCount?: SortOrder
+    fixProgressPercent?: SortOrder
+    cacheDir?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type OpenclawRiskSnapshotSumOrderByAggregateInput = {
+    id?: SortOrder
+    totalIssues?: SortOrder
+    githubAdvisories?: SortOrder
+    nvdCves?: SortOrder
+    officialAdvisoryCount?: SortOrder
+    cveRecordCount?: SortOrder
+    conferencePaperCount?: SortOrder
+    preprintCount?: SortOrder
+    researchCount?: SortOrder
+    newsCount?: SortOrder
+    criticalCount?: SortOrder
+    highRiskCount?: SortOrder
+    fixedCount?: SortOrder
+    unfixedCount?: SortOrder
+    unknownCount?: SortOrder
+    fixProgressPercent?: SortOrder
+  }
+
+  export type StringNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: string | StringFieldRefInput<$PrismaModel> | null
+    in?: string[] | null
+    notIn?: string[] | null
+    lt?: string | StringFieldRefInput<$PrismaModel>
+    lte?: string | StringFieldRefInput<$PrismaModel>
+    gt?: string | StringFieldRefInput<$PrismaModel>
+    gte?: string | StringFieldRefInput<$PrismaModel>
+    contains?: string | StringFieldRefInput<$PrismaModel>
+    startsWith?: string | StringFieldRefInput<$PrismaModel>
+    endsWith?: string | StringFieldRefInput<$PrismaModel>
+    search?: string
+    not?: NestedStringNullableWithAggregatesFilter<$PrismaModel> | string | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedStringNullableFilter<$PrismaModel>
+    _max?: NestedStringNullableFilter<$PrismaModel>
+  }
+
+  export type DateTimeNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
+    in?: Date[] | string[] | null
+    notIn?: Date[] | string[] | null
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeNullableWithAggregatesFilter<$PrismaModel> | Date | string | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedDateTimeNullableFilter<$PrismaModel>
+    _max?: NestedDateTimeNullableFilter<$PrismaModel>
+  }
+  export type JsonWithAggregatesFilter<$PrismaModel = never> =
+    | PatchUndefined<
+        Either<Required<JsonWithAggregatesFilterBase<$PrismaModel>>, Exclude<keyof Required<JsonWithAggregatesFilterBase<$PrismaModel>>, 'path'>>,
+        Required<JsonWithAggregatesFilterBase<$PrismaModel>>
+      >
+    | OptionalFlat<Omit<Required<JsonWithAggregatesFilterBase<$PrismaModel>>, 'path'>>
+
+  export type JsonWithAggregatesFilterBase<$PrismaModel = never> = {
+    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    path?: string
+    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
+    string_contains?: string | StringFieldRefInput<$PrismaModel>
+    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
+    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
+    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    lt?: InputJsonValue
+    lte?: InputJsonValue
+    gt?: InputJsonValue
+    gte?: InputJsonValue
+    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedJsonFilter<$PrismaModel>
+    _max?: NestedJsonFilter<$PrismaModel>
+  }
+
+  export type FloatNullableFilter<$PrismaModel = never> = {
+    equals?: number | FloatFieldRefInput<$PrismaModel> | null
+    in?: number[] | null
+    notIn?: number[] | null
+    lt?: number | FloatFieldRefInput<$PrismaModel>
+    lte?: number | FloatFieldRefInput<$PrismaModel>
+    gt?: number | FloatFieldRefInput<$PrismaModel>
+    gte?: number | FloatFieldRefInput<$PrismaModel>
+    not?: NestedFloatNullableFilter<$PrismaModel> | number | null
+  }
+
+  export type OpenclawRiskSnapshotScalarRelationFilter = {
+    is?: OpenclawRiskSnapshotWhereInput
+    isNot?: OpenclawRiskSnapshotWhereInput
+  }
+
+  export type OpenclawRiskIssueOrderByRelevanceInput = {
+    fields: OpenclawRiskIssueOrderByRelevanceFieldEnum | OpenclawRiskIssueOrderByRelevanceFieldEnum[]
+    sort: SortOrder
+    search: string
+  }
+
+  export type OpenclawRiskIssueSnapshotIdCanonicalIdCompoundUniqueInput = {
+    snapshotId: number
+    canonicalId: string
+  }
+
+  export type OpenclawRiskIssueCountOrderByAggregateInput = {
+    id?: SortOrder
+    snapshotId?: SortOrder
+    canonicalId?: SortOrder
+    issueId?: SortOrder
+    title?: SortOrder
+    summary?: SortOrder
+    description?: SortOrder
+    sourcePrimary?: SortOrder
+    sourceType?: SortOrder
+    sourceSearch?: SortOrder
+    sourceLabels?: SortOrder
+    sources?: SortOrder
+    githubIds?: SortOrder
+    cveIds?: SortOrder
+    projectScope?: SortOrder
+    venue?: SortOrder
+    authors?: SortOrder
+    severity?: SortOrder
+    score?: SortOrder
+    cvssVector?: SortOrder
+    cwes?: SortOrder
+    affectedRange?: SortOrder
+    fixedVersion?: SortOrder
+    latestStableVersion?: SortOrder
+    fixStatus?: SortOrder
+    fixLabel?: SortOrder
+    fixReason?: SortOrder
+    issueUrl?: SortOrder
+    repoUrl?: SortOrder
+    referenceUrls?: SortOrder
+    tags?: SortOrder
+    status?: SortOrder
+    relevanceScore?: SortOrder
+    publishedAt?: SortOrder
+    sourceUpdatedAt?: SortOrder
+    rawData?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type OpenclawRiskIssueAvgOrderByAggregateInput = {
+    id?: SortOrder
+    snapshotId?: SortOrder
+    score?: SortOrder
+    relevanceScore?: SortOrder
+  }
+
+  export type OpenclawRiskIssueMaxOrderByAggregateInput = {
+    id?: SortOrder
+    snapshotId?: SortOrder
+    canonicalId?: SortOrder
+    issueId?: SortOrder
+    title?: SortOrder
+    summary?: SortOrder
+    description?: SortOrder
+    sourcePrimary?: SortOrder
+    sourceType?: SortOrder
+    sourceSearch?: SortOrder
+    projectScope?: SortOrder
+    venue?: SortOrder
+    severity?: SortOrder
+    score?: SortOrder
+    cvssVector?: SortOrder
+    affectedRange?: SortOrder
+    fixedVersion?: SortOrder
+    latestStableVersion?: SortOrder
+    fixStatus?: SortOrder
+    fixLabel?: SortOrder
+    fixReason?: SortOrder
+    issueUrl?: SortOrder
+    repoUrl?: SortOrder
+    status?: SortOrder
+    relevanceScore?: SortOrder
+    publishedAt?: SortOrder
+    sourceUpdatedAt?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type OpenclawRiskIssueMinOrderByAggregateInput = {
+    id?: SortOrder
+    snapshotId?: SortOrder
+    canonicalId?: SortOrder
+    issueId?: SortOrder
+    title?: SortOrder
+    summary?: SortOrder
+    description?: SortOrder
+    sourcePrimary?: SortOrder
+    sourceType?: SortOrder
+    sourceSearch?: SortOrder
+    projectScope?: SortOrder
+    venue?: SortOrder
+    severity?: SortOrder
+    score?: SortOrder
+    cvssVector?: SortOrder
+    affectedRange?: SortOrder
+    fixedVersion?: SortOrder
+    latestStableVersion?: SortOrder
+    fixStatus?: SortOrder
+    fixLabel?: SortOrder
+    fixReason?: SortOrder
+    issueUrl?: SortOrder
+    repoUrl?: SortOrder
+    status?: SortOrder
+    relevanceScore?: SortOrder
+    publishedAt?: SortOrder
+    sourceUpdatedAt?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type OpenclawRiskIssueSumOrderByAggregateInput = {
+    id?: SortOrder
+    snapshotId?: SortOrder
+    score?: SortOrder
+    relevanceScore?: SortOrder
+  }
+
+  export type FloatNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: number | FloatFieldRefInput<$PrismaModel> | null
+    in?: number[] | null
+    notIn?: number[] | null
+    lt?: number | FloatFieldRefInput<$PrismaModel>
+    lte?: number | FloatFieldRefInput<$PrismaModel>
+    gt?: number | FloatFieldRefInput<$PrismaModel>
+    gte?: number | FloatFieldRefInput<$PrismaModel>
+    not?: NestedFloatNullableWithAggregatesFilter<$PrismaModel> | number | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _avg?: NestedFloatNullableFilter<$PrismaModel>
+    _sum?: NestedFloatNullableFilter<$PrismaModel>
+    _min?: NestedFloatNullableFilter<$PrismaModel>
+    _max?: NestedFloatNullableFilter<$PrismaModel>
+  }
+
+  export type SecurityResearchPaperListRelationFilter = {
+    every?: SecurityResearchPaperWhereInput
+    some?: SecurityResearchPaperWhereInput
+    none?: SecurityResearchPaperWhereInput
+  }
+
+  export type SecurityResearchPaperOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type SecurityResearchSnapshotOrderByRelevanceInput = {
+    fields: SecurityResearchSnapshotOrderByRelevanceFieldEnum | SecurityResearchSnapshotOrderByRelevanceFieldEnum[]
+    sort: SortOrder
+    search: string
+  }
+
+  export type SecurityResearchSnapshotCountOrderByAggregateInput = {
+    id?: SortOrder
+    snapshotKey?: SortOrder
+    triggerSource?: SortOrder
+    status?: SortOrder
+    totalPapers?: SortOrder
+    conferencePaperCount?: SortOrder
+    preprintCount?: SortOrder
+    openclawCount?: SortOrder
+    clawCount?: SortOrder
+    skillCount?: SortOrder
+    agentCount?: SortOrder
+    pluginCount?: SortOrder
+    sourceMeta?: SortOrder
+    cacheDir?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type SecurityResearchSnapshotAvgOrderByAggregateInput = {
+    id?: SortOrder
+    totalPapers?: SortOrder
+    conferencePaperCount?: SortOrder
+    preprintCount?: SortOrder
+    openclawCount?: SortOrder
+    clawCount?: SortOrder
+    skillCount?: SortOrder
+    agentCount?: SortOrder
+    pluginCount?: SortOrder
+  }
+
+  export type SecurityResearchSnapshotMaxOrderByAggregateInput = {
+    id?: SortOrder
+    snapshotKey?: SortOrder
+    triggerSource?: SortOrder
+    status?: SortOrder
+    totalPapers?: SortOrder
+    conferencePaperCount?: SortOrder
+    preprintCount?: SortOrder
+    openclawCount?: SortOrder
+    clawCount?: SortOrder
+    skillCount?: SortOrder
+    agentCount?: SortOrder
+    pluginCount?: SortOrder
+    cacheDir?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type SecurityResearchSnapshotMinOrderByAggregateInput = {
+    id?: SortOrder
+    snapshotKey?: SortOrder
+    triggerSource?: SortOrder
+    status?: SortOrder
+    totalPapers?: SortOrder
+    conferencePaperCount?: SortOrder
+    preprintCount?: SortOrder
+    openclawCount?: SortOrder
+    clawCount?: SortOrder
+    skillCount?: SortOrder
+    agentCount?: SortOrder
+    pluginCount?: SortOrder
+    cacheDir?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type SecurityResearchSnapshotSumOrderByAggregateInput = {
+    id?: SortOrder
+    totalPapers?: SortOrder
+    conferencePaperCount?: SortOrder
+    preprintCount?: SortOrder
+    openclawCount?: SortOrder
+    clawCount?: SortOrder
+    skillCount?: SortOrder
+    agentCount?: SortOrder
+    pluginCount?: SortOrder
+  }
+
+  export type FloatFilter<$PrismaModel = never> = {
+    equals?: number | FloatFieldRefInput<$PrismaModel>
+    in?: number[]
+    notIn?: number[]
+    lt?: number | FloatFieldRefInput<$PrismaModel>
+    lte?: number | FloatFieldRefInput<$PrismaModel>
+    gt?: number | FloatFieldRefInput<$PrismaModel>
+    gte?: number | FloatFieldRefInput<$PrismaModel>
+    not?: NestedFloatFilter<$PrismaModel> | number
+  }
+
+  export type BoolFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
+    not?: NestedBoolFilter<$PrismaModel> | boolean
+  }
+
+  export type SecurityResearchSnapshotScalarRelationFilter = {
+    is?: SecurityResearchSnapshotWhereInput
+    isNot?: SecurityResearchSnapshotWhereInput
+  }
+
+  export type SecurityResearchPaperOrderByRelevanceInput = {
+    fields: SecurityResearchPaperOrderByRelevanceFieldEnum | SecurityResearchPaperOrderByRelevanceFieldEnum[]
+    sort: SortOrder
+    search: string
+  }
+
+  export type SecurityResearchPaperSnapshotIdCanonicalIdCompoundUniqueInput = {
+    snapshotId: number
+    canonicalId: string
+  }
+
+  export type SecurityResearchPaperCountOrderByAggregateInput = {
+    id?: SortOrder
+    snapshotId?: SortOrder
+    canonicalId?: SortOrder
+    title?: SortOrder
+    normalizedTitle?: SortOrder
+    sourceType?: SortOrder
+    projectScope?: SortOrder
+    venue?: SortOrder
+    sourcePrimary?: SortOrder
+    sourceSearch?: SortOrder
+    abstractOrSummary?: SortOrder
+    tags?: SortOrder
+    sourceUrl?: SortOrder
+    authors?: SortOrder
+    externalIds?: SortOrder
+    relevanceScore?: SortOrder
+    isTopVenue?: SortOrder
+    publishedAt?: SortOrder
+    status?: SortOrder
+    rawData?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type SecurityResearchPaperAvgOrderByAggregateInput = {
+    id?: SortOrder
+    snapshotId?: SortOrder
+    relevanceScore?: SortOrder
+  }
+
+  export type SecurityResearchPaperMaxOrderByAggregateInput = {
+    id?: SortOrder
+    snapshotId?: SortOrder
+    canonicalId?: SortOrder
+    title?: SortOrder
+    normalizedTitle?: SortOrder
+    sourceType?: SortOrder
+    projectScope?: SortOrder
+    venue?: SortOrder
+    sourcePrimary?: SortOrder
+    sourceSearch?: SortOrder
+    abstractOrSummary?: SortOrder
+    sourceUrl?: SortOrder
+    relevanceScore?: SortOrder
+    isTopVenue?: SortOrder
+    publishedAt?: SortOrder
+    status?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type SecurityResearchPaperMinOrderByAggregateInput = {
+    id?: SortOrder
+    snapshotId?: SortOrder
+    canonicalId?: SortOrder
+    title?: SortOrder
+    normalizedTitle?: SortOrder
+    sourceType?: SortOrder
+    projectScope?: SortOrder
+    venue?: SortOrder
+    sourcePrimary?: SortOrder
+    sourceSearch?: SortOrder
+    abstractOrSummary?: SortOrder
+    sourceUrl?: SortOrder
+    relevanceScore?: SortOrder
+    isTopVenue?: SortOrder
+    publishedAt?: SortOrder
+    status?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type SecurityResearchPaperSumOrderByAggregateInput = {
+    id?: SortOrder
+    snapshotId?: SortOrder
+    relevanceScore?: SortOrder
+  }
+
+  export type FloatWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: number | FloatFieldRefInput<$PrismaModel>
+    in?: number[]
+    notIn?: number[]
+    lt?: number | FloatFieldRefInput<$PrismaModel>
+    lte?: number | FloatFieldRefInput<$PrismaModel>
+    gt?: number | FloatFieldRefInput<$PrismaModel>
+    gte?: number | FloatFieldRefInput<$PrismaModel>
+    not?: NestedFloatWithAggregatesFilter<$PrismaModel> | number
+    _count?: NestedIntFilter<$PrismaModel>
+    _avg?: NestedFloatFilter<$PrismaModel>
+    _sum?: NestedFloatFilter<$PrismaModel>
+    _min?: NestedFloatFilter<$PrismaModel>
+    _max?: NestedFloatFilter<$PrismaModel>
+  }
+
+  export type BoolWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
+    not?: NestedBoolWithAggregatesFilter<$PrismaModel> | boolean
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedBoolFilter<$PrismaModel>
+    _max?: NestedBoolFilter<$PrismaModel>
+  }
+
   export type ExposureRecordCreateNestedManyWithoutSnapshotInput = {
     create?: XOR<ExposureRecordCreateWithoutSnapshotInput, ExposureRecordUncheckedCreateWithoutSnapshotInput> | ExposureRecordCreateWithoutSnapshotInput[] | ExposureRecordUncheckedCreateWithoutSnapshotInput[]
     connectOrCreate?: ExposureRecordCreateOrConnectWithoutSnapshotInput | ExposureRecordCreateOrConnectWithoutSnapshotInput[]
@@ -6686,6 +14229,146 @@ export namespace Prisma {
     decrement?: number
     multiply?: number
     divide?: number
+  }
+
+  export type OpenclawRiskIssueCreateNestedManyWithoutSnapshotInput = {
+    create?: XOR<OpenclawRiskIssueCreateWithoutSnapshotInput, OpenclawRiskIssueUncheckedCreateWithoutSnapshotInput> | OpenclawRiskIssueCreateWithoutSnapshotInput[] | OpenclawRiskIssueUncheckedCreateWithoutSnapshotInput[]
+    connectOrCreate?: OpenclawRiskIssueCreateOrConnectWithoutSnapshotInput | OpenclawRiskIssueCreateOrConnectWithoutSnapshotInput[]
+    createMany?: OpenclawRiskIssueCreateManySnapshotInputEnvelope
+    connect?: OpenclawRiskIssueWhereUniqueInput | OpenclawRiskIssueWhereUniqueInput[]
+  }
+
+  export type OpenclawRiskIssueUncheckedCreateNestedManyWithoutSnapshotInput = {
+    create?: XOR<OpenclawRiskIssueCreateWithoutSnapshotInput, OpenclawRiskIssueUncheckedCreateWithoutSnapshotInput> | OpenclawRiskIssueCreateWithoutSnapshotInput[] | OpenclawRiskIssueUncheckedCreateWithoutSnapshotInput[]
+    connectOrCreate?: OpenclawRiskIssueCreateOrConnectWithoutSnapshotInput | OpenclawRiskIssueCreateOrConnectWithoutSnapshotInput[]
+    createMany?: OpenclawRiskIssueCreateManySnapshotInputEnvelope
+    connect?: OpenclawRiskIssueWhereUniqueInput | OpenclawRiskIssueWhereUniqueInput[]
+  }
+
+  export type NullableStringFieldUpdateOperationsInput = {
+    set?: string | null
+  }
+
+  export type NullableDateTimeFieldUpdateOperationsInput = {
+    set?: Date | string | null
+  }
+
+  export type OpenclawRiskIssueUpdateManyWithoutSnapshotNestedInput = {
+    create?: XOR<OpenclawRiskIssueCreateWithoutSnapshotInput, OpenclawRiskIssueUncheckedCreateWithoutSnapshotInput> | OpenclawRiskIssueCreateWithoutSnapshotInput[] | OpenclawRiskIssueUncheckedCreateWithoutSnapshotInput[]
+    connectOrCreate?: OpenclawRiskIssueCreateOrConnectWithoutSnapshotInput | OpenclawRiskIssueCreateOrConnectWithoutSnapshotInput[]
+    upsert?: OpenclawRiskIssueUpsertWithWhereUniqueWithoutSnapshotInput | OpenclawRiskIssueUpsertWithWhereUniqueWithoutSnapshotInput[]
+    createMany?: OpenclawRiskIssueCreateManySnapshotInputEnvelope
+    set?: OpenclawRiskIssueWhereUniqueInput | OpenclawRiskIssueWhereUniqueInput[]
+    disconnect?: OpenclawRiskIssueWhereUniqueInput | OpenclawRiskIssueWhereUniqueInput[]
+    delete?: OpenclawRiskIssueWhereUniqueInput | OpenclawRiskIssueWhereUniqueInput[]
+    connect?: OpenclawRiskIssueWhereUniqueInput | OpenclawRiskIssueWhereUniqueInput[]
+    update?: OpenclawRiskIssueUpdateWithWhereUniqueWithoutSnapshotInput | OpenclawRiskIssueUpdateWithWhereUniqueWithoutSnapshotInput[]
+    updateMany?: OpenclawRiskIssueUpdateManyWithWhereWithoutSnapshotInput | OpenclawRiskIssueUpdateManyWithWhereWithoutSnapshotInput[]
+    deleteMany?: OpenclawRiskIssueScalarWhereInput | OpenclawRiskIssueScalarWhereInput[]
+  }
+
+  export type OpenclawRiskIssueUncheckedUpdateManyWithoutSnapshotNestedInput = {
+    create?: XOR<OpenclawRiskIssueCreateWithoutSnapshotInput, OpenclawRiskIssueUncheckedCreateWithoutSnapshotInput> | OpenclawRiskIssueCreateWithoutSnapshotInput[] | OpenclawRiskIssueUncheckedCreateWithoutSnapshotInput[]
+    connectOrCreate?: OpenclawRiskIssueCreateOrConnectWithoutSnapshotInput | OpenclawRiskIssueCreateOrConnectWithoutSnapshotInput[]
+    upsert?: OpenclawRiskIssueUpsertWithWhereUniqueWithoutSnapshotInput | OpenclawRiskIssueUpsertWithWhereUniqueWithoutSnapshotInput[]
+    createMany?: OpenclawRiskIssueCreateManySnapshotInputEnvelope
+    set?: OpenclawRiskIssueWhereUniqueInput | OpenclawRiskIssueWhereUniqueInput[]
+    disconnect?: OpenclawRiskIssueWhereUniqueInput | OpenclawRiskIssueWhereUniqueInput[]
+    delete?: OpenclawRiskIssueWhereUniqueInput | OpenclawRiskIssueWhereUniqueInput[]
+    connect?: OpenclawRiskIssueWhereUniqueInput | OpenclawRiskIssueWhereUniqueInput[]
+    update?: OpenclawRiskIssueUpdateWithWhereUniqueWithoutSnapshotInput | OpenclawRiskIssueUpdateWithWhereUniqueWithoutSnapshotInput[]
+    updateMany?: OpenclawRiskIssueUpdateManyWithWhereWithoutSnapshotInput | OpenclawRiskIssueUpdateManyWithWhereWithoutSnapshotInput[]
+    deleteMany?: OpenclawRiskIssueScalarWhereInput | OpenclawRiskIssueScalarWhereInput[]
+  }
+
+  export type OpenclawRiskSnapshotCreateNestedOneWithoutIssuesInput = {
+    create?: XOR<OpenclawRiskSnapshotCreateWithoutIssuesInput, OpenclawRiskSnapshotUncheckedCreateWithoutIssuesInput>
+    connectOrCreate?: OpenclawRiskSnapshotCreateOrConnectWithoutIssuesInput
+    connect?: OpenclawRiskSnapshotWhereUniqueInput
+  }
+
+  export type NullableFloatFieldUpdateOperationsInput = {
+    set?: number | null
+    increment?: number
+    decrement?: number
+    multiply?: number
+    divide?: number
+  }
+
+  export type OpenclawRiskSnapshotUpdateOneRequiredWithoutIssuesNestedInput = {
+    create?: XOR<OpenclawRiskSnapshotCreateWithoutIssuesInput, OpenclawRiskSnapshotUncheckedCreateWithoutIssuesInput>
+    connectOrCreate?: OpenclawRiskSnapshotCreateOrConnectWithoutIssuesInput
+    upsert?: OpenclawRiskSnapshotUpsertWithoutIssuesInput
+    connect?: OpenclawRiskSnapshotWhereUniqueInput
+    update?: XOR<XOR<OpenclawRiskSnapshotUpdateToOneWithWhereWithoutIssuesInput, OpenclawRiskSnapshotUpdateWithoutIssuesInput>, OpenclawRiskSnapshotUncheckedUpdateWithoutIssuesInput>
+  }
+
+  export type SecurityResearchPaperCreateNestedManyWithoutSnapshotInput = {
+    create?: XOR<SecurityResearchPaperCreateWithoutSnapshotInput, SecurityResearchPaperUncheckedCreateWithoutSnapshotInput> | SecurityResearchPaperCreateWithoutSnapshotInput[] | SecurityResearchPaperUncheckedCreateWithoutSnapshotInput[]
+    connectOrCreate?: SecurityResearchPaperCreateOrConnectWithoutSnapshotInput | SecurityResearchPaperCreateOrConnectWithoutSnapshotInput[]
+    createMany?: SecurityResearchPaperCreateManySnapshotInputEnvelope
+    connect?: SecurityResearchPaperWhereUniqueInput | SecurityResearchPaperWhereUniqueInput[]
+  }
+
+  export type SecurityResearchPaperUncheckedCreateNestedManyWithoutSnapshotInput = {
+    create?: XOR<SecurityResearchPaperCreateWithoutSnapshotInput, SecurityResearchPaperUncheckedCreateWithoutSnapshotInput> | SecurityResearchPaperCreateWithoutSnapshotInput[] | SecurityResearchPaperUncheckedCreateWithoutSnapshotInput[]
+    connectOrCreate?: SecurityResearchPaperCreateOrConnectWithoutSnapshotInput | SecurityResearchPaperCreateOrConnectWithoutSnapshotInput[]
+    createMany?: SecurityResearchPaperCreateManySnapshotInputEnvelope
+    connect?: SecurityResearchPaperWhereUniqueInput | SecurityResearchPaperWhereUniqueInput[]
+  }
+
+  export type SecurityResearchPaperUpdateManyWithoutSnapshotNestedInput = {
+    create?: XOR<SecurityResearchPaperCreateWithoutSnapshotInput, SecurityResearchPaperUncheckedCreateWithoutSnapshotInput> | SecurityResearchPaperCreateWithoutSnapshotInput[] | SecurityResearchPaperUncheckedCreateWithoutSnapshotInput[]
+    connectOrCreate?: SecurityResearchPaperCreateOrConnectWithoutSnapshotInput | SecurityResearchPaperCreateOrConnectWithoutSnapshotInput[]
+    upsert?: SecurityResearchPaperUpsertWithWhereUniqueWithoutSnapshotInput | SecurityResearchPaperUpsertWithWhereUniqueWithoutSnapshotInput[]
+    createMany?: SecurityResearchPaperCreateManySnapshotInputEnvelope
+    set?: SecurityResearchPaperWhereUniqueInput | SecurityResearchPaperWhereUniqueInput[]
+    disconnect?: SecurityResearchPaperWhereUniqueInput | SecurityResearchPaperWhereUniqueInput[]
+    delete?: SecurityResearchPaperWhereUniqueInput | SecurityResearchPaperWhereUniqueInput[]
+    connect?: SecurityResearchPaperWhereUniqueInput | SecurityResearchPaperWhereUniqueInput[]
+    update?: SecurityResearchPaperUpdateWithWhereUniqueWithoutSnapshotInput | SecurityResearchPaperUpdateWithWhereUniqueWithoutSnapshotInput[]
+    updateMany?: SecurityResearchPaperUpdateManyWithWhereWithoutSnapshotInput | SecurityResearchPaperUpdateManyWithWhereWithoutSnapshotInput[]
+    deleteMany?: SecurityResearchPaperScalarWhereInput | SecurityResearchPaperScalarWhereInput[]
+  }
+
+  export type SecurityResearchPaperUncheckedUpdateManyWithoutSnapshotNestedInput = {
+    create?: XOR<SecurityResearchPaperCreateWithoutSnapshotInput, SecurityResearchPaperUncheckedCreateWithoutSnapshotInput> | SecurityResearchPaperCreateWithoutSnapshotInput[] | SecurityResearchPaperUncheckedCreateWithoutSnapshotInput[]
+    connectOrCreate?: SecurityResearchPaperCreateOrConnectWithoutSnapshotInput | SecurityResearchPaperCreateOrConnectWithoutSnapshotInput[]
+    upsert?: SecurityResearchPaperUpsertWithWhereUniqueWithoutSnapshotInput | SecurityResearchPaperUpsertWithWhereUniqueWithoutSnapshotInput[]
+    createMany?: SecurityResearchPaperCreateManySnapshotInputEnvelope
+    set?: SecurityResearchPaperWhereUniqueInput | SecurityResearchPaperWhereUniqueInput[]
+    disconnect?: SecurityResearchPaperWhereUniqueInput | SecurityResearchPaperWhereUniqueInput[]
+    delete?: SecurityResearchPaperWhereUniqueInput | SecurityResearchPaperWhereUniqueInput[]
+    connect?: SecurityResearchPaperWhereUniqueInput | SecurityResearchPaperWhereUniqueInput[]
+    update?: SecurityResearchPaperUpdateWithWhereUniqueWithoutSnapshotInput | SecurityResearchPaperUpdateWithWhereUniqueWithoutSnapshotInput[]
+    updateMany?: SecurityResearchPaperUpdateManyWithWhereWithoutSnapshotInput | SecurityResearchPaperUpdateManyWithWhereWithoutSnapshotInput[]
+    deleteMany?: SecurityResearchPaperScalarWhereInput | SecurityResearchPaperScalarWhereInput[]
+  }
+
+  export type SecurityResearchSnapshotCreateNestedOneWithoutPapersInput = {
+    create?: XOR<SecurityResearchSnapshotCreateWithoutPapersInput, SecurityResearchSnapshotUncheckedCreateWithoutPapersInput>
+    connectOrCreate?: SecurityResearchSnapshotCreateOrConnectWithoutPapersInput
+    connect?: SecurityResearchSnapshotWhereUniqueInput
+  }
+
+  export type FloatFieldUpdateOperationsInput = {
+    set?: number
+    increment?: number
+    decrement?: number
+    multiply?: number
+    divide?: number
+  }
+
+  export type BoolFieldUpdateOperationsInput = {
+    set?: boolean
+  }
+
+  export type SecurityResearchSnapshotUpdateOneRequiredWithoutPapersNestedInput = {
+    create?: XOR<SecurityResearchSnapshotCreateWithoutPapersInput, SecurityResearchSnapshotUncheckedCreateWithoutPapersInput>
+    connectOrCreate?: SecurityResearchSnapshotCreateOrConnectWithoutPapersInput
+    upsert?: SecurityResearchSnapshotUpsertWithoutPapersInput
+    connect?: SecurityResearchSnapshotWhereUniqueInput
+    update?: XOR<XOR<SecurityResearchSnapshotUpdateToOneWithWhereWithoutPapersInput, SecurityResearchSnapshotUpdateWithoutPapersInput>, SecurityResearchSnapshotUncheckedUpdateWithoutPapersInput>
   }
 
   export type NestedIntFilter<$PrismaModel = never> = {
@@ -6847,6 +14530,132 @@ export namespace Prisma {
     gt?: number | FloatFieldRefInput<$PrismaModel>
     gte?: number | FloatFieldRefInput<$PrismaModel>
     not?: NestedFloatNullableFilter<$PrismaModel> | number | null
+  }
+
+  export type NestedStringNullableFilter<$PrismaModel = never> = {
+    equals?: string | StringFieldRefInput<$PrismaModel> | null
+    in?: string[] | null
+    notIn?: string[] | null
+    lt?: string | StringFieldRefInput<$PrismaModel>
+    lte?: string | StringFieldRefInput<$PrismaModel>
+    gt?: string | StringFieldRefInput<$PrismaModel>
+    gte?: string | StringFieldRefInput<$PrismaModel>
+    contains?: string | StringFieldRefInput<$PrismaModel>
+    startsWith?: string | StringFieldRefInput<$PrismaModel>
+    endsWith?: string | StringFieldRefInput<$PrismaModel>
+    search?: string
+    not?: NestedStringNullableFilter<$PrismaModel> | string | null
+  }
+
+  export type NestedDateTimeNullableFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
+    in?: Date[] | string[] | null
+    notIn?: Date[] | string[] | null
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeNullableFilter<$PrismaModel> | Date | string | null
+  }
+
+  export type NestedStringNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: string | StringFieldRefInput<$PrismaModel> | null
+    in?: string[] | null
+    notIn?: string[] | null
+    lt?: string | StringFieldRefInput<$PrismaModel>
+    lte?: string | StringFieldRefInput<$PrismaModel>
+    gt?: string | StringFieldRefInput<$PrismaModel>
+    gte?: string | StringFieldRefInput<$PrismaModel>
+    contains?: string | StringFieldRefInput<$PrismaModel>
+    startsWith?: string | StringFieldRefInput<$PrismaModel>
+    endsWith?: string | StringFieldRefInput<$PrismaModel>
+    search?: string
+    not?: NestedStringNullableWithAggregatesFilter<$PrismaModel> | string | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedStringNullableFilter<$PrismaModel>
+    _max?: NestedStringNullableFilter<$PrismaModel>
+  }
+
+  export type NestedDateTimeNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
+    in?: Date[] | string[] | null
+    notIn?: Date[] | string[] | null
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeNullableWithAggregatesFilter<$PrismaModel> | Date | string | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedDateTimeNullableFilter<$PrismaModel>
+    _max?: NestedDateTimeNullableFilter<$PrismaModel>
+  }
+  export type NestedJsonFilter<$PrismaModel = never> =
+    | PatchUndefined<
+        Either<Required<NestedJsonFilterBase<$PrismaModel>>, Exclude<keyof Required<NestedJsonFilterBase<$PrismaModel>>, 'path'>>,
+        Required<NestedJsonFilterBase<$PrismaModel>>
+      >
+    | OptionalFlat<Omit<Required<NestedJsonFilterBase<$PrismaModel>>, 'path'>>
+
+  export type NestedJsonFilterBase<$PrismaModel = never> = {
+    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    path?: string
+    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
+    string_contains?: string | StringFieldRefInput<$PrismaModel>
+    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
+    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
+    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    lt?: InputJsonValue
+    lte?: InputJsonValue
+    gt?: InputJsonValue
+    gte?: InputJsonValue
+    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+  }
+
+  export type NestedFloatNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: number | FloatFieldRefInput<$PrismaModel> | null
+    in?: number[] | null
+    notIn?: number[] | null
+    lt?: number | FloatFieldRefInput<$PrismaModel>
+    lte?: number | FloatFieldRefInput<$PrismaModel>
+    gt?: number | FloatFieldRefInput<$PrismaModel>
+    gte?: number | FloatFieldRefInput<$PrismaModel>
+    not?: NestedFloatNullableWithAggregatesFilter<$PrismaModel> | number | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _avg?: NestedFloatNullableFilter<$PrismaModel>
+    _sum?: NestedFloatNullableFilter<$PrismaModel>
+    _min?: NestedFloatNullableFilter<$PrismaModel>
+    _max?: NestedFloatNullableFilter<$PrismaModel>
+  }
+
+  export type NestedBoolFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
+    not?: NestedBoolFilter<$PrismaModel> | boolean
+  }
+
+  export type NestedFloatWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: number | FloatFieldRefInput<$PrismaModel>
+    in?: number[]
+    notIn?: number[]
+    lt?: number | FloatFieldRefInput<$PrismaModel>
+    lte?: number | FloatFieldRefInput<$PrismaModel>
+    gt?: number | FloatFieldRefInput<$PrismaModel>
+    gte?: number | FloatFieldRefInput<$PrismaModel>
+    not?: NestedFloatWithAggregatesFilter<$PrismaModel> | number
+    _count?: NestedIntFilter<$PrismaModel>
+    _avg?: NestedFloatFilter<$PrismaModel>
+    _sum?: NestedFloatFilter<$PrismaModel>
+    _min?: NestedFloatFilter<$PrismaModel>
+    _max?: NestedFloatFilter<$PrismaModel>
+  }
+
+  export type NestedBoolWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
+    not?: NestedBoolWithAggregatesFilter<$PrismaModel> | boolean
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedBoolFilter<$PrismaModel>
+    _max?: NestedBoolFilter<$PrismaModel>
   }
 
   export type ExposureRecordCreateWithoutSnapshotInput = {
@@ -7116,6 +14925,476 @@ export namespace Prisma {
     records?: ExposureRecordUncheckedUpdateManyWithoutSnapshotNestedInput
   }
 
+  export type OpenclawRiskIssueCreateWithoutSnapshotInput = {
+    id?: bigint | number
+    canonicalId: string
+    issueId: string
+    title: string
+    summary: string
+    description: string
+    sourcePrimary: string
+    sourceType?: string
+    sourceSearch: string
+    sourceLabels: JsonNullValueInput | InputJsonValue
+    sources: JsonNullValueInput | InputJsonValue
+    githubIds: JsonNullValueInput | InputJsonValue
+    cveIds: JsonNullValueInput | InputJsonValue
+    projectScope?: string
+    venue?: string | null
+    authors: JsonNullValueInput | InputJsonValue
+    severity: string
+    score?: number | null
+    cvssVector?: string | null
+    cwes: JsonNullValueInput | InputJsonValue
+    affectedRange?: string | null
+    fixedVersion?: string | null
+    latestStableVersion?: string | null
+    fixStatus: string
+    fixLabel: string
+    fixReason: string
+    issueUrl?: string | null
+    repoUrl?: string | null
+    referenceUrls: JsonNullValueInput | InputJsonValue
+    tags: JsonNullValueInput | InputJsonValue
+    status?: string
+    relevanceScore?: number | null
+    publishedAt?: Date | string | null
+    sourceUpdatedAt?: Date | string | null
+    rawData: JsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+  }
+
+  export type OpenclawRiskIssueUncheckedCreateWithoutSnapshotInput = {
+    id?: bigint | number
+    canonicalId: string
+    issueId: string
+    title: string
+    summary: string
+    description: string
+    sourcePrimary: string
+    sourceType?: string
+    sourceSearch: string
+    sourceLabels: JsonNullValueInput | InputJsonValue
+    sources: JsonNullValueInput | InputJsonValue
+    githubIds: JsonNullValueInput | InputJsonValue
+    cveIds: JsonNullValueInput | InputJsonValue
+    projectScope?: string
+    venue?: string | null
+    authors: JsonNullValueInput | InputJsonValue
+    severity: string
+    score?: number | null
+    cvssVector?: string | null
+    cwes: JsonNullValueInput | InputJsonValue
+    affectedRange?: string | null
+    fixedVersion?: string | null
+    latestStableVersion?: string | null
+    fixStatus: string
+    fixLabel: string
+    fixReason: string
+    issueUrl?: string | null
+    repoUrl?: string | null
+    referenceUrls: JsonNullValueInput | InputJsonValue
+    tags: JsonNullValueInput | InputJsonValue
+    status?: string
+    relevanceScore?: number | null
+    publishedAt?: Date | string | null
+    sourceUpdatedAt?: Date | string | null
+    rawData: JsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+  }
+
+  export type OpenclawRiskIssueCreateOrConnectWithoutSnapshotInput = {
+    where: OpenclawRiskIssueWhereUniqueInput
+    create: XOR<OpenclawRiskIssueCreateWithoutSnapshotInput, OpenclawRiskIssueUncheckedCreateWithoutSnapshotInput>
+  }
+
+  export type OpenclawRiskIssueCreateManySnapshotInputEnvelope = {
+    data: OpenclawRiskIssueCreateManySnapshotInput | OpenclawRiskIssueCreateManySnapshotInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type OpenclawRiskIssueUpsertWithWhereUniqueWithoutSnapshotInput = {
+    where: OpenclawRiskIssueWhereUniqueInput
+    update: XOR<OpenclawRiskIssueUpdateWithoutSnapshotInput, OpenclawRiskIssueUncheckedUpdateWithoutSnapshotInput>
+    create: XOR<OpenclawRiskIssueCreateWithoutSnapshotInput, OpenclawRiskIssueUncheckedCreateWithoutSnapshotInput>
+  }
+
+  export type OpenclawRiskIssueUpdateWithWhereUniqueWithoutSnapshotInput = {
+    where: OpenclawRiskIssueWhereUniqueInput
+    data: XOR<OpenclawRiskIssueUpdateWithoutSnapshotInput, OpenclawRiskIssueUncheckedUpdateWithoutSnapshotInput>
+  }
+
+  export type OpenclawRiskIssueUpdateManyWithWhereWithoutSnapshotInput = {
+    where: OpenclawRiskIssueScalarWhereInput
+    data: XOR<OpenclawRiskIssueUpdateManyMutationInput, OpenclawRiskIssueUncheckedUpdateManyWithoutSnapshotInput>
+  }
+
+  export type OpenclawRiskIssueScalarWhereInput = {
+    AND?: OpenclawRiskIssueScalarWhereInput | OpenclawRiskIssueScalarWhereInput[]
+    OR?: OpenclawRiskIssueScalarWhereInput[]
+    NOT?: OpenclawRiskIssueScalarWhereInput | OpenclawRiskIssueScalarWhereInput[]
+    id?: BigIntFilter<"OpenclawRiskIssue"> | bigint | number
+    snapshotId?: IntFilter<"OpenclawRiskIssue"> | number
+    canonicalId?: StringFilter<"OpenclawRiskIssue"> | string
+    issueId?: StringFilter<"OpenclawRiskIssue"> | string
+    title?: StringFilter<"OpenclawRiskIssue"> | string
+    summary?: StringFilter<"OpenclawRiskIssue"> | string
+    description?: StringFilter<"OpenclawRiskIssue"> | string
+    sourcePrimary?: StringFilter<"OpenclawRiskIssue"> | string
+    sourceType?: StringFilter<"OpenclawRiskIssue"> | string
+    sourceSearch?: StringFilter<"OpenclawRiskIssue"> | string
+    sourceLabels?: JsonFilter<"OpenclawRiskIssue">
+    sources?: JsonFilter<"OpenclawRiskIssue">
+    githubIds?: JsonFilter<"OpenclawRiskIssue">
+    cveIds?: JsonFilter<"OpenclawRiskIssue">
+    projectScope?: StringFilter<"OpenclawRiskIssue"> | string
+    venue?: StringNullableFilter<"OpenclawRiskIssue"> | string | null
+    authors?: JsonFilter<"OpenclawRiskIssue">
+    severity?: StringFilter<"OpenclawRiskIssue"> | string
+    score?: FloatNullableFilter<"OpenclawRiskIssue"> | number | null
+    cvssVector?: StringNullableFilter<"OpenclawRiskIssue"> | string | null
+    cwes?: JsonFilter<"OpenclawRiskIssue">
+    affectedRange?: StringNullableFilter<"OpenclawRiskIssue"> | string | null
+    fixedVersion?: StringNullableFilter<"OpenclawRiskIssue"> | string | null
+    latestStableVersion?: StringNullableFilter<"OpenclawRiskIssue"> | string | null
+    fixStatus?: StringFilter<"OpenclawRiskIssue"> | string
+    fixLabel?: StringFilter<"OpenclawRiskIssue"> | string
+    fixReason?: StringFilter<"OpenclawRiskIssue"> | string
+    issueUrl?: StringNullableFilter<"OpenclawRiskIssue"> | string | null
+    repoUrl?: StringNullableFilter<"OpenclawRiskIssue"> | string | null
+    referenceUrls?: JsonFilter<"OpenclawRiskIssue">
+    tags?: JsonFilter<"OpenclawRiskIssue">
+    status?: StringFilter<"OpenclawRiskIssue"> | string
+    relevanceScore?: FloatNullableFilter<"OpenclawRiskIssue"> | number | null
+    publishedAt?: DateTimeNullableFilter<"OpenclawRiskIssue"> | Date | string | null
+    sourceUpdatedAt?: DateTimeNullableFilter<"OpenclawRiskIssue"> | Date | string | null
+    rawData?: JsonFilter<"OpenclawRiskIssue">
+    createdAt?: DateTimeFilter<"OpenclawRiskIssue"> | Date | string
+  }
+
+  export type OpenclawRiskSnapshotCreateWithoutIssuesInput = {
+    snapshotKey: string
+    triggerSource?: string
+    status?: string
+    latestStableTag?: string | null
+    latestStableVersion?: string | null
+    latestStableUrl?: string | null
+    latestStablePublishedAt?: Date | string | null
+    totalIssues?: number
+    githubAdvisories?: number
+    nvdCves?: number
+    officialAdvisoryCount?: number
+    cveRecordCount?: number
+    conferencePaperCount?: number
+    preprintCount?: number
+    researchCount?: number
+    newsCount?: number
+    criticalCount?: number
+    highRiskCount?: number
+    fixedCount?: number
+    unfixedCount?: number
+    unknownCount?: number
+    fixProgressPercent?: number
+    sourceMeta: JsonNullValueInput | InputJsonValue
+    cacheDir?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type OpenclawRiskSnapshotUncheckedCreateWithoutIssuesInput = {
+    id?: number
+    snapshotKey: string
+    triggerSource?: string
+    status?: string
+    latestStableTag?: string | null
+    latestStableVersion?: string | null
+    latestStableUrl?: string | null
+    latestStablePublishedAt?: Date | string | null
+    totalIssues?: number
+    githubAdvisories?: number
+    nvdCves?: number
+    officialAdvisoryCount?: number
+    cveRecordCount?: number
+    conferencePaperCount?: number
+    preprintCount?: number
+    researchCount?: number
+    newsCount?: number
+    criticalCount?: number
+    highRiskCount?: number
+    fixedCount?: number
+    unfixedCount?: number
+    unknownCount?: number
+    fixProgressPercent?: number
+    sourceMeta: JsonNullValueInput | InputJsonValue
+    cacheDir?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type OpenclawRiskSnapshotCreateOrConnectWithoutIssuesInput = {
+    where: OpenclawRiskSnapshotWhereUniqueInput
+    create: XOR<OpenclawRiskSnapshotCreateWithoutIssuesInput, OpenclawRiskSnapshotUncheckedCreateWithoutIssuesInput>
+  }
+
+  export type OpenclawRiskSnapshotUpsertWithoutIssuesInput = {
+    update: XOR<OpenclawRiskSnapshotUpdateWithoutIssuesInput, OpenclawRiskSnapshotUncheckedUpdateWithoutIssuesInput>
+    create: XOR<OpenclawRiskSnapshotCreateWithoutIssuesInput, OpenclawRiskSnapshotUncheckedCreateWithoutIssuesInput>
+    where?: OpenclawRiskSnapshotWhereInput
+  }
+
+  export type OpenclawRiskSnapshotUpdateToOneWithWhereWithoutIssuesInput = {
+    where?: OpenclawRiskSnapshotWhereInput
+    data: XOR<OpenclawRiskSnapshotUpdateWithoutIssuesInput, OpenclawRiskSnapshotUncheckedUpdateWithoutIssuesInput>
+  }
+
+  export type OpenclawRiskSnapshotUpdateWithoutIssuesInput = {
+    snapshotKey?: StringFieldUpdateOperationsInput | string
+    triggerSource?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    latestStableTag?: NullableStringFieldUpdateOperationsInput | string | null
+    latestStableVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    latestStableUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    latestStablePublishedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    totalIssues?: IntFieldUpdateOperationsInput | number
+    githubAdvisories?: IntFieldUpdateOperationsInput | number
+    nvdCves?: IntFieldUpdateOperationsInput | number
+    officialAdvisoryCount?: IntFieldUpdateOperationsInput | number
+    cveRecordCount?: IntFieldUpdateOperationsInput | number
+    conferencePaperCount?: IntFieldUpdateOperationsInput | number
+    preprintCount?: IntFieldUpdateOperationsInput | number
+    researchCount?: IntFieldUpdateOperationsInput | number
+    newsCount?: IntFieldUpdateOperationsInput | number
+    criticalCount?: IntFieldUpdateOperationsInput | number
+    highRiskCount?: IntFieldUpdateOperationsInput | number
+    fixedCount?: IntFieldUpdateOperationsInput | number
+    unfixedCount?: IntFieldUpdateOperationsInput | number
+    unknownCount?: IntFieldUpdateOperationsInput | number
+    fixProgressPercent?: IntFieldUpdateOperationsInput | number
+    sourceMeta?: JsonNullValueInput | InputJsonValue
+    cacheDir?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type OpenclawRiskSnapshotUncheckedUpdateWithoutIssuesInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    snapshotKey?: StringFieldUpdateOperationsInput | string
+    triggerSource?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    latestStableTag?: NullableStringFieldUpdateOperationsInput | string | null
+    latestStableVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    latestStableUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    latestStablePublishedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    totalIssues?: IntFieldUpdateOperationsInput | number
+    githubAdvisories?: IntFieldUpdateOperationsInput | number
+    nvdCves?: IntFieldUpdateOperationsInput | number
+    officialAdvisoryCount?: IntFieldUpdateOperationsInput | number
+    cveRecordCount?: IntFieldUpdateOperationsInput | number
+    conferencePaperCount?: IntFieldUpdateOperationsInput | number
+    preprintCount?: IntFieldUpdateOperationsInput | number
+    researchCount?: IntFieldUpdateOperationsInput | number
+    newsCount?: IntFieldUpdateOperationsInput | number
+    criticalCount?: IntFieldUpdateOperationsInput | number
+    highRiskCount?: IntFieldUpdateOperationsInput | number
+    fixedCount?: IntFieldUpdateOperationsInput | number
+    unfixedCount?: IntFieldUpdateOperationsInput | number
+    unknownCount?: IntFieldUpdateOperationsInput | number
+    fixProgressPercent?: IntFieldUpdateOperationsInput | number
+    sourceMeta?: JsonNullValueInput | InputJsonValue
+    cacheDir?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type SecurityResearchPaperCreateWithoutSnapshotInput = {
+    id?: bigint | number
+    canonicalId: string
+    title: string
+    normalizedTitle: string
+    sourceType: string
+    projectScope: string
+    venue: string
+    sourcePrimary: string
+    sourceSearch: string
+    abstractOrSummary: string
+    tags: JsonNullValueInput | InputJsonValue
+    sourceUrl?: string | null
+    authors: JsonNullValueInput | InputJsonValue
+    externalIds: JsonNullValueInput | InputJsonValue
+    relevanceScore?: number
+    isTopVenue?: boolean
+    publishedAt?: Date | string | null
+    status?: string
+    rawData: JsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+  }
+
+  export type SecurityResearchPaperUncheckedCreateWithoutSnapshotInput = {
+    id?: bigint | number
+    canonicalId: string
+    title: string
+    normalizedTitle: string
+    sourceType: string
+    projectScope: string
+    venue: string
+    sourcePrimary: string
+    sourceSearch: string
+    abstractOrSummary: string
+    tags: JsonNullValueInput | InputJsonValue
+    sourceUrl?: string | null
+    authors: JsonNullValueInput | InputJsonValue
+    externalIds: JsonNullValueInput | InputJsonValue
+    relevanceScore?: number
+    isTopVenue?: boolean
+    publishedAt?: Date | string | null
+    status?: string
+    rawData: JsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+  }
+
+  export type SecurityResearchPaperCreateOrConnectWithoutSnapshotInput = {
+    where: SecurityResearchPaperWhereUniqueInput
+    create: XOR<SecurityResearchPaperCreateWithoutSnapshotInput, SecurityResearchPaperUncheckedCreateWithoutSnapshotInput>
+  }
+
+  export type SecurityResearchPaperCreateManySnapshotInputEnvelope = {
+    data: SecurityResearchPaperCreateManySnapshotInput | SecurityResearchPaperCreateManySnapshotInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type SecurityResearchPaperUpsertWithWhereUniqueWithoutSnapshotInput = {
+    where: SecurityResearchPaperWhereUniqueInput
+    update: XOR<SecurityResearchPaperUpdateWithoutSnapshotInput, SecurityResearchPaperUncheckedUpdateWithoutSnapshotInput>
+    create: XOR<SecurityResearchPaperCreateWithoutSnapshotInput, SecurityResearchPaperUncheckedCreateWithoutSnapshotInput>
+  }
+
+  export type SecurityResearchPaperUpdateWithWhereUniqueWithoutSnapshotInput = {
+    where: SecurityResearchPaperWhereUniqueInput
+    data: XOR<SecurityResearchPaperUpdateWithoutSnapshotInput, SecurityResearchPaperUncheckedUpdateWithoutSnapshotInput>
+  }
+
+  export type SecurityResearchPaperUpdateManyWithWhereWithoutSnapshotInput = {
+    where: SecurityResearchPaperScalarWhereInput
+    data: XOR<SecurityResearchPaperUpdateManyMutationInput, SecurityResearchPaperUncheckedUpdateManyWithoutSnapshotInput>
+  }
+
+  export type SecurityResearchPaperScalarWhereInput = {
+    AND?: SecurityResearchPaperScalarWhereInput | SecurityResearchPaperScalarWhereInput[]
+    OR?: SecurityResearchPaperScalarWhereInput[]
+    NOT?: SecurityResearchPaperScalarWhereInput | SecurityResearchPaperScalarWhereInput[]
+    id?: BigIntFilter<"SecurityResearchPaper"> | bigint | number
+    snapshotId?: IntFilter<"SecurityResearchPaper"> | number
+    canonicalId?: StringFilter<"SecurityResearchPaper"> | string
+    title?: StringFilter<"SecurityResearchPaper"> | string
+    normalizedTitle?: StringFilter<"SecurityResearchPaper"> | string
+    sourceType?: StringFilter<"SecurityResearchPaper"> | string
+    projectScope?: StringFilter<"SecurityResearchPaper"> | string
+    venue?: StringFilter<"SecurityResearchPaper"> | string
+    sourcePrimary?: StringFilter<"SecurityResearchPaper"> | string
+    sourceSearch?: StringFilter<"SecurityResearchPaper"> | string
+    abstractOrSummary?: StringFilter<"SecurityResearchPaper"> | string
+    tags?: JsonFilter<"SecurityResearchPaper">
+    sourceUrl?: StringNullableFilter<"SecurityResearchPaper"> | string | null
+    authors?: JsonFilter<"SecurityResearchPaper">
+    externalIds?: JsonFilter<"SecurityResearchPaper">
+    relevanceScore?: FloatFilter<"SecurityResearchPaper"> | number
+    isTopVenue?: BoolFilter<"SecurityResearchPaper"> | boolean
+    publishedAt?: DateTimeNullableFilter<"SecurityResearchPaper"> | Date | string | null
+    status?: StringFilter<"SecurityResearchPaper"> | string
+    rawData?: JsonFilter<"SecurityResearchPaper">
+    createdAt?: DateTimeFilter<"SecurityResearchPaper"> | Date | string
+  }
+
+  export type SecurityResearchSnapshotCreateWithoutPapersInput = {
+    snapshotKey: string
+    triggerSource?: string
+    status?: string
+    totalPapers?: number
+    conferencePaperCount?: number
+    preprintCount?: number
+    openclawCount?: number
+    clawCount?: number
+    skillCount?: number
+    agentCount?: number
+    pluginCount?: number
+    sourceMeta: JsonNullValueInput | InputJsonValue
+    cacheDir?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type SecurityResearchSnapshotUncheckedCreateWithoutPapersInput = {
+    id?: number
+    snapshotKey: string
+    triggerSource?: string
+    status?: string
+    totalPapers?: number
+    conferencePaperCount?: number
+    preprintCount?: number
+    openclawCount?: number
+    clawCount?: number
+    skillCount?: number
+    agentCount?: number
+    pluginCount?: number
+    sourceMeta: JsonNullValueInput | InputJsonValue
+    cacheDir?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type SecurityResearchSnapshotCreateOrConnectWithoutPapersInput = {
+    where: SecurityResearchSnapshotWhereUniqueInput
+    create: XOR<SecurityResearchSnapshotCreateWithoutPapersInput, SecurityResearchSnapshotUncheckedCreateWithoutPapersInput>
+  }
+
+  export type SecurityResearchSnapshotUpsertWithoutPapersInput = {
+    update: XOR<SecurityResearchSnapshotUpdateWithoutPapersInput, SecurityResearchSnapshotUncheckedUpdateWithoutPapersInput>
+    create: XOR<SecurityResearchSnapshotCreateWithoutPapersInput, SecurityResearchSnapshotUncheckedCreateWithoutPapersInput>
+    where?: SecurityResearchSnapshotWhereInput
+  }
+
+  export type SecurityResearchSnapshotUpdateToOneWithWhereWithoutPapersInput = {
+    where?: SecurityResearchSnapshotWhereInput
+    data: XOR<SecurityResearchSnapshotUpdateWithoutPapersInput, SecurityResearchSnapshotUncheckedUpdateWithoutPapersInput>
+  }
+
+  export type SecurityResearchSnapshotUpdateWithoutPapersInput = {
+    snapshotKey?: StringFieldUpdateOperationsInput | string
+    triggerSource?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    totalPapers?: IntFieldUpdateOperationsInput | number
+    conferencePaperCount?: IntFieldUpdateOperationsInput | number
+    preprintCount?: IntFieldUpdateOperationsInput | number
+    openclawCount?: IntFieldUpdateOperationsInput | number
+    clawCount?: IntFieldUpdateOperationsInput | number
+    skillCount?: IntFieldUpdateOperationsInput | number
+    agentCount?: IntFieldUpdateOperationsInput | number
+    pluginCount?: IntFieldUpdateOperationsInput | number
+    sourceMeta?: JsonNullValueInput | InputJsonValue
+    cacheDir?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type SecurityResearchSnapshotUncheckedUpdateWithoutPapersInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    snapshotKey?: StringFieldUpdateOperationsInput | string
+    triggerSource?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    totalPapers?: IntFieldUpdateOperationsInput | number
+    conferencePaperCount?: IntFieldUpdateOperationsInput | number
+    preprintCount?: IntFieldUpdateOperationsInput | number
+    openclawCount?: IntFieldUpdateOperationsInput | number
+    clawCount?: IntFieldUpdateOperationsInput | number
+    skillCount?: IntFieldUpdateOperationsInput | number
+    agentCount?: IntFieldUpdateOperationsInput | number
+    pluginCount?: IntFieldUpdateOperationsInput | number
+    sourceMeta?: JsonNullValueInput | InputJsonValue
+    cacheDir?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type ExposureRecordCreateManySnapshotInput = {
     id?: bigint | number
     snapshotDate: Date | string
@@ -7205,6 +15484,254 @@ export namespace Prisma {
     version?: StringFieldUpdateOperationsInput | string
     risk?: StringFieldUpdateOperationsInput | string
     lastSeen?: DateTimeFieldUpdateOperationsInput | Date | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type OpenclawRiskIssueCreateManySnapshotInput = {
+    id?: bigint | number
+    canonicalId: string
+    issueId: string
+    title: string
+    summary: string
+    description: string
+    sourcePrimary: string
+    sourceType?: string
+    sourceSearch: string
+    sourceLabels: JsonNullValueInput | InputJsonValue
+    sources: JsonNullValueInput | InputJsonValue
+    githubIds: JsonNullValueInput | InputJsonValue
+    cveIds: JsonNullValueInput | InputJsonValue
+    projectScope?: string
+    venue?: string | null
+    authors: JsonNullValueInput | InputJsonValue
+    severity: string
+    score?: number | null
+    cvssVector?: string | null
+    cwes: JsonNullValueInput | InputJsonValue
+    affectedRange?: string | null
+    fixedVersion?: string | null
+    latestStableVersion?: string | null
+    fixStatus: string
+    fixLabel: string
+    fixReason: string
+    issueUrl?: string | null
+    repoUrl?: string | null
+    referenceUrls: JsonNullValueInput | InputJsonValue
+    tags: JsonNullValueInput | InputJsonValue
+    status?: string
+    relevanceScore?: number | null
+    publishedAt?: Date | string | null
+    sourceUpdatedAt?: Date | string | null
+    rawData: JsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+  }
+
+  export type OpenclawRiskIssueUpdateWithoutSnapshotInput = {
+    id?: BigIntFieldUpdateOperationsInput | bigint | number
+    canonicalId?: StringFieldUpdateOperationsInput | string
+    issueId?: StringFieldUpdateOperationsInput | string
+    title?: StringFieldUpdateOperationsInput | string
+    summary?: StringFieldUpdateOperationsInput | string
+    description?: StringFieldUpdateOperationsInput | string
+    sourcePrimary?: StringFieldUpdateOperationsInput | string
+    sourceType?: StringFieldUpdateOperationsInput | string
+    sourceSearch?: StringFieldUpdateOperationsInput | string
+    sourceLabels?: JsonNullValueInput | InputJsonValue
+    sources?: JsonNullValueInput | InputJsonValue
+    githubIds?: JsonNullValueInput | InputJsonValue
+    cveIds?: JsonNullValueInput | InputJsonValue
+    projectScope?: StringFieldUpdateOperationsInput | string
+    venue?: NullableStringFieldUpdateOperationsInput | string | null
+    authors?: JsonNullValueInput | InputJsonValue
+    severity?: StringFieldUpdateOperationsInput | string
+    score?: NullableFloatFieldUpdateOperationsInput | number | null
+    cvssVector?: NullableStringFieldUpdateOperationsInput | string | null
+    cwes?: JsonNullValueInput | InputJsonValue
+    affectedRange?: NullableStringFieldUpdateOperationsInput | string | null
+    fixedVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    latestStableVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    fixStatus?: StringFieldUpdateOperationsInput | string
+    fixLabel?: StringFieldUpdateOperationsInput | string
+    fixReason?: StringFieldUpdateOperationsInput | string
+    issueUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    repoUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    referenceUrls?: JsonNullValueInput | InputJsonValue
+    tags?: JsonNullValueInput | InputJsonValue
+    status?: StringFieldUpdateOperationsInput | string
+    relevanceScore?: NullableFloatFieldUpdateOperationsInput | number | null
+    publishedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    sourceUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    rawData?: JsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type OpenclawRiskIssueUncheckedUpdateWithoutSnapshotInput = {
+    id?: BigIntFieldUpdateOperationsInput | bigint | number
+    canonicalId?: StringFieldUpdateOperationsInput | string
+    issueId?: StringFieldUpdateOperationsInput | string
+    title?: StringFieldUpdateOperationsInput | string
+    summary?: StringFieldUpdateOperationsInput | string
+    description?: StringFieldUpdateOperationsInput | string
+    sourcePrimary?: StringFieldUpdateOperationsInput | string
+    sourceType?: StringFieldUpdateOperationsInput | string
+    sourceSearch?: StringFieldUpdateOperationsInput | string
+    sourceLabels?: JsonNullValueInput | InputJsonValue
+    sources?: JsonNullValueInput | InputJsonValue
+    githubIds?: JsonNullValueInput | InputJsonValue
+    cveIds?: JsonNullValueInput | InputJsonValue
+    projectScope?: StringFieldUpdateOperationsInput | string
+    venue?: NullableStringFieldUpdateOperationsInput | string | null
+    authors?: JsonNullValueInput | InputJsonValue
+    severity?: StringFieldUpdateOperationsInput | string
+    score?: NullableFloatFieldUpdateOperationsInput | number | null
+    cvssVector?: NullableStringFieldUpdateOperationsInput | string | null
+    cwes?: JsonNullValueInput | InputJsonValue
+    affectedRange?: NullableStringFieldUpdateOperationsInput | string | null
+    fixedVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    latestStableVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    fixStatus?: StringFieldUpdateOperationsInput | string
+    fixLabel?: StringFieldUpdateOperationsInput | string
+    fixReason?: StringFieldUpdateOperationsInput | string
+    issueUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    repoUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    referenceUrls?: JsonNullValueInput | InputJsonValue
+    tags?: JsonNullValueInput | InputJsonValue
+    status?: StringFieldUpdateOperationsInput | string
+    relevanceScore?: NullableFloatFieldUpdateOperationsInput | number | null
+    publishedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    sourceUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    rawData?: JsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type OpenclawRiskIssueUncheckedUpdateManyWithoutSnapshotInput = {
+    id?: BigIntFieldUpdateOperationsInput | bigint | number
+    canonicalId?: StringFieldUpdateOperationsInput | string
+    issueId?: StringFieldUpdateOperationsInput | string
+    title?: StringFieldUpdateOperationsInput | string
+    summary?: StringFieldUpdateOperationsInput | string
+    description?: StringFieldUpdateOperationsInput | string
+    sourcePrimary?: StringFieldUpdateOperationsInput | string
+    sourceType?: StringFieldUpdateOperationsInput | string
+    sourceSearch?: StringFieldUpdateOperationsInput | string
+    sourceLabels?: JsonNullValueInput | InputJsonValue
+    sources?: JsonNullValueInput | InputJsonValue
+    githubIds?: JsonNullValueInput | InputJsonValue
+    cveIds?: JsonNullValueInput | InputJsonValue
+    projectScope?: StringFieldUpdateOperationsInput | string
+    venue?: NullableStringFieldUpdateOperationsInput | string | null
+    authors?: JsonNullValueInput | InputJsonValue
+    severity?: StringFieldUpdateOperationsInput | string
+    score?: NullableFloatFieldUpdateOperationsInput | number | null
+    cvssVector?: NullableStringFieldUpdateOperationsInput | string | null
+    cwes?: JsonNullValueInput | InputJsonValue
+    affectedRange?: NullableStringFieldUpdateOperationsInput | string | null
+    fixedVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    latestStableVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    fixStatus?: StringFieldUpdateOperationsInput | string
+    fixLabel?: StringFieldUpdateOperationsInput | string
+    fixReason?: StringFieldUpdateOperationsInput | string
+    issueUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    repoUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    referenceUrls?: JsonNullValueInput | InputJsonValue
+    tags?: JsonNullValueInput | InputJsonValue
+    status?: StringFieldUpdateOperationsInput | string
+    relevanceScore?: NullableFloatFieldUpdateOperationsInput | number | null
+    publishedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    sourceUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    rawData?: JsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type SecurityResearchPaperCreateManySnapshotInput = {
+    id?: bigint | number
+    canonicalId: string
+    title: string
+    normalizedTitle: string
+    sourceType: string
+    projectScope: string
+    venue: string
+    sourcePrimary: string
+    sourceSearch: string
+    abstractOrSummary: string
+    tags: JsonNullValueInput | InputJsonValue
+    sourceUrl?: string | null
+    authors: JsonNullValueInput | InputJsonValue
+    externalIds: JsonNullValueInput | InputJsonValue
+    relevanceScore?: number
+    isTopVenue?: boolean
+    publishedAt?: Date | string | null
+    status?: string
+    rawData: JsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+  }
+
+  export type SecurityResearchPaperUpdateWithoutSnapshotInput = {
+    id?: BigIntFieldUpdateOperationsInput | bigint | number
+    canonicalId?: StringFieldUpdateOperationsInput | string
+    title?: StringFieldUpdateOperationsInput | string
+    normalizedTitle?: StringFieldUpdateOperationsInput | string
+    sourceType?: StringFieldUpdateOperationsInput | string
+    projectScope?: StringFieldUpdateOperationsInput | string
+    venue?: StringFieldUpdateOperationsInput | string
+    sourcePrimary?: StringFieldUpdateOperationsInput | string
+    sourceSearch?: StringFieldUpdateOperationsInput | string
+    abstractOrSummary?: StringFieldUpdateOperationsInput | string
+    tags?: JsonNullValueInput | InputJsonValue
+    sourceUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    authors?: JsonNullValueInput | InputJsonValue
+    externalIds?: JsonNullValueInput | InputJsonValue
+    relevanceScore?: FloatFieldUpdateOperationsInput | number
+    isTopVenue?: BoolFieldUpdateOperationsInput | boolean
+    publishedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    status?: StringFieldUpdateOperationsInput | string
+    rawData?: JsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type SecurityResearchPaperUncheckedUpdateWithoutSnapshotInput = {
+    id?: BigIntFieldUpdateOperationsInput | bigint | number
+    canonicalId?: StringFieldUpdateOperationsInput | string
+    title?: StringFieldUpdateOperationsInput | string
+    normalizedTitle?: StringFieldUpdateOperationsInput | string
+    sourceType?: StringFieldUpdateOperationsInput | string
+    projectScope?: StringFieldUpdateOperationsInput | string
+    venue?: StringFieldUpdateOperationsInput | string
+    sourcePrimary?: StringFieldUpdateOperationsInput | string
+    sourceSearch?: StringFieldUpdateOperationsInput | string
+    abstractOrSummary?: StringFieldUpdateOperationsInput | string
+    tags?: JsonNullValueInput | InputJsonValue
+    sourceUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    authors?: JsonNullValueInput | InputJsonValue
+    externalIds?: JsonNullValueInput | InputJsonValue
+    relevanceScore?: FloatFieldUpdateOperationsInput | number
+    isTopVenue?: BoolFieldUpdateOperationsInput | boolean
+    publishedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    status?: StringFieldUpdateOperationsInput | string
+    rawData?: JsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type SecurityResearchPaperUncheckedUpdateManyWithoutSnapshotInput = {
+    id?: BigIntFieldUpdateOperationsInput | bigint | number
+    canonicalId?: StringFieldUpdateOperationsInput | string
+    title?: StringFieldUpdateOperationsInput | string
+    normalizedTitle?: StringFieldUpdateOperationsInput | string
+    sourceType?: StringFieldUpdateOperationsInput | string
+    projectScope?: StringFieldUpdateOperationsInput | string
+    venue?: StringFieldUpdateOperationsInput | string
+    sourcePrimary?: StringFieldUpdateOperationsInput | string
+    sourceSearch?: StringFieldUpdateOperationsInput | string
+    abstractOrSummary?: StringFieldUpdateOperationsInput | string
+    tags?: JsonNullValueInput | InputJsonValue
+    sourceUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    authors?: JsonNullValueInput | InputJsonValue
+    externalIds?: JsonNullValueInput | InputJsonValue
+    relevanceScore?: FloatFieldUpdateOperationsInput | number
+    isTopVenue?: BoolFieldUpdateOperationsInput | boolean
+    publishedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    status?: StringFieldUpdateOperationsInput | string
+    rawData?: JsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 

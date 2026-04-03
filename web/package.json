@@ -16,6 +16,8 @@
     "db:migrate:operator": "node server/scripts/migrate-vendor-to-operator.mjs",
     "db:import:exposure": "node server/scripts/import-exposure-data.mjs",
     "db:rebuild:agg": "node server/scripts/rebuild-exposure-aggregates.mjs",
+    "risk:refresh": "node server/scripts/refresh-openclaw-risk.mjs",
+    "research:refresh": "node server/scripts/refresh-security-research.mjs",
     "db:setup": "npm run db:generate && npm run db:push && npm run db:import:exposure",
     "build": "npm run setup && vite build",
     "preview": "vite preview"

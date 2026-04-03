@@ -9,6 +9,18 @@ import {
   getVersionTrend,
   getWorldDistribution,
 } from "./services/exposureService.mjs";
+import {
+  getOpenclawRiskIssues,
+  getOpenclawRiskOverview,
+  initializeOpenclawRiskScheduler,
+  triggerOpenclawRiskRefresh,
+} from "./services/openclawRiskService.mjs";
+import {
+  getSecurityResearchOverview,
+  getSecurityResearchPapers,
+  initializeSecurityResearchScheduler,
+  triggerSecurityResearchRefresh,
+} from "./services/securityResearchService.mjs";
 import { prisma } from "./lib/prisma.mjs";
 
 const app = express();
@@ -75,9 +87,66 @@ app.get("/api/exposure/list", async (req, res) => {
   }
 });
 
+app.get("/api/openclaw-risk/overview", async (req, res) => {
+  try {
+    const data = await getOpenclawRiskOverview(req.query);
+    res.json(data);
+  } catch (error) {
+    res.status(500).json({ message: error.message || "Failed to fetch OpenClaw risk overview." });
+  }
+});
+
+app.get("/api/openclaw-risk/issues", async (req, res) => {
+  try {
+    const data = await getOpenclawRiskIssues(req.query);
+    res.json(data);
+  } catch (error) {
+    res.status(500).json({ message: error.message || "Failed to fetch OpenClaw risk issues." });
+  }
+});
+
+app.post("/api/openclaw-risk/refresh", async (_req, res) => {
+  try {
+    const data = await triggerOpenclawRiskRefresh("manual-api");
+    res.json(data);
+  } catch (error) {
+    res.status(500).json({ message: error.message || "Failed to refresh OpenClaw risk data." });
+  }
+});
+
+app.get("/api/security-research/overview", async (req, res) => {
+  try {
+    const data = await getSecurityResearchOverview(req.query);
+    res.json(data);
+  } catch (error) {
+    res.status(500).json({ message: error.message || "Failed to fetch security research overview." });
+  }
+});
+
+app.get("/api/security-research/papers", async (req, res) => {
+  try {
+    const data = await getSecurityResearchPapers(req.query);
+    res.json(data);
+  } catch (error) {
+    res.status(500).json({ message: error.message || "Failed to fetch security research papers." });
+  }
+});
+
+app.post("/api/security-research/refresh", async (_req, res) => {
+  try {
+    const data = await triggerSecurityResearchRefresh("manual-api");
+    res.json(data);
+  } catch (error) {
+    res.status(500).json({ message: error.message || "Failed to refresh security research data." });
+  }
+});
+
 app.listen(port, () => {
   console.log(`[exposure-api] listening on http://127.0.0.1:${port}`);
 });
+
+initializeOpenclawRiskScheduler();
+initializeSecurityResearchScheduler();
 
 process.on("SIGINT", async () => {
   await prisma.$disconnect();

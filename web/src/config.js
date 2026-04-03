@@ -8,6 +8,10 @@ export const DATA_PATHS = {
   EXPOSURE_TREND: "/api/exposure/trend",
   VERSION_TREND: "/api/exposure/version-trend",
   EXPOSURE_LIST: "/api/exposure/list",
+  OPENCLAW_RISK_OVERVIEW: "/api/openclaw-risk/overview",
+  OPENCLAW_RISK_ISSUES: "/api/openclaw-risk/issues",
+  SECURITY_RESEARCH_OVERVIEW: "/api/security-research/overview",
+  SECURITY_RESEARCH_PAPERS: "/api/security-research/papers",
 };
 
 /** Static fallback paths when API is unavailable */
@@ -30,6 +34,7 @@ export const GEO_PATHS = {
 export const PAGE_IDS = {
   HOME: "home",
   OPENCLAW_EXPOSURE: "openclaw-exposure",
+  SECURITY_RESEARCH: "openclaw-deploy",
 };
 
 /** Table page-size options */

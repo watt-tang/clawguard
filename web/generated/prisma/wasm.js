@@ -145,9 +145,126 @@ exports.Prisma.ExposureVersionDailyAggScalarFieldEnum = {
   createdAt: 'createdAt'
 };
 
+exports.Prisma.OpenclawRiskSnapshotScalarFieldEnum = {
+  id: 'id',
+  snapshotKey: 'snapshotKey',
+  triggerSource: 'triggerSource',
+  status: 'status',
+  latestStableTag: 'latestStableTag',
+  latestStableVersion: 'latestStableVersion',
+  latestStableUrl: 'latestStableUrl',
+  latestStablePublishedAt: 'latestStablePublishedAt',
+  totalIssues: 'totalIssues',
+  githubAdvisories: 'githubAdvisories',
+  nvdCves: 'nvdCves',
+  officialAdvisoryCount: 'officialAdvisoryCount',
+  cveRecordCount: 'cveRecordCount',
+  conferencePaperCount: 'conferencePaperCount',
+  preprintCount: 'preprintCount',
+  researchCount: 'researchCount',
+  newsCount: 'newsCount',
+  criticalCount: 'criticalCount',
+  highRiskCount: 'highRiskCount',
+  fixedCount: 'fixedCount',
+  unfixedCount: 'unfixedCount',
+  unknownCount: 'unknownCount',
+  fixProgressPercent: 'fixProgressPercent',
+  sourceMeta: 'sourceMeta',
+  cacheDir: 'cacheDir',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.OpenclawRiskIssueScalarFieldEnum = {
+  id: 'id',
+  snapshotId: 'snapshotId',
+  canonicalId: 'canonicalId',
+  issueId: 'issueId',
+  title: 'title',
+  summary: 'summary',
+  description: 'description',
+  sourcePrimary: 'sourcePrimary',
+  sourceType: 'sourceType',
+  sourceSearch: 'sourceSearch',
+  sourceLabels: 'sourceLabels',
+  sources: 'sources',
+  githubIds: 'githubIds',
+  cveIds: 'cveIds',
+  projectScope: 'projectScope',
+  venue: 'venue',
+  authors: 'authors',
+  severity: 'severity',
+  score: 'score',
+  cvssVector: 'cvssVector',
+  cwes: 'cwes',
+  affectedRange: 'affectedRange',
+  fixedVersion: 'fixedVersion',
+  latestStableVersion: 'latestStableVersion',
+  fixStatus: 'fixStatus',
+  fixLabel: 'fixLabel',
+  fixReason: 'fixReason',
+  issueUrl: 'issueUrl',
+  repoUrl: 'repoUrl',
+  referenceUrls: 'referenceUrls',
+  tags: 'tags',
+  status: 'status',
+  relevanceScore: 'relevanceScore',
+  publishedAt: 'publishedAt',
+  sourceUpdatedAt: 'sourceUpdatedAt',
+  rawData: 'rawData',
+  createdAt: 'createdAt'
+};
+
+exports.Prisma.SecurityResearchSnapshotScalarFieldEnum = {
+  id: 'id',
+  snapshotKey: 'snapshotKey',
+  triggerSource: 'triggerSource',
+  status: 'status',
+  totalPapers: 'totalPapers',
+  conferencePaperCount: 'conferencePaperCount',
+  preprintCount: 'preprintCount',
+  openclawCount: 'openclawCount',
+  clawCount: 'clawCount',
+  skillCount: 'skillCount',
+  agentCount: 'agentCount',
+  pluginCount: 'pluginCount',
+  sourceMeta: 'sourceMeta',
+  cacheDir: 'cacheDir',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.SecurityResearchPaperScalarFieldEnum = {
+  id: 'id',
+  snapshotId: 'snapshotId',
+  canonicalId: 'canonicalId',
+  title: 'title',
+  normalizedTitle: 'normalizedTitle',
+  sourceType: 'sourceType',
+  projectScope: 'projectScope',
+  venue: 'venue',
+  sourcePrimary: 'sourcePrimary',
+  sourceSearch: 'sourceSearch',
+  abstractOrSummary: 'abstractOrSummary',
+  tags: 'tags',
+  sourceUrl: 'sourceUrl',
+  authors: 'authors',
+  externalIds: 'externalIds',
+  relevanceScore: 'relevanceScore',
+  isTopVenue: 'isTopVenue',
+  publishedAt: 'publishedAt',
+  status: 'status',
+  rawData: 'rawData',
+  createdAt: 'createdAt'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
+};
+
+exports.Prisma.JsonNullValueInput = {
+  JsonNull: Prisma.JsonNull
 };
 
 exports.Prisma.ExposureSnapshotOrderByRelevanceFieldEnum = {
@@ -183,12 +300,82 @@ exports.Prisma.ExposureVersionDailyAggOrderByRelevanceFieldEnum = {
   version: 'version'
 };
 
+exports.Prisma.JsonNullValueFilter = {
+  DbNull: Prisma.DbNull,
+  JsonNull: Prisma.JsonNull,
+  AnyNull: Prisma.AnyNull
+};
+
+exports.Prisma.QueryMode = {
+  default: 'default',
+  insensitive: 'insensitive'
+};
+
+exports.Prisma.OpenclawRiskSnapshotOrderByRelevanceFieldEnum = {
+  snapshotKey: 'snapshotKey',
+  triggerSource: 'triggerSource',
+  status: 'status',
+  latestStableTag: 'latestStableTag',
+  latestStableVersion: 'latestStableVersion',
+  latestStableUrl: 'latestStableUrl',
+  cacheDir: 'cacheDir'
+};
+
+exports.Prisma.OpenclawRiskIssueOrderByRelevanceFieldEnum = {
+  canonicalId: 'canonicalId',
+  issueId: 'issueId',
+  title: 'title',
+  summary: 'summary',
+  description: 'description',
+  sourcePrimary: 'sourcePrimary',
+  sourceType: 'sourceType',
+  sourceSearch: 'sourceSearch',
+  projectScope: 'projectScope',
+  venue: 'venue',
+  severity: 'severity',
+  cvssVector: 'cvssVector',
+  affectedRange: 'affectedRange',
+  fixedVersion: 'fixedVersion',
+  latestStableVersion: 'latestStableVersion',
+  fixStatus: 'fixStatus',
+  fixLabel: 'fixLabel',
+  fixReason: 'fixReason',
+  issueUrl: 'issueUrl',
+  repoUrl: 'repoUrl',
+  status: 'status'
+};
+
+exports.Prisma.SecurityResearchSnapshotOrderByRelevanceFieldEnum = {
+  snapshotKey: 'snapshotKey',
+  triggerSource: 'triggerSource',
+  status: 'status',
+  cacheDir: 'cacheDir'
+};
+
+exports.Prisma.SecurityResearchPaperOrderByRelevanceFieldEnum = {
+  canonicalId: 'canonicalId',
+  title: 'title',
+  normalizedTitle: 'normalizedTitle',
+  sourceType: 'sourceType',
+  projectScope: 'projectScope',
+  venue: 'venue',
+  sourcePrimary: 'sourcePrimary',
+  sourceSearch: 'sourceSearch',
+  abstractOrSummary: 'abstractOrSummary',
+  sourceUrl: 'sourceUrl',
+  status: 'status'
+};
+
 
 exports.Prisma.ModelName = {
   ExposureSnapshot: 'ExposureSnapshot',
   ExposureRecord: 'ExposureRecord',
   ExposureDailyAgg: 'ExposureDailyAgg',
-  ExposureVersionDailyAgg: 'ExposureVersionDailyAgg'
+  ExposureVersionDailyAgg: 'ExposureVersionDailyAgg',
+  OpenclawRiskSnapshot: 'OpenclawRiskSnapshot',
+  OpenclawRiskIssue: 'OpenclawRiskIssue',
+  SecurityResearchSnapshot: 'SecurityResearchSnapshot',
+  SecurityResearchPaper: 'SecurityResearchPaper'
 };
 /**
  * Create the Client
@@ -219,7 +406,7 @@ const config = {
     "isCustomOutput": true
   },
   "relativeEnvPaths": {
-    "rootEnvPath": "../../.env",
+    "rootEnvPath": null,
     "schemaEnvPath": "../../.env"
   },
   "relativePath": "../../prisma",
@@ -238,13 +425,13 @@ const config = {
       }
     }
   },
-  "inlineSchema": "generator client {\n  provider = \"prisma-client-js\"\n  output   = \"../generated/prisma\"\n}\n\ndatasource db {\n  provider = \"mysql\"\n  url      = env(\"DATABASE_URL\")\n}\n\nmodel ExposureSnapshot {\n  id           Int               @id @default(autoincrement())\n  dateKey      String            @unique @db.VarChar(8)\n  snapshotDate DateTime          @unique @db.Date\n  sourceFile   String            @db.VarChar(255)\n  createdAt    DateTime          @default(now())\n  updatedAt    DateTime          @updatedAt\n  records      ExposureRecord[]\n  dailyAgg     ExposureDailyAgg?\n\n  @@index([snapshotDate])\n}\n\nmodel ExposureRecord {\n  id           BigInt           @id @default(autoincrement()) @db.UnsignedBigInt\n  snapshotId   Int\n  snapshot     ExposureSnapshot @relation(fields: [snapshotId], references: [id], onDelete: Cascade)\n  snapshotDate DateTime         @db.Date\n  ip           String           @db.VarChar(45)\n  country      String           @default(\"Unknown\") @db.VarChar(128)\n  countryZh    String           @default(\"未知\") @db.VarChar(128)\n  province     String           @default(\"未知\") @db.VarChar(128)\n  region       String           @default(\"Unknown\") @db.VarChar(191)\n  city         String           @default(\"Unknown\") @db.VarChar(128)\n  asn          String           @default(\"AS0\") @db.VarChar(32)\n  isp          String           @default(\"Unknown ISP\") @db.VarChar(191)\n  host         String           @default(\"-\") @db.VarChar(128)\n  service      String           @default(\"18789 / OpenClaw\") @db.VarChar(128)\n  serviceDesc  String           @default(\"OpenClaw service\") @db.VarChar(191)\n  operator     String           @default(\"Unknown Operator\") @db.VarChar(64)\n  status       String           @default(\"在线监测\") @db.VarChar(64)\n  scope        String           @default(\"境外暴露\") @db.VarChar(64)\n  version      String           @default(\"unknown\") @db.VarChar(64)\n  risk         String           @default(\"待补充\") @db.VarChar(64)\n  lastSeen     DateTime         @db.Date\n  createdAt    DateTime         @default(now())\n\n  @@unique([snapshotId, ip])\n  @@index([snapshotId])\n  @@index([snapshotDate])\n  @@index([ip])\n  @@index([ip, snapshotDate])\n  @@index([country])\n  @@index([scope])\n  @@index([version])\n  @@index([operator])\n}\n\nmodel ExposureDailyAgg {\n  snapshotDate              DateTime          @id @db.Date\n  snapshotId                Int?              @unique\n  snapshot                  ExposureSnapshot? @relation(fields: [snapshotId], references: [id], onDelete: SetNull)\n  exposedCount              Int\n  domesticCount             Int               @default(0)\n  overseasCount             Int               @default(0)\n  newDistinctIpCount        Int               @default(0)\n  cumulativeDistinctIpCount Int               @default(0)\n  createdAt                 DateTime          @default(now())\n  updatedAt                 DateTime          @updatedAt\n\n  @@index([snapshotDate])\n}\n\nmodel ExposureVersionDailyAgg {\n  id           BigInt   @id @default(autoincrement()) @db.UnsignedBigInt\n  snapshotDate DateTime @db.Date\n  version      String   @db.VarChar(64)\n  count        Int\n  createdAt    DateTime @default(now())\n\n  @@unique([snapshotDate, version])\n  @@index([snapshotDate])\n  @@index([version])\n}\n",
-  "inlineSchemaHash": "41d6affaf7962c595d915b04be1cea5bec06417a46dfe0a4728aaa69ebf9780d",
+  "inlineSchema": "generator client {\n  provider = \"prisma-client-js\"\n  output   = \"../generated/prisma\"\n}\n\ndatasource db {\n  provider = \"mysql\"\n  url      = env(\"DATABASE_URL\")\n}\n\nmodel ExposureSnapshot {\n  id           Int               @id @default(autoincrement())\n  dateKey      String            @unique @db.VarChar(8)\n  snapshotDate DateTime          @unique @db.Date\n  sourceFile   String            @db.VarChar(255)\n  createdAt    DateTime          @default(now())\n  updatedAt    DateTime          @updatedAt\n  records      ExposureRecord[]\n  dailyAgg     ExposureDailyAgg?\n\n  @@index([snapshotDate])\n}\n\nmodel ExposureRecord {\n  id           BigInt           @id @default(autoincrement()) @db.UnsignedBigInt\n  snapshotId   Int\n  snapshot     ExposureSnapshot @relation(fields: [snapshotId], references: [id], onDelete: Cascade)\n  snapshotDate DateTime         @db.Date\n  ip           String           @db.VarChar(45)\n  country      String           @default(\"Unknown\") @db.VarChar(128)\n  countryZh    String           @default(\"未知\") @db.VarChar(128)\n  province     String           @default(\"未知\") @db.VarChar(128)\n  region       String           @default(\"Unknown\") @db.VarChar(191)\n  city         String           @default(\"Unknown\") @db.VarChar(128)\n  asn          String           @default(\"AS0\") @db.VarChar(32)\n  isp          String           @default(\"Unknown ISP\") @db.VarChar(191)\n  host         String           @default(\"-\") @db.VarChar(128)\n  service      String           @default(\"18789 / OpenClaw\") @db.VarChar(128)\n  serviceDesc  String           @default(\"OpenClaw service\") @db.VarChar(191)\n  operator     String           @default(\"Unknown Operator\") @db.VarChar(64)\n  status       String           @default(\"在线监测\") @db.VarChar(64)\n  scope        String           @default(\"境外暴露\") @db.VarChar(64)\n  version      String           @default(\"unknown\") @db.VarChar(64)\n  risk         String           @default(\"待补充\") @db.VarChar(64)\n  lastSeen     DateTime         @db.Date\n  createdAt    DateTime         @default(now())\n\n  @@unique([snapshotId, ip])\n  @@index([snapshotId])\n  @@index([snapshotDate])\n  @@index([ip])\n  @@index([ip, snapshotDate])\n  @@index([country])\n  @@index([scope])\n  @@index([version])\n  @@index([operator])\n}\n\nmodel ExposureDailyAgg {\n  snapshotDate              DateTime          @id @db.Date\n  snapshotId                Int?              @unique\n  snapshot                  ExposureSnapshot? @relation(fields: [snapshotId], references: [id], onDelete: SetNull)\n  exposedCount              Int\n  domesticCount             Int               @default(0)\n  overseasCount             Int               @default(0)\n  newDistinctIpCount        Int               @default(0)\n  cumulativeDistinctIpCount Int               @default(0)\n  createdAt                 DateTime          @default(now())\n  updatedAt                 DateTime          @updatedAt\n\n  @@index([snapshotDate])\n}\n\nmodel ExposureVersionDailyAgg {\n  id           BigInt   @id @default(autoincrement()) @db.UnsignedBigInt\n  snapshotDate DateTime @db.Date\n  version      String   @db.VarChar(64)\n  count        Int\n  createdAt    DateTime @default(now())\n\n  @@unique([snapshotDate, version])\n  @@index([snapshotDate])\n  @@index([version])\n}\n\nmodel OpenclawRiskSnapshot {\n  id                      Int                 @id @default(autoincrement())\n  snapshotKey             String              @unique @db.VarChar(32)\n  triggerSource           String              @default(\"scheduled\") @db.VarChar(32)\n  status                  String              @default(\"completed\") @db.VarChar(32)\n  latestStableTag         String?             @db.VarChar(64)\n  latestStableVersion     String?             @db.VarChar(64)\n  latestStableUrl         String?             @db.VarChar(255)\n  latestStablePublishedAt DateTime?\n  totalIssues             Int                 @default(0)\n  githubAdvisories        Int                 @default(0)\n  nvdCves                 Int                 @default(0)\n  officialAdvisoryCount   Int                 @default(0)\n  cveRecordCount          Int                 @default(0)\n  conferencePaperCount    Int                 @default(0)\n  preprintCount           Int                 @default(0)\n  researchCount           Int                 @default(0)\n  newsCount               Int                 @default(0)\n  criticalCount           Int                 @default(0)\n  highRiskCount           Int                 @default(0)\n  fixedCount              Int                 @default(0)\n  unfixedCount            Int                 @default(0)\n  unknownCount            Int                 @default(0)\n  fixProgressPercent      Int                 @default(0)\n  sourceMeta              Json\n  cacheDir                String?             @db.VarChar(255)\n  createdAt               DateTime            @default(now())\n  updatedAt               DateTime            @updatedAt\n  issues                  OpenclawRiskIssue[]\n\n  @@index([createdAt])\n  @@index([status, createdAt])\n}\n\nmodel OpenclawRiskIssue {\n  id                  BigInt               @id @default(autoincrement()) @db.UnsignedBigInt\n  snapshotId          Int\n  snapshot            OpenclawRiskSnapshot @relation(fields: [snapshotId], references: [id], onDelete: Cascade)\n  canonicalId         String               @db.VarChar(128)\n  issueId             String               @db.VarChar(128)\n  title               String               @db.VarChar(255)\n  summary             String               @db.Text\n  description         String               @db.LongText\n  sourcePrimary       String               @db.VarChar(32)\n  sourceType          String               @default(\"official_advisory\") @db.VarChar(32)\n  sourceSearch        String               @db.VarChar(64)\n  sourceLabels        Json\n  sources             Json\n  githubIds           Json\n  cveIds              Json\n  projectScope        String               @default(\"agent\") @db.VarChar(32)\n  venue               String?              @db.VarChar(128)\n  authors             Json\n  severity            String               @db.VarChar(32)\n  score               Float?\n  cvssVector          String?              @db.VarChar(255)\n  cwes                Json\n  affectedRange       String?              @db.Text\n  fixedVersion        String?              @db.VarChar(64)\n  latestStableVersion String?              @db.VarChar(64)\n  fixStatus           String               @db.VarChar(32)\n  fixLabel            String               @db.VarChar(32)\n  fixReason           String               @db.Text\n  issueUrl            String?              @db.VarChar(255)\n  repoUrl             String?              @db.VarChar(255)\n  referenceUrls       Json\n  tags                Json\n  status              String               @default(\"new\") @db.VarChar(32)\n  relevanceScore      Float?\n  publishedAt         DateTime?\n  sourceUpdatedAt     DateTime?\n  rawData             Json\n  createdAt           DateTime             @default(now())\n\n  @@unique([snapshotId, canonicalId])\n  @@index([snapshotId])\n  @@index([canonicalId])\n  @@index([issueId])\n  @@index([severity])\n  @@index([fixStatus])\n  @@index([sourcePrimary])\n  @@index([sourceType])\n  @@index([projectScope])\n  @@index([venue])\n  @@index([status])\n  @@index([publishedAt])\n}\n\nmodel SecurityResearchSnapshot {\n  id                   Int                     @id @default(autoincrement())\n  snapshotKey          String                  @unique @db.VarChar(32)\n  triggerSource        String                  @default(\"scheduled\") @db.VarChar(32)\n  status               String                  @default(\"completed\") @db.VarChar(32)\n  totalPapers          Int                     @default(0)\n  conferencePaperCount Int                     @default(0)\n  preprintCount        Int                     @default(0)\n  openclawCount        Int                     @default(0)\n  clawCount            Int                     @default(0)\n  skillCount           Int                     @default(0)\n  agentCount           Int                     @default(0)\n  pluginCount          Int                     @default(0)\n  sourceMeta           Json\n  cacheDir             String?                 @db.VarChar(255)\n  createdAt            DateTime                @default(now())\n  updatedAt            DateTime                @updatedAt\n  papers               SecurityResearchPaper[]\n\n  @@index([createdAt])\n  @@index([status, createdAt])\n}\n\nmodel SecurityResearchPaper {\n  id                BigInt                   @id @default(autoincrement()) @db.UnsignedBigInt\n  snapshotId        Int\n  snapshot          SecurityResearchSnapshot @relation(fields: [snapshotId], references: [id], onDelete: Cascade)\n  canonicalId       String                   @db.VarChar(191)\n  title             String                   @db.VarChar(500)\n  normalizedTitle   String                   @db.VarChar(500)\n  sourceType        String                   @db.VarChar(32)\n  projectScope      String                   @db.VarChar(32)\n  venue             String                   @db.VarChar(128)\n  sourcePrimary     String                   @db.VarChar(32)\n  sourceSearch      String                   @db.VarChar(128)\n  abstractOrSummary String                   @db.LongText\n  tags              Json\n  sourceUrl         String?                  @db.VarChar(255)\n  authors           Json\n  externalIds       Json\n  relevanceScore    Float                    @default(0)\n  isTopVenue        Boolean                  @default(false)\n  publishedAt       DateTime?\n  status            String                   @default(\"active\") @db.VarChar(32)\n  rawData           Json\n  createdAt         DateTime                 @default(now())\n\n  @@unique([snapshotId, canonicalId])\n  @@index([snapshotId])\n  @@index([canonicalId])\n  @@index([normalizedTitle])\n  @@index([sourceType])\n  @@index([projectScope])\n  @@index([venue])\n  @@index([sourcePrimary])\n  @@index([isTopVenue])\n  @@index([publishedAt])\n  @@index([relevanceScore])\n}\n",
+  "inlineSchemaHash": "c50c9b3cf9c8406e4c3ba2660eebcdd25720ed743593a53adcfbb73711f22f34",
   "copyEngine": true
 }
 config.dirname = '/'
 
-config.runtimeDataModel = JSON.parse("{\"models\":{\"ExposureSnapshot\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"dateKey\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"snapshotDate\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"sourceFile\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"updatedAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"records\",\"kind\":\"object\",\"type\":\"ExposureRecord\",\"relationName\":\"ExposureRecordToExposureSnapshot\"},{\"name\":\"dailyAgg\",\"kind\":\"object\",\"type\":\"ExposureDailyAgg\",\"relationName\":\"ExposureDailyAggToExposureSnapshot\"}],\"dbName\":null},\"ExposureRecord\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"BigInt\"},{\"name\":\"snapshotId\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"snapshot\",\"kind\":\"object\",\"type\":\"ExposureSnapshot\",\"relationName\":\"ExposureRecordToExposureSnapshot\"},{\"name\":\"snapshotDate\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"ip\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"country\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"countryZh\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"province\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"region\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"city\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"asn\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"isp\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"host\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"service\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"serviceDesc\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"operator\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"status\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"scope\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"version\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"risk\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"lastSeen\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"}],\"dbName\":null},\"ExposureDailyAgg\":{\"fields\":[{\"name\":\"snapshotDate\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"snapshotId\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"snapshot\",\"kind\":\"object\",\"type\":\"ExposureSnapshot\",\"relationName\":\"ExposureDailyAggToExposureSnapshot\"},{\"name\":\"exposedCount\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"domesticCount\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"overseasCount\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"newDistinctIpCount\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"cumulativeDistinctIpCount\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"updatedAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"}],\"dbName\":null},\"ExposureVersionDailyAgg\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"BigInt\"},{\"name\":\"snapshotDate\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"version\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"count\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"}],\"dbName\":null}},\"enums\":{},\"types\":{}}")
+config.runtimeDataModel = JSON.parse("{\"models\":{\"ExposureSnapshot\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"dateKey\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"snapshotDate\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"sourceFile\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"updatedAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"records\",\"kind\":\"object\",\"type\":\"ExposureRecord\",\"relationName\":\"ExposureRecordToExposureSnapshot\"},{\"name\":\"dailyAgg\",\"kind\":\"object\",\"type\":\"ExposureDailyAgg\",\"relationName\":\"ExposureDailyAggToExposureSnapshot\"}],\"dbName\":null},\"ExposureRecord\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"BigInt\"},{\"name\":\"snapshotId\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"snapshot\",\"kind\":\"object\",\"type\":\"ExposureSnapshot\",\"relationName\":\"ExposureRecordToExposureSnapshot\"},{\"name\":\"snapshotDate\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"ip\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"country\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"countryZh\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"province\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"region\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"city\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"asn\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"isp\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"host\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"service\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"serviceDesc\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"operator\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"status\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"scope\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"version\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"risk\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"lastSeen\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"}],\"dbName\":null},\"ExposureDailyAgg\":{\"fields\":[{\"name\":\"snapshotDate\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"snapshotId\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"snapshot\",\"kind\":\"object\",\"type\":\"ExposureSnapshot\",\"relationName\":\"ExposureDailyAggToExposureSnapshot\"},{\"name\":\"exposedCount\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"domesticCount\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"overseasCount\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"newDistinctIpCount\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"cumulativeDistinctIpCount\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"updatedAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"}],\"dbName\":null},\"ExposureVersionDailyAgg\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"BigInt\"},{\"name\":\"snapshotDate\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"version\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"count\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"}],\"dbName\":null},\"OpenclawRiskSnapshot\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"snapshotKey\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"triggerSource\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"status\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"latestStableTag\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"latestStableVersion\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"latestStableUrl\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"latestStablePublishedAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"totalIssues\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"githubAdvisories\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"nvdCves\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"officialAdvisoryCount\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"cveRecordCount\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"conferencePaperCount\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"preprintCount\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"researchCount\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"newsCount\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"criticalCount\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"highRiskCount\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"fixedCount\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"unfixedCount\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"unknownCount\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"fixProgressPercent\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"sourceMeta\",\"kind\":\"scalar\",\"type\":\"Json\"},{\"name\":\"cacheDir\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"updatedAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"issues\",\"kind\":\"object\",\"type\":\"OpenclawRiskIssue\",\"relationName\":\"OpenclawRiskIssueToOpenclawRiskSnapshot\"}],\"dbName\":null},\"OpenclawRiskIssue\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"BigInt\"},{\"name\":\"snapshotId\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"snapshot\",\"kind\":\"object\",\"type\":\"OpenclawRiskSnapshot\",\"relationName\":\"OpenclawRiskIssueToOpenclawRiskSnapshot\"},{\"name\":\"canonicalId\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"issueId\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"title\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"summary\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"description\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"sourcePrimary\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"sourceType\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"sourceSearch\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"sourceLabels\",\"kind\":\"scalar\",\"type\":\"Json\"},{\"name\":\"sources\",\"kind\":\"scalar\",\"type\":\"Json\"},{\"name\":\"githubIds\",\"kind\":\"scalar\",\"type\":\"Json\"},{\"name\":\"cveIds\",\"kind\":\"scalar\",\"type\":\"Json\"},{\"name\":\"projectScope\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"venue\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"authors\",\"kind\":\"scalar\",\"type\":\"Json\"},{\"name\":\"severity\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"score\",\"kind\":\"scalar\",\"type\":\"Float\"},{\"name\":\"cvssVector\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"cwes\",\"kind\":\"scalar\",\"type\":\"Json\"},{\"name\":\"affectedRange\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"fixedVersion\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"latestStableVersion\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"fixStatus\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"fixLabel\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"fixReason\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"issueUrl\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"repoUrl\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"referenceUrls\",\"kind\":\"scalar\",\"type\":\"Json\"},{\"name\":\"tags\",\"kind\":\"scalar\",\"type\":\"Json\"},{\"name\":\"status\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"relevanceScore\",\"kind\":\"scalar\",\"type\":\"Float\"},{\"name\":\"publishedAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"sourceUpdatedAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"rawData\",\"kind\":\"scalar\",\"type\":\"Json\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"}],\"dbName\":null},\"SecurityResearchSnapshot\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"snapshotKey\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"triggerSource\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"status\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"totalPapers\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"conferencePaperCount\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"preprintCount\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"openclawCount\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"clawCount\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"skillCount\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"agentCount\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"pluginCount\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"sourceMeta\",\"kind\":\"scalar\",\"type\":\"Json\"},{\"name\":\"cacheDir\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"updatedAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"papers\",\"kind\":\"object\",\"type\":\"SecurityResearchPaper\",\"relationName\":\"SecurityResearchPaperToSecurityResearchSnapshot\"}],\"dbName\":null},\"SecurityResearchPaper\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"BigInt\"},{\"name\":\"snapshotId\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"snapshot\",\"kind\":\"object\",\"type\":\"SecurityResearchSnapshot\",\"relationName\":\"SecurityResearchPaperToSecurityResearchSnapshot\"},{\"name\":\"canonicalId\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"title\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"normalizedTitle\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"sourceType\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"projectScope\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"venue\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"sourcePrimary\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"sourceSearch\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"abstractOrSummary\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"tags\",\"kind\":\"scalar\",\"type\":\"Json\"},{\"name\":\"sourceUrl\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"authors\",\"kind\":\"scalar\",\"type\":\"Json\"},{\"name\":\"externalIds\",\"kind\":\"scalar\",\"type\":\"Json\"},{\"name\":\"relevanceScore\",\"kind\":\"scalar\",\"type\":\"Float\"},{\"name\":\"isTopVenue\",\"kind\":\"scalar\",\"type\":\"Boolean\"},{\"name\":\"publishedAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"status\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"rawData\",\"kind\":\"scalar\",\"type\":\"Json\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"}],\"dbName\":null}},\"enums\":{},\"types\":{}}")
 defineDmmfProperty(exports.Prisma, config.runtimeDataModel)
 config.engineWasm = {
   getRuntime: async () => require('./query_engine_bg.js'),

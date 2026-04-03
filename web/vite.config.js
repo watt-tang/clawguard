@@ -705,6 +705,18 @@ export default defineConfig({
         target: process.env.EXPOSURE_API_PROXY || "http://127.0.0.1:8787",
         changeOrigin: true,
       },
+      "/api/openclaw-risk": {
+        target: process.env.EXPOSURE_API_PROXY || "http://127.0.0.1:8787",
+        changeOrigin: true,
+      },
+      "/api/security-research": {
+        target: process.env.EXPOSURE_API_PROXY || "http://127.0.0.1:8787",
+        changeOrigin: true,
+      },
+      "/api/health": {
+        target: process.env.EXPOSURE_API_PROXY || "http://127.0.0.1:8787",
+        changeOrigin: true,
+      },
     },
   },
 });

@@ -173,9 +173,126 @@ exports.Prisma.ExposureVersionDailyAggScalarFieldEnum = {
   createdAt: 'createdAt'
 };
 
+exports.Prisma.OpenclawRiskSnapshotScalarFieldEnum = {
+  id: 'id',
+  snapshotKey: 'snapshotKey',
+  triggerSource: 'triggerSource',
+  status: 'status',
+  latestStableTag: 'latestStableTag',
+  latestStableVersion: 'latestStableVersion',
+  latestStableUrl: 'latestStableUrl',
+  latestStablePublishedAt: 'latestStablePublishedAt',
+  totalIssues: 'totalIssues',
+  githubAdvisories: 'githubAdvisories',
+  nvdCves: 'nvdCves',
+  officialAdvisoryCount: 'officialAdvisoryCount',
+  cveRecordCount: 'cveRecordCount',
+  conferencePaperCount: 'conferencePaperCount',
+  preprintCount: 'preprintCount',
+  researchCount: 'researchCount',
+  newsCount: 'newsCount',
+  criticalCount: 'criticalCount',
+  highRiskCount: 'highRiskCount',
+  fixedCount: 'fixedCount',
+  unfixedCount: 'unfixedCount',
+  unknownCount: 'unknownCount',
+  fixProgressPercent: 'fixProgressPercent',
+  sourceMeta: 'sourceMeta',
+  cacheDir: 'cacheDir',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.OpenclawRiskIssueScalarFieldEnum = {
+  id: 'id',
+  snapshotId: 'snapshotId',
+  canonicalId: 'canonicalId',
+  issueId: 'issueId',
+  title: 'title',
+  summary: 'summary',
+  description: 'description',
+  sourcePrimary: 'sourcePrimary',
+  sourceType: 'sourceType',
+  sourceSearch: 'sourceSearch',
+  sourceLabels: 'sourceLabels',
+  sources: 'sources',
+  githubIds: 'githubIds',
+  cveIds: 'cveIds',
+  projectScope: 'projectScope',
+  venue: 'venue',
+  authors: 'authors',
+  severity: 'severity',
+  score: 'score',
+  cvssVector: 'cvssVector',
+  cwes: 'cwes',
+  affectedRange: 'affectedRange',
+  fixedVersion: 'fixedVersion',
+  latestStableVersion: 'latestStableVersion',
+  fixStatus: 'fixStatus',
+  fixLabel: 'fixLabel',
+  fixReason: 'fixReason',
+  issueUrl: 'issueUrl',
+  repoUrl: 'repoUrl',
+  referenceUrls: 'referenceUrls',
+  tags: 'tags',
+  status: 'status',
+  relevanceScore: 'relevanceScore',
+  publishedAt: 'publishedAt',
+  sourceUpdatedAt: 'sourceUpdatedAt',
+  rawData: 'rawData',
+  createdAt: 'createdAt'
+};
+
+exports.Prisma.SecurityResearchSnapshotScalarFieldEnum = {
+  id: 'id',
+  snapshotKey: 'snapshotKey',
+  triggerSource: 'triggerSource',
+  status: 'status',
+  totalPapers: 'totalPapers',
+  conferencePaperCount: 'conferencePaperCount',
+  preprintCount: 'preprintCount',
+  openclawCount: 'openclawCount',
+  clawCount: 'clawCount',
+  skillCount: 'skillCount',
+  agentCount: 'agentCount',
+  pluginCount: 'pluginCount',
+  sourceMeta: 'sourceMeta',
+  cacheDir: 'cacheDir',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.SecurityResearchPaperScalarFieldEnum = {
+  id: 'id',
+  snapshotId: 'snapshotId',
+  canonicalId: 'canonicalId',
+  title: 'title',
+  normalizedTitle: 'normalizedTitle',
+  sourceType: 'sourceType',
+  projectScope: 'projectScope',
+  venue: 'venue',
+  sourcePrimary: 'sourcePrimary',
+  sourceSearch: 'sourceSearch',
+  abstractOrSummary: 'abstractOrSummary',
+  tags: 'tags',
+  sourceUrl: 'sourceUrl',
+  authors: 'authors',
+  externalIds: 'externalIds',
+  relevanceScore: 'relevanceScore',
+  isTopVenue: 'isTopVenue',
+  publishedAt: 'publishedAt',
+  status: 'status',
+  rawData: 'rawData',
+  createdAt: 'createdAt'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
+};
+
+exports.Prisma.JsonNullValueInput = {
+  JsonNull: Prisma.JsonNull
 };
 
 exports.Prisma.ExposureSnapshotOrderByRelevanceFieldEnum = {
@@ -211,12 +328,82 @@ exports.Prisma.ExposureVersionDailyAggOrderByRelevanceFieldEnum = {
   version: 'version'
 };
 
+exports.Prisma.JsonNullValueFilter = {
+  DbNull: Prisma.DbNull,
+  JsonNull: Prisma.JsonNull,
+  AnyNull: Prisma.AnyNull
+};
+
+exports.Prisma.QueryMode = {
+  default: 'default',
+  insensitive: 'insensitive'
+};
+
+exports.Prisma.OpenclawRiskSnapshotOrderByRelevanceFieldEnum = {
+  snapshotKey: 'snapshotKey',
+  triggerSource: 'triggerSource',
+  status: 'status',
+  latestStableTag: 'latestStableTag',
+  latestStableVersion: 'latestStableVersion',
+  latestStableUrl: 'latestStableUrl',
+  cacheDir: 'cacheDir'
+};
+
+exports.Prisma.OpenclawRiskIssueOrderByRelevanceFieldEnum = {
+  canonicalId: 'canonicalId',
+  issueId: 'issueId',
+  title: 'title',
+  summary: 'summary',
+  description: 'description',
+  sourcePrimary: 'sourcePrimary',
+  sourceType: 'sourceType',
+  sourceSearch: 'sourceSearch',
+  projectScope: 'projectScope',
+  venue: 'venue',
+  severity: 'severity',
+  cvssVector: 'cvssVector',
+  affectedRange: 'affectedRange',
+  fixedVersion: 'fixedVersion',
+  latestStableVersion: 'latestStableVersion',
+  fixStatus: 'fixStatus',
+  fixLabel: 'fixLabel',
+  fixReason: 'fixReason',
+  issueUrl: 'issueUrl',
+  repoUrl: 'repoUrl',
+  status: 'status'
+};
+
+exports.Prisma.SecurityResearchSnapshotOrderByRelevanceFieldEnum = {
+  snapshotKey: 'snapshotKey',
+  triggerSource: 'triggerSource',
+  status: 'status',
+  cacheDir: 'cacheDir'
+};
+
+exports.Prisma.SecurityResearchPaperOrderByRelevanceFieldEnum = {
+  canonicalId: 'canonicalId',
+  title: 'title',
+  normalizedTitle: 'normalizedTitle',
+  sourceType: 'sourceType',
+  projectScope: 'projectScope',
+  venue: 'venue',
+  sourcePrimary: 'sourcePrimary',
+  sourceSearch: 'sourceSearch',
+  abstractOrSummary: 'abstractOrSummary',
+  sourceUrl: 'sourceUrl',
+  status: 'status'
+};
+
 
 exports.Prisma.ModelName = {
   ExposureSnapshot: 'ExposureSnapshot',
   ExposureRecord: 'ExposureRecord',
   ExposureDailyAgg: 'ExposureDailyAgg',
-  ExposureVersionDailyAgg: 'ExposureVersionDailyAgg'
+  ExposureVersionDailyAgg: 'ExposureVersionDailyAgg',
+  OpenclawRiskSnapshot: 'OpenclawRiskSnapshot',
+  OpenclawRiskIssue: 'OpenclawRiskIssue',
+  SecurityResearchSnapshot: 'SecurityResearchSnapshot',
+  SecurityResearchPaper: 'SecurityResearchPaper'
 };
 
 /**
