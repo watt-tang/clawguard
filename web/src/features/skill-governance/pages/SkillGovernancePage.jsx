@@ -1791,7 +1791,7 @@ export default function SkillGovernancePage({ auth }) {
         <div className="oc-page-header-main">
           <div className="oc-page-tag">Skill 生态后门投毒治理</div>
           <h2 className="oc-page-title">Skill 扫描中心</h2>
-          <p className="oc-page-desc">面向 Skill 包、SKILL.md 清单与目录样本的统一扫描入口，支持拖拽上传、批量接收和 slug 直扫，并整合 6 个 scanner 的执行结果。</p>
+          <p className="oc-page-desc">面向 Skill 包、SKILL.md 清单与目录样本的统一扫描入口，支持拖拽上传、批量接收和 slug 直扫，并整合 多种扫码器 的执行结果。</p>
         </div>
       </section>
 

@@ -4,8 +4,11 @@ import {
   ChevronLeft,
   ChevronRight,
   ExternalLink,
+  Heart,
+  MessageCircle,
   RefreshCw,
   Search,
+  Send,
   Sparkles,
   Zap,
 } from "lucide-react";
@@ -15,6 +18,12 @@ import {
   fetchSecurityResearchPapers,
   triggerSecurityResearchRefresh,
 } from "../services/dataService.js";
+import {
+  createSecurityResearchComment,
+  loadSecurityResearchDiscussion,
+  replySecurityResearchComment,
+  toggleSecurityResearchCommentLike,
+} from "../services/discussionService.js";
 
 const SOURCE_TYPE_OPTIONS = [
   { label: "全部来源", value: "" },
@@ -40,6 +49,23 @@ function compactSummary(value = "", maxLength = 220) {
   if (!normalized) return "-";
   if (normalized.length <= maxLength) return normalized;
   return `${normalized.slice(0, maxLength).trim()}...`;
+}
+
+function formatRelativeTime(value) {
+  if (!value) return "-";
+  const timestamp = new Date(value).getTime();
+  if (Number.isNaN(timestamp)) return "-";
+
+  const diffMinutes = Math.max(1, Math.round((Date.now() - timestamp) / 60000));
+  if (diffMinutes < 60) return `${diffMinutes} 分钟前`;
+
+  const diffHours = Math.round(diffMinutes / 60);
+  if (diffHours < 24) return `${diffHours} 小时前`;
+
+  const diffDays = Math.round(diffHours / 24);
+  if (diffDays < 30) return `${diffDays} 天前`;
+
+  return formatDate(value);
 }
 
 function Badge({ tone = "neutral", children }) {
@@ -139,7 +165,163 @@ function FilterField({ id, label, children }) {
   );
 }
 
-export default function SecurityResearchPage() {
+function DiscussionComposer({ auth, value, onChange, onSubmit, submitting }) {
+  const isLoggedIn = Boolean(auth?.isLoggedIn);
+
+  return (
+    <div className="research-discussion-composer">
+      <div className="research-discussion-composer-top">
+        <div>
+          <div className="research-discussion-title">发表评论</div>
+          <div className="research-discussion-hint">
+            {isLoggedIn
+              ? `以 ${auth.user?.username || "guest"} 身份参与讨论，分享对论文、方向或方法的看法。`
+              : "登录后可在平台发表评论、点赞与回复。"}
+          </div>
+        </div>
+        <div className="research-discussion-author">
+          <span>{isLoggedIn ? auth.user?.username : "未登录"}</span>
+        </div>
+      </div>
+
+      <textarea
+        className="research-discussion-textarea"
+        value={value}
+        onChange={(event) => onChange(event.target.value)}
+        placeholder={isLoggedIn ? "输入你的观点、补充线索或风险判断..." : "请先登录后参与讨论"}
+        disabled={!isLoggedIn || submitting}
+      />
+
+      <div className="research-discussion-actions">
+        <span className="research-discussion-count">{value.trim().length}/500</span>
+        <button
+          type="button"
+          className="oc-primary-btn"
+          onClick={onSubmit}
+          disabled={!isLoggedIn || submitting || !value.trim()}
+        >
+          <Send size={14} />
+          <span>{submitting ? "发布中..." : "发布评论"}</span>
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function DiscussionReplyComposer({ value, onChange, onSubmit, onCancel, disabled }) {
+  return (
+    <div className="research-reply-composer">
+      <textarea
+        className="research-discussion-textarea is-reply"
+        value={value}
+        onChange={(event) => onChange(event.target.value)}
+        placeholder="写下你的回复..."
+        disabled={disabled}
+      />
+      <div className="research-reply-actions">
+        <button type="button" className="utility-ghost-btn" onClick={onCancel}>
+          取消
+        </button>
+        <button type="button" className="oc-primary-btn" onClick={onSubmit} disabled={disabled || !value.trim()}>
+          <Send size={14} />
+          <span>回复</span>
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function DiscussionCard({
+  comment,
+  auth,
+  replyDraft,
+  replyOpen,
+  onToggleLike,
+  onOpenReply,
+  onReplyDraftChange,
+  onSubmitReply,
+  onCancelReply,
+}) {
+  const currentUser = String(auth?.user?.username || "").trim().toLowerCase();
+  const isLoggedIn = Boolean(auth?.isLoggedIn);
+  const commentLiked = currentUser ? comment.likes.includes(currentUser) : false;
+
+  return (
+    <article className="research-discussion-card">
+      <div className="research-discussion-card-head">
+        <div className="research-discussion-avatar">{comment.author.slice(0, 1).toUpperCase()}</div>
+        <div className="research-discussion-meta">
+          <strong>{comment.author}</strong>
+          <span>{formatRelativeTime(comment.createdAt)}</span>
+        </div>
+      </div>
+
+      <p className="research-discussion-content">{comment.content}</p>
+
+      <div className="research-discussion-toolbar">
+        <button
+          type="button"
+          className={`research-discussion-btn${commentLiked ? " is-active" : ""}`}
+          onClick={() => onToggleLike(comment.id)}
+          disabled={!isLoggedIn}
+        >
+          <Heart size={14} />
+          <span>点赞 {comment.likes.length}</span>
+        </button>
+        <button
+          type="button"
+          className={`research-discussion-btn${replyOpen ? " is-active" : ""}`}
+          onClick={() => onOpenReply(comment.id)}
+          disabled={!isLoggedIn}
+        >
+          <MessageCircle size={14} />
+          <span>回复 {comment.replies.length}</span>
+        </button>
+      </div>
+
+      {replyOpen ? (
+        <DiscussionReplyComposer
+          value={replyDraft}
+          onChange={onReplyDraftChange}
+          onSubmit={() => onSubmitReply(comment.id)}
+          onCancel={onCancelReply}
+          disabled={!isLoggedIn}
+        />
+      ) : null}
+
+      {comment.replies.length ? (
+        <div className="research-reply-list">
+          {comment.replies.map((reply) => {
+            const replyLiked = currentUser ? reply.likes.includes(currentUser) : false;
+            return (
+              <div key={reply.id} className="research-reply-card">
+                <div className="research-discussion-card-head is-reply">
+                  <div className="research-discussion-avatar is-reply">{reply.author.slice(0, 1).toUpperCase()}</div>
+                  <div className="research-discussion-meta">
+                    <strong>{reply.author}</strong>
+                    <span>{formatRelativeTime(reply.createdAt)}</span>
+                  </div>
+                </div>
+                <p className="research-discussion-content is-reply">{reply.content}</p>
+                <button
+                  type="button"
+                  className={`research-discussion-btn is-inline${replyLiked ? " is-active" : ""}`}
+                  onClick={() => onToggleLike(comment.id, reply.id)}
+                  disabled={!isLoggedIn}
+                >
+                  <Heart size={13} />
+                  <span>点赞 {reply.likes.length}</span>
+                </button>
+              </div>
+            );
+          })}
+        </div>
+      ) : null}
+    </article>
+  );
+}
+
+export default function SecurityResearchPage({ auth }) {
   const [overview, setOverview] = useState(null);
   const [overviewLoading, setOverviewLoading] = useState(true);
   const [overviewError, setOverviewError] = useState("");
@@ -147,6 +329,10 @@ export default function SecurityResearchPage() {
   const [papersLoading, setPapersLoading] = useState(true);
   const [papersError, setPapersError] = useState("");
   const [refreshing, setRefreshing] = useState(false);
+  const [discussion, setDiscussion] = useState([]);
+  const [commentDraft, setCommentDraft] = useState("");
+  const [activeReplyId, setActiveReplyId] = useState("");
+  const [replyDrafts, setReplyDrafts] = useState({});
   const [filters, setFilters] = useState({
     page: 1,
     pageSize: PAGE_SIZE_OPTIONS[0],
@@ -196,6 +382,10 @@ export default function SecurityResearchPage() {
   }, []);
 
   useEffect(() => {
+    setDiscussion(loadSecurityResearchDiscussion());
+  }, []);
+
+  useEffect(() => {
     void loadPapers();
   }, [filters.page, filters.pageSize, filters.sourceType, filters.venue, filters.projectScope, filters.keyword, filters.sort]);
 
@@ -218,6 +408,39 @@ export default function SecurityResearchPage() {
   const scheduler = sourceMeta?.scheduler;
   const keywords = sourceMeta?.keywords || [];
   const latestPapers = overview?.latest || [];
+  const totalReplyCount = discussion.reduce((sum, item) => sum + item.replies.length, 0);
+
+  function handleSubmitComment() {
+    if (!auth?.isLoggedIn) return;
+    const next = createSecurityResearchComment({
+      author: auth.user?.username || "guest",
+      content: commentDraft.slice(0, 500),
+    });
+    setDiscussion(next);
+    setCommentDraft("");
+  }
+
+  function handleToggleLike(commentId, replyId = "") {
+    if (!auth?.isLoggedIn) return;
+    const next = toggleSecurityResearchCommentLike({
+      commentId,
+      replyId,
+      username: auth.user?.username || "",
+    });
+    setDiscussion(next);
+  }
+
+  function handleSubmitReply(commentId) {
+    if (!auth?.isLoggedIn) return;
+    const next = replySecurityResearchComment({
+      commentId,
+      author: auth.user?.username || "guest",
+      content: replyDrafts[commentId] || "",
+    });
+    setDiscussion(next);
+    setReplyDrafts((prev) => ({ ...prev, [commentId]: "" }));
+    setActiveReplyId("");
+  }
 
   return (
     <div className="oc-page research-page">
@@ -531,6 +754,56 @@ export default function SecurityResearchPage() {
             onPageSize={(nextPageSize) => setFilters((prev) => ({ ...prev, page: 1, pageSize: nextPageSize }))}
           />
         ) : null}
+      </section>
+
+      <section className="research-panel">
+        <div className="research-panel-header">
+          <h3>讨论区</h3>
+          <span>围绕论文观点、技术路线与安全判断展开交流，登录后即可评论、点赞与回复。</span>
+        </div>
+
+        <div className="research-discussion-overview">
+          <div className="research-discussion-stat">
+            <span>评论总数</span>
+            <strong>{discussion.length}</strong>
+          </div>
+          <div className="research-discussion-stat">
+            <span>回复总数</span>
+            <strong>{totalReplyCount}</strong>
+          </div>
+          <div className="research-discussion-stat">
+            <span>当前状态</span>
+            <strong>{auth?.isLoggedIn ? "已登录" : "游客"}</strong>
+          </div>
+        </div>
+
+        <DiscussionComposer
+          auth={auth}
+          value={commentDraft}
+          onChange={setCommentDraft}
+          onSubmit={handleSubmitComment}
+          submitting={false}
+        />
+
+        <div className="research-discussion-list">
+          {discussion.map((comment) => (
+            <DiscussionCard
+              key={comment.id}
+              comment={comment}
+              auth={auth}
+              replyDraft={replyDrafts[comment.id] || ""}
+              replyOpen={activeReplyId === comment.id}
+              onToggleLike={handleToggleLike}
+              onOpenReply={(commentId) => setActiveReplyId((prev) => (prev === commentId ? "" : commentId))}
+              onReplyDraftChange={(value) => setReplyDrafts((prev) => ({ ...prev, [comment.id]: value.slice(0, 300) }))}
+              onSubmitReply={handleSubmitReply}
+              onCancelReply={() => setActiveReplyId("")}
+            />
+          ))}
+          {!discussion.length ? (
+            <div className="research-empty">暂无讨论内容。登录后可以成为第一个发表评论的人。</div>
+          ) : null}
+        </div>
       </section>
 
       <section className="research-panel research-panel-footnote">

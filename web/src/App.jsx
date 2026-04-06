@@ -71,8 +71,6 @@ const RAW_MODULES = [
 
 const MODULES = RAW_MODULES;
 
-const QUICK_TAGS = ["实时监测", "重点暴露", "最新发现", "技能检测", "公网资产", "边界服务"];
-
 const PRIMARY_HOME_PAGE_IDS = [PAGE_IDS.OPENCLAW_EXPOSURE, "skill-governance"];
 
 const STATUS_TICKERS = [
@@ -363,9 +361,8 @@ function DashboardHome({ modules, onNavigate }) {
         </span>
       </div>
 
-      <LiveStatusStrip onlineCount={onlineCount} riskCount={secondaryModules.length + primaryModules.length} lastUpdate={lastUpdate} />
-
       <section className="oc-home-hero">
+        <img className="oc-home-logo-watermark" src={nkuLogo} alt="" aria-hidden="true" />
         <div className="oc-home-hero-layout">
           <div className="oc-home-hero-main">
             <div className="oc-home-badge">Platform Gateway</div>
@@ -375,15 +372,6 @@ function DashboardHome({ modules, onNavigate }) {
             </p>
           </div>
 
-          <aside className="oc-home-hero-brand" aria-label="平台标识">
-            <div className="oc-home-hero-brand-inner">
-              <img className="oc-home-logo" src={nkuLogo} alt="南开大学 Logo" />
-            </div>
-            <div className="oc-home-brand-text">
-              <strong>Security Navigation</strong>
-              <span>ClawGuard Unified Entry</span>
-            </div>
-          </aside>
         </div>
       </section>
 
@@ -431,6 +419,7 @@ export default function App() {
   const [activePage, setActivePage] = useState(PAGE_IDS.HOME);
   const [showLoginModal, setShowLoginModal] = useState(false);
   const auth = useAuth();
+  const navModules = MODULES.filter((module) => module.pageId !== PAGE_IDS.HOME);
 
   const activeModule = useMemo(
     () => MODULES.find((module) => module.pageId === activePage) ?? MODULES[0],
@@ -520,17 +509,15 @@ export default function App() {
                 <p className="module-nav-caption">聚合平台功能入口，可在不同安全模块之间快速切换并查看对应内容。</p>
               </div>
 
-              <div className="module-quick-tags" aria-label="快捷标签">
-                {QUICK_TAGS.map((tag, index) => (
-                  <span key={tag} className={`module-quick-tag${index === 0 ? " is-active" : ""}`}>
-                    {tag}
-                  </span>
-                ))}
-              </div>
             </div>
 
-            <div className="module-tab-grid" role="tablist" aria-label="平台模块导航">
-              {MODULES.map((module) => (
+            <div
+              className="module-tab-grid"
+              role="tablist"
+              aria-label="平台模块导航"
+              style={{ gridTemplateColumns: `repeat(${Math.max(navModules.length, 1)}, minmax(0, 1fr))` }}
+            >
+              {navModules.map((module) => (
                 <ModuleTab
                   key={module.pageId}
                   module={module}
