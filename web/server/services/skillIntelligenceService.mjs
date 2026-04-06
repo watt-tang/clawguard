@@ -2,9 +2,8 @@ import { prisma } from "../lib/prisma.mjs";
 
 const CACHE_TTL_MS = 60 * 1000;
 
-let cachedOverview = null;
-let cachedAt = 0;
-let inflightPromise = null;
+const overviewCache = new Map();
+const inflightRequests = new Map();
 
 function toNumber(value) {
   const num = Number(value);
@@ -28,6 +27,18 @@ function percent(part, total) {
   return Math.round((part / total) * 1000) / 10;
 }
 
+function normalizePositiveInt(value, fallback, { min = 1, max = Number.MAX_SAFE_INTEGER } = {}) {
+  const num = Number(value);
+  if (!Number.isFinite(num)) return fallback;
+  return Math.min(max, Math.max(min, Math.floor(num)));
+}
+
+function buildCacheKey(query = {}) {
+  const page = normalizePositiveInt(query.page, 1);
+  const pageSize = normalizePositiveInt(query.page_size ?? query.pageSize, 20, { min: 1, max: 100 });
+  return `${page}:${pageSize}`;
+}
+
 function buildFailureReason(errorMessage) {
   const message = String(errorMessage || "").toLowerCase();
   if (!message) return "unknown";
@@ -48,7 +59,10 @@ function buildUnknownReason(riskSourceText) {
   return "other";
 }
 
-async function queryOverview() {
+async function queryOverview(query = {}) {
+  const requestedPage = normalizePositiveInt(query.page, 1);
+  const pageSize = normalizePositiveInt(query.page_size ?? query.pageSize, 20, { min: 1, max: 100 });
+
   const [corpusRows, latestBatchRows] = await Promise.all([
     prisma.$queryRawUnsafe(`
       SELECT
@@ -94,11 +108,17 @@ async function queryOverview() {
       recentBatches: [],
       unknownClusters: [],
       reviewRows: [],
+      reviewPagination: {
+        page: 1,
+        page_size: pageSize,
+        total: 0,
+        total_pages: 1,
+      },
       generatedAt: new Date().toISOString(),
     };
   }
 
-  const [riskRows, failureRows, unknownRows, repoRows, reviewRows] = await Promise.all([
+  const [riskRows, failureRows, unknownRows, repoRows, reviewTotalRows] = await Promise.all([
     prisma.$queryRawUnsafe(
       `
         SELECT
@@ -138,30 +158,10 @@ async function queryOverview() {
     ),
     prisma.$queryRawUnsafe(
       `
-        SELECT
-          s.id,
-          s.name,
-          s.author,
-          s.repositoryUrl,
-          r.maxSeverity,
-          r.findingCount,
-          r.scannedAt,
-          r.riskSourceText
+        SELECT CAST(COUNT(*) AS SIGNED) AS total
         FROM skillstaticscanresult r
-        INNER JOIN skillrecord s ON s.id = r.skillId
         WHERE r.batchId = ?
           AND r.riskLabel = 'dangerous'
-        ORDER BY
-          CASE
-            WHEN r.maxSeverity = 'CRITICAL' THEN 0
-            WHEN r.maxSeverity = 'HIGH' THEN 1
-            WHEN r.maxSeverity = 'MEDIUM' THEN 2
-            WHEN r.maxSeverity = 'LOW' THEN 3
-            ELSE 4
-          END,
-          r.findingCount DESC,
-          r.scannedAt DESC
-        LIMIT 20
       `,
       latestBatch.id,
     ),
@@ -206,6 +206,43 @@ async function queryOverview() {
     .sort((a, b) => b.total - a.total)
     .slice(0, 4);
 
+  const reviewTotal = toNumber(reviewTotalRows[0]?.total);
+  const reviewTotalPages = Math.max(1, Math.ceil(reviewTotal / pageSize));
+  const reviewPage = Math.min(requestedPage, reviewTotalPages);
+  const reviewOffset = (reviewPage - 1) * pageSize;
+
+  const reviewRows = await prisma.$queryRawUnsafe(
+    `
+      SELECT
+        s.id,
+        s.name,
+        s.author,
+        s.repositoryUrl,
+        r.maxSeverity,
+        r.findingCount,
+        r.scannedAt,
+        r.riskSourceText
+      FROM skillstaticscanresult r
+      INNER JOIN skillrecord s ON s.id = r.skillId
+      WHERE r.batchId = ?
+        AND r.riskLabel = 'dangerous'
+      ORDER BY
+        CASE
+          WHEN r.maxSeverity = 'CRITICAL' THEN 0
+          WHEN r.maxSeverity = 'HIGH' THEN 1
+          WHEN r.maxSeverity = 'MEDIUM' THEN 2
+          WHEN r.maxSeverity = 'LOW' THEN 3
+          ELSE 4
+        END,
+        r.findingCount DESC,
+        r.scannedAt DESC
+      LIMIT ?, ?
+    `,
+    latestBatch.id,
+    reviewOffset,
+    pageSize,
+  );
+
   return {
     summary: {
       totalSkills,
@@ -238,29 +275,38 @@ async function queryOverview() {
       scannedAt: row.scannedAt ? new Date(row.scannedAt).toISOString() : null,
       riskSourceText: String(row.riskSourceText || ""),
     })),
+    reviewPagination: {
+      page: reviewPage,
+      page_size: pageSize,
+      total: reviewTotal,
+      total_pages: reviewTotalPages,
+    },
     generatedAt: new Date().toISOString(),
   };
 }
 
-export async function getSkillIntelligenceOverview() {
+export async function getSkillIntelligenceOverview(query = {}) {
+  const cacheKey = buildCacheKey(query);
   const now = Date.now();
-  if (cachedOverview && now - cachedAt < CACHE_TTL_MS) {
-    return cachedOverview;
+  const cached = overviewCache.get(cacheKey);
+
+  if (cached && now - cached.cachedAt < CACHE_TTL_MS) {
+    return cached.data;
   }
 
-  if (inflightPromise) {
-    return inflightPromise;
+  if (inflightRequests.has(cacheKey)) {
+    return inflightRequests.get(cacheKey);
   }
 
-  inflightPromise = queryOverview()
+  const inflightPromise = queryOverview(query)
     .then((data) => {
-      cachedOverview = data;
-      cachedAt = Date.now();
+      overviewCache.set(cacheKey, { data, cachedAt: Date.now() });
       return data;
     })
     .finally(() => {
-      inflightPromise = null;
+      inflightRequests.delete(cacheKey);
     });
 
+  inflightRequests.set(cacheKey, inflightPromise);
   return inflightPromise;
 }

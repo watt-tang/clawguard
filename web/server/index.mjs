@@ -134,9 +134,9 @@ app.get("/api/security-research/papers", async (req, res) => {
   }
 });
 
-app.get("/api/skill/intelligence/overview", async (_req, res) => {
+app.get("/api/skill/intelligence/overview", async (req, res) => {
   try {
-    const data = await getSkillIntelligenceOverview();
+    const data = await getSkillIntelligenceOverview(req.query);
     res.json(data);
   } catch (error) {
     res.status(500).json({ message: error.message || "Failed to fetch skill intelligence overview." });

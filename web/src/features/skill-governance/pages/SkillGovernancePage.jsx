@@ -5,6 +5,8 @@ import {
   AlertCircle,
   BarChart3,
   Box,
+  ChevronLeft,
+  ChevronRight,
   Database,
   Eye,
   EyeOff,
@@ -21,6 +23,7 @@ import {
   UploadCloud,
   X,
 } from "lucide-react";
+import { PAGE_SIZE_OPTIONS } from "../../../config.js";
 import { getSkillScanStatus, scanSkillByRepositoryUrl, scanSkillBySlug, scanSkillFiles } from "../services/skillScanService.js";
 import { getSkillIntelligenceOverview } from "../services/skillIntelligenceService.js";
 import { searchSkills } from "../services/skillSearchService.js";
@@ -1007,6 +1010,84 @@ function getUnknownReasonLabel(reason) {
   return labels[reason] || reason;
 }
 
+function TablePager({ page, pageSize, total, onPage, onPageSize }) {
+  const totalPages = Math.max(1, Math.ceil(Math.max(total, 1) / pageSize));
+  const canPrev = page > 1;
+  const canNext = page < totalPages;
+
+  const pageNums = useMemo(() => {
+    if (totalPages <= 7) {
+      return Array.from({ length: totalPages }, (_, index) => index + 1);
+    }
+
+    const nums = new Set([1, totalPages, page]);
+    for (let delta = -2; delta <= 2; delta += 1) {
+      const next = page + delta;
+      if (next >= 1 && next <= totalPages) nums.add(next);
+    }
+    return Array.from(nums).sort((a, b) => a - b);
+  }, [page, totalPages]);
+
+  return (
+    <div className="oc-pager">
+      <span className="oc-pager-info">
+        共 {total.toLocaleString("zh-CN")} 条，当前第 {page} / {totalPages} 页
+      </span>
+      <div className="oc-pager-controls">
+        <button
+          className="oc-pager-btn"
+          type="button"
+          disabled={!canPrev}
+          onClick={() => onPage(page - 1)}
+          aria-label="上一页"
+        >
+          <ChevronLeft size={14} />
+        </button>
+
+        {pageNums.map((pageNum, index) => {
+          const prev = pageNums[index - 1];
+          const hasGap = prev && pageNum - prev > 1;
+          return (
+            <span key={pageNum} className="oc-pager-pages">
+              {hasGap ? <span className="oc-pager-ellipsis">...</span> : null}
+              <button
+                type="button"
+                className={`oc-pager-btn${pageNum === page ? " is-active" : ""}`}
+                onClick={() => onPage(pageNum)}
+              >
+                {pageNum}
+              </button>
+            </span>
+          );
+        })}
+
+        <button
+          className="oc-pager-btn"
+          type="button"
+          disabled={!canNext}
+          onClick={() => onPage(page + 1)}
+          aria-label="下一页"
+        >
+          <ChevronRight size={14} />
+        </button>
+
+        <select
+          className="oc-select"
+          value={pageSize}
+          onChange={(event) => onPageSize(Number(event.target.value))}
+          aria-label="每页条数"
+        >
+          {PAGE_SIZE_OPTIONS.map((size) => (
+            <option key={size} value={size}>
+              {size} 条 / 页
+            </option>
+          ))}
+        </select>
+      </div>
+    </div>
+  );
+}
+
 function SkillIntelligencePanel() {
   const [overview, setOverview] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -1458,10 +1539,14 @@ function SkillIntelligencePanelV2() {
 function SkillIntelligencePanelV3() {
   const [overview, setOverview] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [reviewQuery, setReviewQuery] = useState({
+    page: 1,
+    pageSize: PAGE_SIZE_OPTIONS[0],
+  });
 
   useEffect(() => {
     let cancelled = false;
-    const cacheKey = "clawguard.skill.intelligence.overview.v3";
+    const cacheKey = `clawguard.skill.intelligence.overview.v3:${reviewQuery.page}:${reviewQuery.pageSize}`;
 
     async function loadOverview() {
       try {
@@ -1478,7 +1563,10 @@ function SkillIntelligencePanelV3() {
       }
 
       try {
-        const data = await getSkillIntelligenceOverview();
+        const data = await getSkillIntelligenceOverview({
+          page: reviewQuery.page,
+          page_size: reviewQuery.pageSize,
+        });
         if (cancelled) return;
         setOverview(data);
         setLoading(false);
@@ -1498,7 +1586,7 @@ function SkillIntelligencePanelV3() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [reviewQuery.page, reviewQuery.pageSize]);
 
   if (loading) {
     return (
@@ -1523,6 +1611,7 @@ function SkillIntelligencePanelV3() {
     ? overview.unknownClusters.filter((item) => Number(item.total || 0) > 0)
     : [];
   const reviewRows = Array.isArray(overview?.reviewRows) ? overview.reviewRows : [];
+  const reviewPagination = overview?.reviewPagination || {};
   const safeSlice = riskDistribution.find((item) => item.riskLabel === "safe");
   const reviewSlice = riskDistribution.find((item) => item.riskLabel === "dangerous");
   const unknownSlice = riskDistribution.find((item) => item.riskLabel === "unknown");
@@ -1538,8 +1627,8 @@ function SkillIntelligencePanelV3() {
       <div className="skill-intel-hero skill-intel-hero--clean">
         <div className="skill-intel-hero-copy">
           <span className="skill-intel-badge">基础情报 / 最近批次</span>
-          <h3 className="skill-intel-title">Skill 安全结构</h3>
-          <p className="skill-intel-desc">重点看安全 Skill、待复核 Skill 和待确定 Skill 的占比，再结合待确定原因与待复核清单做人工判断。</p>
+          <h3 className="skill-intel-title">Skill 风险基线概览</h3>
+          <p className="skill-intel-desc">面向用户展示最近一批 Skill 扫描结果，帮助快速识别安全、危险和待确认 Skill 的占比，并定位需要优先复核的高风险样本。</p>
           <div className="skill-intel-meta">
             <span>最近批次 #{latestBatch?.id ?? "--"}</span>
             <span>更新时间 {formatScanTime(latestBatch?.updatedAt)}</span>
@@ -1556,8 +1645,8 @@ function SkillIntelligencePanelV3() {
           </div>
           <div className="skill-intel-legend">
             <div><i className="is-completed" />安全 {formatPercent(safePercent)}</div>
-            <div><i className="is-failed" />待复核 {formatPercent(reviewPercent)}</div>
-            <div><i className="is-skipped" />待确定 {formatPercent(unknownPercent)}</div>
+            <div><i className="is-failed" />危险 {formatPercent(reviewPercent)}</div>
+            <div><i className="is-skipped" />待确认 {formatPercent(unknownPercent)}</div>
           </div>
         </div>
       </div>
@@ -1567,7 +1656,7 @@ function SkillIntelligencePanelV3() {
           <div className="skill-intel-kpi-icon"><Database size={18} strokeWidth={1.8} /></div>
           <span className="skill-summary-label">Skill 总量</span>
           <strong>{formatCompactCount(summary.totalSkills)}</strong>
-          <span className="skill-metric-hint">数据库当前样本池</span>
+          <span className="skill-metric-hint">当前样本池规模</span>
         </div>
         <div className="skill-intel-kpi-card skill-intel-kpi-card--clean">
           <div className="skill-intel-kpi-icon"><ShieldCheck size={18} strokeWidth={1.8} /></div>
@@ -1577,15 +1666,15 @@ function SkillIntelligencePanelV3() {
         </div>
         <div className="skill-intel-kpi-card skill-intel-kpi-card--danger">
           <div className="skill-intel-kpi-icon"><AlertCircle size={18} strokeWidth={1.8} /></div>
-          <span className="skill-summary-label">待复核比例</span>
+          <span className="skill-summary-label">危险 Skill 比例</span>
           <strong>{formatPercent(reviewPercent)}</strong>
-          <span className="skill-metric-hint">{formatCompactCount(reviewSlice?.total)} 个进入待复核队列</span>
+          <span className="skill-metric-hint">{formatCompactCount(reviewSlice?.total)} 个进入危险队列</span>
         </div>
         <div className="skill-intel-kpi-card skill-intel-kpi-card--warm">
           <div className="skill-intel-kpi-icon"><Sparkles size={18} strokeWidth={1.8} /></div>
-          <span className="skill-summary-label">待确定比例</span>
+          <span className="skill-summary-label">待确认比例</span>
           <strong>{formatPercent(unknownPercent)}</strong>
-          <span className="skill-metric-hint">{formatCompactCount(unknownSlice?.total)} 个仍待确认</span>
+          <span className="skill-metric-hint">{formatCompactCount(unknownSlice?.total)} 个仍待进一步确认</span>
         </div>
       </div>
 
@@ -1593,15 +1682,15 @@ function SkillIntelligencePanelV3() {
         <div className="skill-upload-list skill-intel-panel">
           <div className="skill-card-head">
             <div>
-              <div className="skill-card-title">安全与待确定结构</div>
-              <div className="skill-card-desc">优先看 safe、待复核、待确定三类的结构分布，判断人工介入密度。</div>
+              <div className="skill-card-title">风险标签分布</div>
+              <div className="skill-card-desc">从安全、危险、待确认三类结果观察当前 Skill 池结构，帮助判断人工复核压力和优先级。</div>
             </div>
           </div>
           <div className="skill-intel-stack">
             {riskDistribution.map((item) => (
               <div key={item.riskLabel} className={`skill-intel-stack-row is-${item.riskLabel}`}>
                 <div className="skill-intel-stack-head">
-                  <span>{item.riskLabel === "safe" ? "安全 Skill / safe" : item.riskLabel === "dangerous" ? "待复核 / dangerous" : "待确定 / unknown"}</span>
+                  <span>{item.riskLabel === "safe" ? "安全 Skill / safe" : item.riskLabel === "dangerous" ? "危险 Skill / dangerous" : "待确认 / unknown"}</span>
                   <strong>{formatCompactCount(item.total)}</strong>
                 </div>
                 <div className="skill-intel-bar-track">
@@ -1616,8 +1705,8 @@ function SkillIntelligencePanelV3() {
         <div className="skill-upload-list skill-intel-panel">
           <div className="skill-card-head">
             <div>
-              <div className="skill-card-title">待确定原因</div>
-              <div className="skill-card-desc">待确定并不等于危险，更多是当前证据不足。这里展示最常见的待确定来源。</div>
+              <div className="skill-card-title">待确认原因</div>
+              <div className="skill-card-desc">待确认并不等于危险，更多代表当前证据不足。这里展示最常见的待确认来源，便于后续补扫或核实。</div>
             </div>
           </div>
           <div className="skill-intel-cluster-list">
@@ -1625,12 +1714,12 @@ function SkillIntelligencePanelV3() {
               <div key={item.reason} className="skill-intel-cluster-item">
                 <div>
                   <div className="skill-intel-cluster-title">{getUnknownReasonLabel(item.reason)}</div>
-                  <div className="skill-card-desc">占待确定项 {formatPercent(item.percent)}</div>
+                  <div className="skill-card-desc">占待确认结果 {formatPercent(item.percent)}</div>
                 </div>
                 <strong>{formatCompactCount(item.total)}</strong>
               </div>
             )) : (
-              <div className="skill-inline-empty">当前待确定项较少，暂无需要单独强调的原因。</div>
+              <div className="skill-inline-empty">当前待确认项较少，暂无需要单独强调的原因。</div>
             )}
           </div>
         </div>
@@ -1639,8 +1728,8 @@ function SkillIntelligencePanelV3() {
       <div className="skill-upload-list skill-intel-panel">
         <div className="skill-card-head">
           <div>
-            <div className="skill-card-title">待复核 Skill</div>
-            <div className="skill-card-desc">展示当前最需要人工复核的 Skill，表格样式与其他界面保持一致。</div>
+            <div className="skill-card-title">危险 Skill 列表</div>
+            <div className="skill-card-desc">展示最近批次中被判定为 dangerous 的全部 Skill，并按严重级别、发现数和扫描时间排序。可翻页查看完整结果。</div>
           </div>
         </div>
         <div className="risk-table-wrap risk-table-wrap-strong">
@@ -1679,7 +1768,16 @@ function SkillIntelligencePanelV3() {
               ))}
             </tbody>
           </table>
-          {!reviewRows.length ? <div className="skill-inline-empty">当前没有需要额外展示的待复核 Skill。</div> : null}
+          {!reviewRows.length ? <div className="skill-inline-empty">当前没有被标记为危险的 Skill。</div> : null}
+          {reviewPagination.total > 0 ? (
+            <TablePager
+              page={reviewPagination.page ?? reviewQuery.page}
+              pageSize={reviewPagination.page_size ?? reviewQuery.pageSize}
+              total={reviewPagination.total ?? 0}
+              onPage={(page) => setReviewQuery((prev) => ({ ...prev, page }))}
+              onPageSize={(pageSize) => setReviewQuery({ page: 1, pageSize })}
+            />
+          ) : null}
         </div>
       </div>
     </section>
