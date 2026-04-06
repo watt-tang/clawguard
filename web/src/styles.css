@@ -959,6 +959,14 @@ select {
   gap: 14px;
 }
 
+.top-utility-center {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  min-width: 0;
+  padding: 0 18px;
+}
+
 .utility-home-btn,
 .utility-ghost-btn {
   display: inline-flex;
@@ -1045,6 +1053,177 @@ select {
   display: flex;
   flex-direction: column;
   min-width: 72px;
+}
+
+.global-search {
+  position: relative;
+  width: min(100%, 620px);
+}
+
+.global-search-shell {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  min-height: 42px;
+  gap: 10px;
+  padding: 0 12px 0 14px;
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.06);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  transition: border-color 0.18s ease, background 0.18s ease, box-shadow 0.18s ease;
+}
+
+.global-search-shell.is-open,
+.global-search-shell:focus-within {
+  border-color: rgba(126, 203, 255, 0.42);
+  background: rgba(255, 255, 255, 0.1);
+  box-shadow: 0 0 0 4px rgba(56, 189, 248, 0.12);
+}
+
+.global-search-icon,
+.global-search-clear {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.global-search-input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: #fff;
+  font-size: 13px;
+}
+
+.global-search-input::placeholder {
+  color: rgba(255, 255, 255, 0.52);
+}
+
+.global-search-clear {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  cursor: pointer;
+}
+
+.global-search-clear:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.global-search-panel {
+  position: absolute;
+  top: calc(100% + 10px);
+  left: 0;
+  right: 0;
+  padding: 12px;
+  border-radius: 22px;
+  border: 1px solid rgba(126, 12, 110, 0.14);
+  background:
+    radial-gradient(circle at top right, rgba(3, 105, 161, 0.08), transparent 30%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(247, 245, 249, 0.96));
+  box-shadow: 0 24px 60px rgba(11, 8, 20, 0.22);
+  color: var(--cg-text-primary);
+}
+
+.global-search-panel-head,
+.global-search-result-top,
+.global-search-result-meta,
+.global-search-tip,
+.global-search-state {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.global-search-panel-head {
+  padding: 2px 4px 12px;
+  color: var(--cg-text-secondary);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.global-search-state {
+  justify-content: flex-start;
+  padding: 18px 12px;
+  color: var(--cg-text-secondary);
+  font-size: 13px;
+}
+
+.global-search-state.is-error {
+  color: #9a2742;
+}
+
+.global-search-result-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: min(62vh, 520px);
+  overflow-y: auto;
+}
+
+.global-search-result {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+  padding: 14px;
+  border: 1px solid rgba(126, 12, 110, 0.08);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.72);
+  cursor: pointer;
+  text-align: left;
+  transition: transform 0.16s ease, border-color 0.16s ease, box-shadow 0.16s ease;
+}
+
+.global-search-result:hover,
+.global-search-result.is-active {
+  transform: translateY(-1px);
+  border-color: rgba(3, 105, 161, 0.2);
+  box-shadow: var(--cg-shadow-sm);
+}
+
+.global-search-result-top strong {
+  font-size: 14px;
+}
+
+.global-search-result-top span,
+.global-search-result-meta {
+  color: var(--cg-text-secondary);
+  font-size: 12px;
+}
+
+.global-search-result-sub {
+  color: var(--cg-text-primary);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.global-search-tip {
+  justify-content: flex-start;
+  padding: 12px 4px 2px;
+  color: var(--cg-text-muted);
+  font-size: 12px;
+}
+
+.global-search-spin {
+  animation: global-search-spin 1s linear infinite;
+}
+
+@keyframes global-search-spin {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .console-body {
@@ -4203,6 +4382,11 @@ select {
     padding-bottom: 10px;
   }
 
+  .top-utility-center {
+    width: 100%;
+    padding: 0;
+  }
+
   .console-body {
     padding-top: 112px;
   }
@@ -4250,6 +4434,16 @@ select {
 }
 
 @media (max-width: 640px) {
+  .top-utility-bar {
+    gap: 10px;
+  }
+
+  .top-utility-left,
+  .top-utility-right {
+    width: 100%;
+    justify-content: space-between;
+  }
+
   .console-body {
     padding-left: 14px;
     padding-right: 14px;

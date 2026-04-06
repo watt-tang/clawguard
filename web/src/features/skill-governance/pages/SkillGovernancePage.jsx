@@ -25,13 +25,13 @@ import {
 } from "lucide-react";
 import { PAGE_SIZE_OPTIONS } from "../../../config.js";
 import { getSkillScanStatus, scanSkillByRepositoryUrl, scanSkillBySlug, scanSkillFiles } from "../services/skillScanService.js";
-import { getSkillIntelligenceOverview } from "../services/skillIntelligenceService.js";
+import { getSkillIntelligenceOverview, peekSkillIntelligenceOverview } from "../services/skillIntelligenceService.js";
 import { searchSkills } from "../services/skillSearchService.js";
 
 const TABS = [
   { id: "intelligence", label: "基础情报" },
   { id: "sandbox", label: "文件沙箱" },
-  { id: "skill-detect", label: "Skill 扫描", badge: "NEW" },
+  { id: "skill-detect", label: "Skill 扫描" },
 ];
 
 const SOURCE_OPTIONS = [
@@ -1537,44 +1537,42 @@ function SkillIntelligencePanelV2() {
 }
 
 function SkillIntelligencePanelV3() {
-  const [overview, setOverview] = useState(null);
-  const [loading, setLoading] = useState(true);
   const [reviewQuery, setReviewQuery] = useState({
     page: 1,
     pageSize: PAGE_SIZE_OPTIONS[0],
   });
+  const [overview, setOverview] = useState(() =>
+    peekSkillIntelligenceOverview({
+      page: 1,
+      page_size: PAGE_SIZE_OPTIONS[0],
+    }),
+  );
+  const [loading, setLoading] = useState(() => !peekSkillIntelligenceOverview({
+    page: 1,
+    page_size: PAGE_SIZE_OPTIONS[0],
+  }));
 
   useEffect(() => {
     let cancelled = false;
-    const cacheKey = `clawguard.skill.intelligence.overview.v3:${reviewQuery.page}:${reviewQuery.pageSize}`;
+    const query = {
+      page: reviewQuery.page,
+      page_size: reviewQuery.pageSize,
+    };
+    const cached = peekSkillIntelligenceOverview(query);
+
+    if (cached) {
+      setOverview(cached);
+      setLoading(false);
+    } else {
+      setLoading(true);
+    }
 
     async function loadOverview() {
       try {
-        const cachedRaw = window.sessionStorage.getItem(cacheKey);
-        if (cachedRaw) {
-          const cached = JSON.parse(cachedRaw);
-          if (!cancelled && cached && typeof cached === "object") {
-            setOverview(cached);
-            setLoading(false);
-          }
-        }
-      } catch {
-        // Ignore stale cache payloads.
-      }
-
-      try {
-        const data = await getSkillIntelligenceOverview({
-          page: reviewQuery.page,
-          page_size: reviewQuery.pageSize,
-        });
+        const data = await getSkillIntelligenceOverview(query);
         if (cancelled) return;
         setOverview(data);
         setLoading(false);
-        try {
-          window.sessionStorage.setItem(cacheKey, JSON.stringify(data));
-        } catch {
-          // Ignore browser storage failures.
-        }
       } catch {
         if (!cancelled) {
           setLoading(false);
@@ -1785,7 +1783,7 @@ function SkillIntelligencePanelV3() {
 }
 
 export default function SkillGovernancePage({ auth }) {
-  const [activeTab, setActiveTab] = useState("skill-detect");
+  const [activeTab, setActiveTab] = useState("intelligence");
 
   return (
     <div className="oc-page skill-page">

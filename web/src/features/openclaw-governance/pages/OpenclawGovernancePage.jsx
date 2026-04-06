@@ -20,7 +20,7 @@ const CLAW_SUMMARY = {
   wsOrSse: "5+",
 };
 
-const CLAW_PRODUCTS = [
+export const CLAW_PRODUCTS = [
   {
     name: "NanoClaw",
     official: "",

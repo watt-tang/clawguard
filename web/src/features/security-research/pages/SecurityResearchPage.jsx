@@ -53,23 +53,6 @@ function SourceTypeBadge({ sourceType, isTopVenue }) {
   return <Badge tone="preprint">预印本</Badge>;
 }
 
-function ProviderBadge({ provider }) {
-  const toneMap = {
-    online: "top",
-    rate_limited: "preprint",
-    error: "danger",
-    manual: "scope",
-  };
-  const textMap = {
-    online: "已接通",
-    rate_limited: "限流",
-    error: "异常",
-    manual: "待合规接入",
-  };
-
-  return <Badge tone={toneMap[provider.status] || "scope"}>{textMap[provider.status] || "未知状态"}</Badge>;
-}
-
 function Pager({ page, pageSize, total, onPage, onPageSize }) {
   const totalPages = Math.max(1, Math.ceil(Math.max(total, 1) / pageSize));
   const canPrev = page > 1;
@@ -143,32 +126,6 @@ function HighlightCard({ paper }) {
         <span>{paper.projectScope}</span>
         <span>相关度 {paper.relevanceScore}</span>
       </div>
-    </article>
-  );
-}
-
-function ProviderCard({ providerKey, provider }) {
-  return (
-    <article className={`research-provider-card is-${provider.status || "unknown"}`}>
-      <div className="research-provider-head">
-        <div>
-          <div className="research-provider-name">{provider.name || providerKey}</div>
-          <div className="research-provider-subtitle">{provider.note || "暂无说明"}</div>
-        </div>
-        <ProviderBadge provider={provider} />
-      </div>
-      <div className="research-provider-metrics">
-        <div className="research-provider-metric">
-          <span>本次入库</span>
-          <strong>{provider.count ?? 0}</strong>
-        </div>
-        <div className="research-provider-metric">
-          <span>接入方式</span>
-          <strong>{provider.enabled ? "自动" : "外部方案"}</strong>
-        </div>
-      </div>
-      {provider.error ? <div className="research-provider-error">{provider.error}</div> : null}
-      {provider.recommendation ? <div className="research-provider-tip">{provider.recommendation}</div> : null}
     </article>
   );
 }
@@ -259,7 +216,6 @@ export default function SecurityResearchPage() {
   const totals = overview?.totals;
   const sourceMeta = overview?.sourceMeta;
   const scheduler = sourceMeta?.scheduler;
-  const providers = Object.entries(sourceMeta?.providers || {});
   const keywords = sourceMeta?.keywords || [];
   const latestPapers = overview?.latest || [];
 
@@ -267,11 +223,11 @@ export default function SecurityResearchPage() {
     <div className="oc-page research-page">
       <section className="research-hero">
         <div className="research-hero-main">
-          <div className="oc-page-tag">学术进展页面</div>
-          <h2 className="oc-page-title">安全研究情报台</h2>
+          <div className="oc-page-tag">学术安全前沿</div>
+          <h2 className="oc-page-title">安全研究前沿</h2>
           <p className="oc-page-desc">
-            自动聚合 OpenClaw / Claw / Skill / Plugin / Agent 生态安全研究，优先展示白名单顶会论文，并将 arXiv
-            严格标记为预印本，方便做生态安全分析与研究跟踪。
+            围绕 OpenClaw、Claw、Skill、Plugin 与 Agent 生态，集中展示近期更值得关注的安全论文、预印本与研究主题，
+            帮助快速把握值得跟进的方向。
           </p>
 
           <div className="research-toolbar">
@@ -297,7 +253,7 @@ export default function SecurityResearchPage() {
           </div>
 
           <div className="research-live-note" aria-live="polite">
-            {overviewError || papersError || "接口状态已同步到下方数据源面板，限流与未接入源会显示原因和解决方案。"}
+            {overviewError || papersError || "优先从重点研究开始浏览，再用下方筛选器按会议、范围和关键词继续收窄。"}
           </div>
         </div>
 
@@ -323,20 +279,8 @@ export default function SecurityResearchPage() {
 
       <section className="research-panel">
         <div className="research-panel-header">
-          <h3>数据源状态</h3>
-          <span>区分已接通、限流和待合规接入的数据源</span>
-        </div>
-        <div className="research-provider-grid">
-          {providers.map(([providerKey, provider]) => (
-            <ProviderCard key={providerKey} providerKey={providerKey} provider={provider} />
-          ))}
-        </div>
-      </section>
-
-      <section className="research-panel">
-        <div className="research-panel-header">
           <h3>重点研究</h3>
-          <span>顶会优先，按相关度与时间综合排序</span>
+          <span>优先展示更值得先读的论文，兼顾会议质量、相关性与时间新鲜度</span>
         </div>
         <div className="research-highlight-grid">
           {(overview?.featured || []).map((paper) => (
@@ -348,8 +292,8 @@ export default function SecurityResearchPage() {
 
       <section className="research-panel">
         <div className="research-panel-header">
-          <h3>生态分析</h3>
-          <span>快速观察研究聚焦范围、会议来源和最新动态</span>
+          <h3>研究概览</h3>
+          <span>从研究范围、会议来源和最新入库三个角度快速判断当前关注重点</span>
         </div>
 
         <div className="research-analysis-grid">
@@ -436,7 +380,7 @@ export default function SecurityResearchPage() {
       <section className="research-panel">
         <div className="research-panel-header">
           <h3>论文列表</h3>
-          <span>支持关键词筛选、时间排序和来源区分</span>
+          <span>支持按来源、会议、范围和关键词筛选，适合继续深入查阅</span>
         </div>
 
         <div className="research-filter-bar">

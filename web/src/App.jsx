@@ -12,6 +12,7 @@ import {
   Sparkles,
   University,
 } from "lucide-react";
+import GlobalSearchBar from "./components/GlobalSearchBar.jsx";
 import { PAGE_IDS } from "./config.js";
 import { useAuth } from "./hooks/useAuth.js";
 import OpenclawExposurePage from "./features/openclaw-exposure/pages/OpenclawExposurePage.jsx";
@@ -74,12 +75,15 @@ const MODULES = RAW_MODULES.map((module) =>
       description: "聚合 OpenClaw / Skill / Agent / Plugin 安全研究，区分顶会论文与预印本，支撑生态安全分析。",
       status: "已上线",
     }
-    : module,
+    : {
+      ...module,
+      status: "已上线",
+    },
 );
 
 const QUICK_TAGS = ["实时监测", "重点暴露", "最新发现", "技能检测", "公网资产", "边界服务"];
 
-function TopUtilityBar({ userName, role, isLoggedIn, onGoHome, onAuthAction }) {
+function TopUtilityBar({ userName, role, isLoggedIn, modules, onGoHome, onNavigate, onAuthAction }) {
   const safeUserName = userName || "guest";
   const roleLabel = role === "admin" ? "平台管理员" : role === "user" ? "普通用户" : "未登录";
 
@@ -100,6 +104,10 @@ function TopUtilityBar({ userName, role, isLoggedIn, onGoHome, onAuthAction }) {
             <span>ClawGuard 平台</span>
           </div>
         </div>
+      </div>
+
+      <div className="top-utility-center">
+        <GlobalSearchBar modules={modules} onNavigate={onNavigate} />
       </div>
 
       <div className="top-utility-right">
@@ -242,7 +250,7 @@ function ModuleTab({ module, active, onClick }) {
         <span className="module-tab-title">{module.label}</span>
         <span className="module-tab-desc">{module.description}</span>
       </div>
-      <span className={`module-tab-status${module.status === "已上线" || module.status === "前端已就绪" ? " is-online" : ""}`}>
+      <span className={`module-tab-status${module.status === "已上线" ? " is-online" : ""}`}>
         {module.status}
       </span>
     </button>
@@ -322,7 +330,7 @@ function DashboardHome({ modules, activePage, onNavigate }) {
 
           const Icon = module.icon;
           const isActive = module.pageId === activePage;
-          const isOnline = module.status === "已上线" || module.status === "前端已就绪";
+          const isOnline = module.status === "已上线";
 
           return (
             <button
@@ -432,7 +440,9 @@ export default function App() {
         userName={auth.user?.username ?? "guest"}
         role={auth.user?.role}
         isLoggedIn={auth.isLoggedIn}
+        modules={MODULES}
         onGoHome={() => setActivePage(PAGE_IDS.HOME)}
+        onNavigate={setActivePage}
         onAuthAction={handleAuthAction}
       />
 
