@@ -15,6 +15,7 @@ import {
 import { PAGE_IDS } from "./config.js";
 import { useAuth } from "./hooks/useAuth.js";
 import OpenclawExposurePage from "./features/openclaw-exposure/pages/OpenclawExposurePage.jsx";
+import OpenclawGovernancePage from "./features/openclaw-governance/pages/OpenclawGovernancePage.jsx";
 import OpenclawRiskPage from "./features/openclaw-risk/pages/OpenclawRiskPage.jsx";
 import SecurityResearchPage from "./features/security-research/pages/SecurityResearchPage.jsx";
 import SkillGovernancePage from "./features/skill-governance/pages/SkillGovernancePage.jsx";
@@ -68,11 +69,11 @@ const RAW_MODULES = [
 const MODULES = RAW_MODULES.map((module) =>
   module.pageId === "openclaw-deploy"
     ? {
-        ...module,
-        label: "学术安全前沿",
-        description: "聚合 OpenClaw / Skill / Agent / Plugin 安全研究，区分顶会论文与预印本，支撑生态安全分析。",
-        status: "已上线",
-      }
+      ...module,
+      label: "学术安全前沿",
+      description: "聚合 OpenClaw / Skill / Agent / Plugin 安全研究，区分顶会论文与预印本，支撑生态安全分析。",
+      status: "已上线",
+    }
     : module,
 );
 
@@ -380,6 +381,10 @@ export default function App() {
 
     if (activePage === PAGE_IDS.OPENCLAW_EXPOSURE) {
       return <OpenclawExposurePage auth={auth} />;
+    }
+
+    if (activePage === "openclaw-governance") {
+      return <OpenclawGovernancePage auth={auth} />;
     }
 
     if (activePage === "openclaw-risk") {

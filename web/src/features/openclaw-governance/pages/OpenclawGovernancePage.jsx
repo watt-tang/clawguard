@@ -1,75 +1,465 @@
 import { useEffect, useMemo, useState } from "react";
-import { Activity, BookOpenText, Globe2, ShieldAlert, ShieldCheck } from "lucide-react";
+import {
+  Activity,
+  AlertTriangle,
+  ArrowUpRight,
+  Clock3,
+  Network,
+  Radar,
+  ShieldCheck,
+  Sparkles,
+} from "lucide-react";
 import { useEChart } from "../../../hooks/useEChart.js";
 import { fetchGovernanceOverview } from "../services/dataService.js";
 
-function GovernanceCard({ title, subtitle, icon: Icon, children }) {
+const CLAW_SUMMARY = {
+  totalProducts: 17,
+  publicProducts: 10,
+  highRiskCandidates: 6,
+  webhookExposure: "3+",
+  wsOrSse: "5+",
+};
+
+const CLAW_PRODUCTS = [
+  {
+    name: "NanoClaw",
+    official: "",
+    github: "https://github.com/qwibitai/nanoclaw",
+    port: "-",
+    fingerprint: "None",
+    auth: "-",
+    authTone: "neutral",
+    risk: "低风险",
+    riskTone: "low",
+    interfaceSummary: "无已知暴露接口",
+    interfaces: [],
+    highlights: "未观察到明确公网暴露面。",
+  },
+  {
+    name: "Nanobot",
+    official: "",
+    github: "https://github.com/HKUDS/nanobot",
+    port: "-",
+    fingerprint: "None",
+    auth: "-",
+    authTone: "neutral",
+    risk: "低风险",
+    riskTone: "low",
+    interfaceSummary: "无已知暴露接口",
+    interfaces: [],
+    highlights: "暂无公开暴露面记录。",
+  },
+  {
+    name: "EasyClaw",
+    official: "",
+    github: "",
+    port: "-",
+    fingerprint: "Not open source",
+    auth: "未知",
+    authTone: "review",
+    risk: "未知",
+    riskTone: "neutral",
+    interfaceSummary: "未知",
+    interfaces: [],
+    highlights: "未开源，接口面未知。",
+  },
+  {
+    name: "ZeroClaw",
+    official: "https://zeroclaw.org/zh",
+    github: "https://github.com/zeroclaw-labs/zeroclaw",
+    port: "42617",
+    fingerprint: "<title>ZeroClaw</title>",
+    auth: "弱鉴权",
+    authTone: "warning",
+    risk: "高风险",
+    riskTone: "high",
+    interfaceSummary: "API / WS / Webhook / Admin",
+    interfaces: ["GET /health", "/metrics", "/_app/*", "POST /linq", "/pair", "/webhook", "/api/*", "/admin/*", "SSE /api/events", "WS /ws/chat", "/ws/nodes"],
+    highlights: "同时具备 Webhook、Admin、WS/SSE，是攻击面最完整的产品之一。",
+    unauthCount: 3,
+    matrix: { api: 95, ws: 92, webhook: 90, admin: 94, auth: 28 },
+  },
+  {
+    name: "PicoClaw",
+    official: "https://picoclaw.net/zh/",
+    github: "https://github.com/sipeed/picoclaw",
+    port: "18800",
+    fingerprint: "<title>PicoClaw</title>",
+    auth: "部分鉴权",
+    authTone: "review",
+    risk: "中风险",
+    riskTone: "medium",
+    interfaceSummary: "Config / OAuth / Skills / Sessions / WS",
+    interfaces: ["/api/config", "/api/system/*", "/api/oauth/*", "/api/skills*", "/api/sessions*", "/api/gateway/*", "/pico/ws"],
+    highlights: "接口面完整，包含 Skills CRUD、Session 与 Gateway 接口。",
+    unauthCount: 1,
+    matrix: { api: 88, ws: 72, webhook: 0, admin: 10, auth: 54 },
+  },
+  {
+    name: "IronClaw",
+    official: "",
+    github: "https://github.com/nearai/ironclaw",
+    port: "3000",
+    fingerprint: "<title>IronClaw</title>",
+    auth: "强鉴权",
+    authTone: "safe",
+    risk: "中风险",
+    riskTone: "medium",
+    interfaceSummary: "Bearer API / WS / SSE",
+    interfaces: ["/api/* (Bearer Auth)", "/api/health", "WS/SSE with token"],
+    highlights: "鉴权模式清晰，但仍存在实时通道暴露。",
+    unauthCount: 0,
+    matrix: { api: 70, ws: 64, webhook: 0, admin: 0, auth: 88 },
+  },
+  {
+    name: "TinyClaw",
+    official: "https://tinyclaw.dev/zh",
+    github: "",
+    port: "3000",
+    fingerprint: "<title>TinyClaw Mission Control</title>",
+    auth: "未知",
+    authTone: "review",
+    risk: "中风险",
+    riskTone: "medium",
+    interfaceSummary: "Message / Tasks / Projects / Stream",
+    interfaces: ["/api/message", "/api/agents", "/api/tasks", "/api/projects", "/api/queue/*", "/api/events/stream"],
+    highlights: "任务、项目与流式事件并存，适合纳入行为链观察。",
+    unauthCount: 1,
+    matrix: { api: 80, ws: 18, webhook: 0, admin: 0, auth: 36 },
+  },
+  {
+    name: "NullClaw",
+    official: "https://nullclaw.io",
+    github: "https://github.com/nullclaw/nullclaw",
+    port: "-",
+    fingerprint: "None",
+    auth: "-",
+    authTone: "neutral",
+    risk: "低风险",
+    riskTone: "low",
+    interfaceSummary: "无已知暴露接口",
+    interfaces: [],
+    highlights: "未观察到明确暴露接口。",
+  },
+  {
+    name: "MimiClaw",
+    official: "",
+    github: "",
+    port: "-",
+    fingerprint: "None",
+    auth: "-",
+    authTone: "neutral",
+    risk: "低风险",
+    riskTone: "low",
+    interfaceSummary: "无已知暴露接口",
+    interfaces: [],
+    highlights: "暂无公开入口信息。",
+  },
+  {
+    name: "SeaClaw",
+    official: "https://seaclawagent.com/",
+    github: "",
+    port: "3000",
+    fingerprint: "<title>Human Control</title>",
+    auth: "弱鉴权",
+    authTone: "warning",
+    risk: "高风险",
+    riskTone: "high",
+    interfaceSummary: "Webhook / Pair / A2A / Messaging",
+    interfaces: ["/health", "/ready", "/webhook", "/pair", "/a2a", "/telegram", "/slack/events", "/line", "/api/messages"],
+    highlights: "Webhook 与外部通信入口较多，易形成消息注入和外联扩散。",
+    unauthCount: 2,
+    matrix: { api: 76, ws: 0, webhook: 92, admin: 8, auth: 30 },
+  },
+  {
+    name: "FemtoClaw",
+    official: "",
+    github: "",
+    port: "-",
+    fingerprint: "None",
+    auth: "-",
+    authTone: "neutral",
+    risk: "低风险",
+    riskTone: "low",
+    interfaceSummary: "无已知暴露接口",
+    interfaces: [],
+    highlights: "暂无公开入口信息。",
+  },
+  {
+    name: "GoClaw",
+    official: "",
+    github: "https://github.com/nextlevelbuilder/goclaw",
+    port: "3000",
+    fingerprint: "<title>GoClaw Dashboard</title>",
+    auth: "公开入口",
+    authTone: "warning",
+    risk: "低风险",
+    riskTone: "low",
+    interfaceSummary: "SPA / OpenAPI / Health",
+    interfaces: ["/", "/login", "/@vite/client", "/v1/openapi.json", "/health"],
+    highlights: "开发态与 OpenAPI 暴露使其适合做接口枚举。",
+    unauthCount: 1,
+    matrix: { api: 62, ws: 0, webhook: 0, admin: 0, auth: 24 },
+  },
+  {
+    name: "LispClaw",
+    official: "",
+    github: "",
+    port: "-",
+    fingerprint: "Unknown",
+    auth: "未知",
+    authTone: "review",
+    risk: "未知",
+    riskTone: "neutral",
+    interfaceSummary: "未知",
+    interfaces: [],
+    highlights: "接口面未知。",
+  },
+  {
+    name: "LobsterAI",
+    official: "https://lobsterai.youdao.com/#/index",
+    github: "",
+    port: "5175",
+    fingerprint: "<title>LobsterAI</title>",
+    auth: "混合",
+    authTone: "review",
+    risk: "中风险",
+    riskTone: "medium",
+    interfaceSummary: "Health / Search / MCP Execute",
+    interfaces: ["/healthz", "/api/health", "/v1/messages", "/api/search", "/mcp/execute"],
+    highlights: "MCP 执行接口与消息接口组合，适合关注工具调用风险。",
+    unauthCount: 1,
+    matrix: { api: 74, ws: 0, webhook: 0, admin: 0, auth: 48 },
+  },
+  {
+    name: "MoltWorker",
+    official: "",
+    github: "https://github.com/cloudflare/moltworker",
+    port: "4173",
+    fingerprint: "<title>Moltbot Admin</title>",
+    auth: "弱鉴权",
+    authTone: "warning",
+    risk: "高风险",
+    riskTone: "high",
+    interfaceSummary: "Admin / Debug / Secret Query",
+    interfaces: ["/_admin", "/api/status", "/api/admin/*", "/debug/*", "/cdp?secret="],
+    highlights: "存在 Admin、Debug 和 secret query 三类高敏入口。",
+    unauthCount: 2,
+    matrix: { api: 84, ws: 36, webhook: 0, admin: 98, auth: 22 },
+  },
+  {
+    name: "RivonClaw",
+    official: "",
+    github: "https://github.com/gaoyangz77/rivonclaw",
+    port: "3210",
+    fingerprint: "<title>RivonClaw</title>",
+    auth: "混合",
+    authTone: "review",
+    risk: "中风险",
+    riskTone: "medium",
+    interfaceSummary: "Tools / Provider Keys / OAuth",
+    interfaces: ["/api/status", "/api/tools/*", "/api/provider-keys", "/api/chat-sessions", "/api/auth/*", "/api/oauth/*"],
+    highlights: "涉及工具调用、密钥管理和 OAuth，是典型聚合入口。",
+    unauthCount: 1,
+    matrix: { api: 86, ws: 0, webhook: 0, admin: 18, auth: 44 },
+  },
+];
+
+const HIGH_RISK_INTERFACES = ["/webhook", "/api/admin/*", "/debug/*", "/cdp?secret=", "/api/skills", "/api/tasks"];
+const MEDIUM_RISK_INTERFACES = ["/ws/*", "/api/events", "/api/oauth/*", "/api/sessions"];
+const LOW_RISK_INTERFACES = ["/health", "/metrics", "/status"];
+
+function formatNumber(value) {
+  return Number(value || 0).toLocaleString("zh-CN");
+}
+
+function GovernanceSection({ title, subtitle, icon: Icon, children, extra }) {
   return (
-    <section className="gov-card">
-      <div className="gov-card-head">
-        <div className="gov-card-icon">
-          <Icon size={16} strokeWidth={2} />
+    <section className="cg-overview-section">
+      <div className="cg-overview-section-head">
+        <div className="cg-overview-section-title-wrap">
+          <div className="cg-overview-section-icon">
+            <Icon size={15} strokeWidth={2} />
+          </div>
+          <div>
+            <div className="cg-overview-section-title">{title}</div>
+            <div className="cg-overview-section-subtitle">{subtitle}</div>
+          </div>
         </div>
-        <div>
-          <div className="gov-card-title">{title}</div>
-          <div className="gov-card-subtitle">{subtitle}</div>
-        </div>
+        {extra}
       </div>
       {children}
     </section>
   );
 }
 
-function HealthRadar({ exposure, risk, research }) {
-  const indicators = [
-    { name: "暴露收敛", value: Math.max(5, 100 - Math.min(100, Math.round((exposure?.currentExposed || 0) / 900))) },
-    { name: "漏洞修复", value: risk?.fixProgress?.percentFixed ?? 0 },
-    { name: "情报覆盖", value: Math.min(100, ((research?.totals?.conferencePaperCount || 0) + (research?.totals?.preprintCount || 0)) * 5) },
-    { name: "源稳定性", value: (research?.sourceMeta?.providers?.crossref?.ok ? 35 : 0) + (research?.sourceMeta?.providers?.arxiv?.ok ? 25 : 0) + (risk?.sourceMeta?.github?.ok ? 20 : 0) + (risk?.sourceMeta?.nvd?.ok ? 20 : 0) },
+function KpiCard({ label, value, tone = "default" }) {
+  return (
+    <div className={`cg-kpi-card is-${tone}`}>
+      <span>{label}</span>
+      <strong>{value}</strong>
+    </div>
+  );
+}
+
+function EcosystemRelationChart() {
+  const nodes = [
+    { id: "gateway", name: "Gateway", x: 22, y: 28, symbolSize: 34, itemStyle: { color: "#7e0c6e" } },
+    { id: "agent", name: "Agent", x: 24, y: 64, symbolSize: 30, itemStyle: { color: "#911481" } },
+    { id: "skill", name: "Skill", x: 54, y: 24, symbolSize: 28, itemStyle: { color: "#a63a97" } },
+    { id: "model", name: "Model", x: 56, y: 62, symbolSize: 28, itemStyle: { color: "#94a3b8" } },
+    { id: "external", name: "External", x: 84, y: 43, symbolSize: 30, itemStyle: { color: "#cbd5e1" } },
   ];
+
+  const links = [
+    { source: "gateway", target: "skill" },
+    { source: "gateway", target: "model" },
+    { source: "agent", target: "skill" },
+    { source: "agent", target: "model" },
+    { source: "skill", target: "external" },
+    { source: "model", target: "external" },
+  ];
+
   const { chartRef } = useEChart(
     () => ({
-      radar: {
-        radius: "66%",
-        splitNumber: 4,
-        axisName: { color: "#3e3347", fontWeight: 700 },
-        splitLine: { lineStyle: { color: ["rgba(126,12,110,0.08)"] } },
-        splitArea: { areaStyle: { color: ["rgba(255,255,255,0.22)", "rgba(126,12,110,0.03)"] } },
-        axisLine: { lineStyle: { color: "rgba(126,12,110,0.1)" } },
-        indicator: indicators.map((item) => ({ name: item.name, max: 100 })),
-      },
+      tooltip: { show: false },
+      animationDuration: 420,
+      animationDurationUpdate: 320,
       series: [
         {
-          type: "radar",
-          symbol: "circle",
-          symbolSize: 8,
-          itemStyle: { color: "#8f2ca1" },
-          lineStyle: { color: "#8f2ca1", width: 2 },
-          areaStyle: { color: "rgba(143,44,161,0.18)" },
-          data: [{ value: indicators.map((item) => item.value) }],
+          type: "graph",
+          layout: "none",
+          roam: false,
+          label: {
+            show: true,
+            color: "#334155",
+            fontSize: 11,
+            fontWeight: 600,
+          },
+          edgeSymbol: ["none", "arrow"],
+          edgeSymbolSize: [0, 7],
+          lineStyle: {
+            width: 1,
+            color: "rgba(100,116,139,0.52)",
+            curveness: 0.1,
+          },
+          emphasis: {
+            focus: "adjacency",
+            scale: 1.08,
+            lineStyle: {
+              width: 1.6,
+              color: "rgba(126,12,110,0.32)",
+            },
+          },
+          data: nodes,
+          links,
         },
       ],
     }),
-    [JSON.stringify(indicators)],
+    [],
   );
 
-  return <div ref={chartRef} className="gov-chart-canvas" />;
+  return <div ref={chartRef} className="cg-eco-chart" />;
 }
 
-function SnapshotTimeline({ exposure, risk, research }) {
-  const items = [
-    { label: "暴露面更新", value: exposure?.updatedAt || "-", tone: "exposure" },
-    { label: "漏洞快照", value: risk?.sourceMeta?.storage?.snapshotKey || "-", tone: "risk" },
-    { label: "学术快照", value: research?.sourceMeta?.storage?.snapshotKey || "-", tone: "research" },
+function getHeatLevel(value, columnKey) {
+  if (columnKey === "auth") {
+    if (value >= 75) return "safe";
+    if (value >= 45) return "medium";
+    return "high";
+  }
+  if (value >= 80) return "high";
+  if (value >= 45) return "medium";
+  if (value > 0) return "low";
+  return "empty";
+}
+
+function AttackSurfaceMatrix({ products }) {
+  const columns = [
+    { key: "api", label: "API" },
+    { key: "ws", label: "WS" },
+    { key: "webhook", label: "Webhook" },
+    { key: "admin", label: "Admin" },
+    { key: "auth", label: "Auth" },
   ];
+
   return (
-    <div className="gov-timeline">
-      {items.map((item) => (
-        <div key={item.label} className="gov-timeline-item">
-          <span className={`gov-timeline-dot is-${item.tone}`} />
-          <div>
-            <div className="gov-timeline-label">{item.label}</div>
-            <div className="gov-timeline-value">{item.value}</div>
+    <div className="cg-matrix">
+      <div className="cg-matrix-head">
+        <span>产品</span>
+        {columns.map((column) => (
+          <span key={column.key}>{column.label}</span>
+        ))}
+      </div>
+
+      <div className="cg-matrix-body">
+        {products.map((product) => (
+          <div key={product.name} className="cg-matrix-row">
+            <div className="cg-matrix-product">
+              <strong>{product.name}</strong>
+              <span>{product.interfaceSummary}</span>
+            </div>
+            {columns.map((column) => {
+              const value = product.matrix[column.key];
+              const level = getHeatLevel(value, column.key);
+              return (
+                <div key={`${product.name}-${column.key}`} className={`cg-matrix-cell is-${level}`}>
+                  <div className="cg-matrix-cell-bar">
+                    <div className="cg-matrix-cell-bar-fill" style={{ width: `${Math.max(6, value)}%` }} />
+                  </div>
+                  <span>{value}</span>
+                </div>
+              );
+            })}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function AttackPathPanel() {
+  const steps = [
+    {
+      title: "Webhook 注入",
+      desc: "从对外开放入口进入系统执行链路，是最常见的首跳场景。",
+      tone: "high",
+      tag: "高风险",
+    },
+    {
+      title: "Agent 转发",
+      desc: "外部请求被带入任务或消息上下文，开始影响内部处理流程。",
+      tone: "medium",
+      tag: "重点关注",
+    },
+    {
+      title: "Skill 执行",
+      desc: "工具与技能被触发后，系统能力范围明显放大。",
+      tone: "medium",
+      tag: "可利用",
+    },
+    {
+      title: "Gateway / Model",
+      desc: "请求继续流向模型服务或外部接口，带来进一步扩散风险。",
+      tone: "low",
+      tag: "扩散面",
+    },
+  ];
+
+  return (
+    <div className="cg-timeline">
+      {steps.map((step, index) => (
+        <div key={step.title} className="cg-timeline-item">
+          <div className="cg-timeline-rail">
+            <span className={`cg-timeline-dot is-${step.tone}`} />
+            {index < steps.length - 1 ? <span className="cg-timeline-line" /> : null}
+          </div>
+          <div className="cg-timeline-content">
+            <div className="cg-timeline-top">
+              <strong>{step.title}</strong>
+              <span className={`cg-risk-badge is-${step.tone}`}>{step.tag}</span>
+            </div>
+            <p>{step.desc}</p>
           </div>
         </div>
       ))}
@@ -77,8 +467,77 @@ function SnapshotTimeline({ exposure, risk, research }) {
   );
 }
 
+function ProductLink({ row }) {
+  const href = row.official || row.github;
+  const label = row.official ? "官网" : row.github ? "GitHub" : "";
+
+  if (!href) {
+    return <span className="cg-link-empty" />;
+  }
+
+  return (
+    <a className="cg-product-link" href={href} target="_blank" rel="noreferrer">
+      <span>{label}</span>
+      <ArrowUpRight size={13} strokeWidth={2} />
+    </a>
+  );
+}
+
+function InterfaceTable({ rows }) {
+  return (
+    <div className="cg-api-table-wrap">
+      <div className="cg-api-table">
+        <div className="cg-api-table-head">
+          <span>产品</span>
+          <span>官网 / 源码</span>
+          <span>指纹 / 端口</span>
+          <span>鉴权</span>
+          <span>风险</span>
+          <span>接口详情</span>
+        </div>
+        <div className="cg-api-table-body">
+          {rows.map((row) => (
+            <article key={row.name} className="cg-api-row">
+              <div className="cg-api-name">
+                <strong>{row.name}</strong>
+                <span>{row.highlights}</span>
+              </div>
+              <div>
+                <ProductLink row={row} />
+              </div>
+              <div className="cg-api-signature">
+                <span>Port {row.port}</span>
+                <code>{row.fingerprint}</code>
+              </div>
+              <div>
+                <span className={`cg-risk-badge is-${row.authTone}`}>{row.auth}</span>
+              </div>
+              <div>
+                <span className={`cg-risk-badge is-${row.riskTone}`}>{row.risk}</span>
+              </div>
+              <div className="cg-api-detail">
+                <div className="cg-api-summary">{row.interfaceSummary}</div>
+                {row.interfaces.length ? (
+                  <details className="cg-api-disclosure">
+                    <summary>展开</summary>
+                    <div className="cg-api-interface-list">
+                      {row.interfaces.map((item) => (
+                        <code key={`${row.name}-${item}`}>{item}</code>
+                      ))}
+                    </div>
+                  </details>
+                ) : null}
+              </div>
+            </article>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function OpenclawGovernancePage() {
-  const [data, setData] = useState(null);
+  const [overview, setOverview] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -87,119 +546,118 @@ export default function OpenclawGovernancePage() {
     fetchGovernanceOverview()
       .then((payload) => {
         if (!alive) return;
-        setData(payload);
+        setOverview(payload);
         setLoading(false);
       })
       .catch((err) => {
         if (!alive) return;
-        setError(err.message || "加载失败");
+        setError(err.message || "加载总览数据失败");
         setLoading(false);
       });
+
     return () => {
       alive = false;
     };
   }, []);
 
-  const exposure = data?.exposure;
-  const risk = data?.risk;
-  const research = data?.research;
-  const healthLabel = useMemo(() => {
-    const percent = risk?.fixProgress?.percentFixed ?? 0;
-    if (percent >= 90) return "稳态收敛";
-    if (percent >= 70) return "持续修复";
-    return "重点治理";
-  }, [risk?.fixProgress?.percentFixed]);
+  const matrixProducts = useMemo(
+    () => CLAW_PRODUCTS.filter((item) => item.matrix),
+    [],
+  );
+
+  const unauthenticatedInterfaces = useMemo(
+    () => CLAW_PRODUCTS.reduce((sum, item) => sum + (item.unauthCount || 0), 0),
+    [],
+  );
+
+  const helperStats = useMemo(
+    () => [
+      { label: "公网可访问产品", value: CLAW_SUMMARY.publicProducts },
+      { label: "高风险接口类型", value: HIGH_RISK_INTERFACES.length },
+      { label: "支持 WS / SSE 的产品", value: CLAW_SUMMARY.wsOrSse },
+      { label: "存在 Webhook 暴露的产品", value: CLAW_SUMMARY.webhookExposure },
+    ],
+    [],
+  );
 
   return (
-    <div className="oc-page gov-page">
-      <section className="gov-hero">
-        <div className="gov-hero-main">
-          <div className="oc-page-tag">生态安全总览</div>
-          <h2 className="oc-page-title">Claw 生态安全总览</h2>
+    <div className="oc-page cg-overview-page">
+      <section className="oc-page-header cg-overview-hero">
+        <div className="cg-overview-hero-copy">
+          <div className="oc-page-tag">
+            <Sparkles size={13} strokeWidth={2} />
+            <span>Claw 系列总览</span>
+          </div>
+          <h2 className="oc-page-title">Claw 系列产品安全总览</h2>
           <p className="oc-page-desc">
-            把公网暴露、漏洞修复与学术情报汇到一个统一面板里，帮助快速判断当前生态安全态势和后续治理优先级。
+            面向 Claw 系列产品的统一安全总览页面，集中展示资产规模、重点风险、攻击面分布与接口信息，帮助用户快速理解当前生态暴露情况与治理重点。
           </p>
-          {error ? <div className="research-error">{error}</div> : null}
-          <div className="gov-status-strip">
-            <div className="gov-status-pill">
-              <span>当前状态</span>
-              <strong>{loading ? "--" : healthLabel}</strong>
+          <div className="cg-overview-meta">
+            <div className="cg-overview-meta-item">
+              <ShieldCheck size={14} strokeWidth={2} />
+              <span>当前状态：建议持续重点治理</span>
             </div>
-            <div className="gov-status-pill">
-              <span>最新稳定版</span>
-              <strong>{loading ? "--" : risk?.latestStable?.tagName || "-"}</strong>
+            <div className="cg-overview-meta-item">
+              <Clock3 size={14} strokeWidth={2} />
+              <span>数据更新时间：{loading ? "--" : overview?.exposure?.updatedAt || "-"}</span>
             </div>
           </div>
         </div>
 
-        <div className="gov-kpi-grid">
-          <div className="gov-kpi-card">
-            <span>公网暴露</span>
-            <strong>{loading ? "--" : exposure?.currentExposed ?? 0}</strong>
-          </div>
-          <div className="gov-kpi-card">
-            <span>高危漏洞</span>
-            <strong>{loading ? "--" : risk?.totals?.highRiskCount ?? 0}</strong>
-          </div>
-          <div className="gov-kpi-card">
-            <span>顶会研究</span>
-            <strong>{loading ? "--" : research?.totals?.conferencePaperCount ?? 0}</strong>
-          </div>
-          <div className="gov-kpi-card">
-            <span>修复进度</span>
-            <strong>{loading ? "--" : `${risk?.fixProgress?.percentFixed ?? 0}%`}</strong>
-          </div>
+        <div className="cg-kpi-strip">
+          <KpiCard label="总资产数" value={formatNumber(CLAW_SUMMARY.totalProducts)} tone="primary" />
+          <KpiCard label="高风险数" value={formatNumber(CLAW_SUMMARY.highRiskCandidates)} tone="danger" />
+          <KpiCard label="未鉴权接口数" value={formatNumber(unauthenticatedInterfaces)} tone="warning" />
         </div>
       </section>
 
-      <section className="gov-grid">
-        <GovernanceCard title="总体健康度" subtitle="从暴露、漏洞、情报、源稳定性综合观察" icon={Activity}>
-          <HealthRadar exposure={exposure} risk={risk} research={research} />
-        </GovernanceCard>
-
-        <GovernanceCard title="最新快照" subtitle="三个模块当前使用的最新数据基线" icon={ShieldCheck}>
-          <SnapshotTimeline exposure={exposure} risk={risk} research={research} />
-        </GovernanceCard>
-
-        <GovernanceCard title="攻击面概览" subtitle="公网暴露和供应侧压力信号" icon={Globe2}>
-          <div className="gov-metric-list">
-            <div><span>当前暴露节点</span><strong>{loading ? "--" : exposure?.currentExposed ?? 0}</strong></div>
-            <div><span>覆盖国家</span><strong>{loading ? "--" : exposure?.countryCoverage ?? 0}</strong></div>
-            <div><span>城市数</span><strong>{loading ? "--" : exposure?.cityCount ?? 0}</strong></div>
-            <div><span>运营商数</span><strong>{loading ? "--" : exposure?.operatorCount ?? 0}</strong></div>
+      <div className="cg-overview-helper-strip">
+        {helperStats.map((item) => (
+          <div key={item.label} className="cg-helper-item">
+            <span>{item.label}</span>
+            <strong>{item.value}</strong>
           </div>
-        </GovernanceCard>
+        ))}
+      </div>
 
-        <GovernanceCard title="漏洞治理" subtitle="聚焦修复状态和关键风险密度" icon={ShieldAlert}>
-          <div className="gov-metric-list">
-            <div><span>漏洞总量</span><strong>{loading ? "--" : risk?.totals?.totalIssues ?? 0}</strong></div>
-            <div><span>Critical</span><strong>{loading ? "--" : risk?.totals?.criticalCount ?? 0}</strong></div>
-            <div><span>已修复</span><strong>{loading ? "--" : risk?.fixProgress?.fixed ?? 0}</strong></div>
-            <div><span>待确认</span><strong>{loading ? "--" : risk?.fixProgress?.unknown ?? 0}</strong></div>
-          </div>
-        </GovernanceCard>
+      <GovernanceSection
+        title="攻击面矩阵"
+        subtitle="从接口、实时通道、Webhook、管理入口与鉴权强度五个维度展示各产品暴露情况"
+        icon={Radar}
+        extra={<span className="cg-section-flag">核心</span>}
+      >
+        <AttackSurfaceMatrix products={matrixProducts} />
+      </GovernanceSection>
 
-        <GovernanceCard title="学术情报" subtitle="研究来源与重点方向覆盖" icon={BookOpenText}>
-          <div className="gov-metric-list">
-            <div><span>顶会论文</span><strong>{loading ? "--" : research?.totals?.conferencePaperCount ?? 0}</strong></div>
-            <div><span>预印本</span><strong>{loading ? "--" : research?.totals?.preprintCount ?? 0}</strong></div>
-            <div><span>Agent 相关</span><strong>{loading ? "--" : research?.totals?.agent ?? 0}</strong></div>
-            <div><span>Skill 相关</span><strong>{loading ? "--" : research?.totals?.skill ?? 0}</strong></div>
-          </div>
-        </GovernanceCard>
+      <section className="cg-overview-bottom-grid">
+        <GovernanceSection
+          title="生态图"
+          subtitle="展示 Gateway、Agent、Skill、Model 与外部服务之间的核心关系"
+          icon={Network}
+        >
+          <EcosystemRelationChart />
+        </GovernanceSection>
 
-        <GovernanceCard title="运维建议" subtitle="对当前失败项和治理优先级给出短建议" icon={Activity}>
-          <div className="gov-advice-list">
-            <div className="gov-advice-item">优先保持漏洞页和暴露页的定时刷新，确保快照先稳定。</div>
-            <div className="gov-advice-item">
-              学术模块当前主要依赖 Crossref；arXiv 若出现限流，建议放到定时任务低频刷新，不要频繁手动刷。
-            </div>
-            <div className="gov-advice-item">
-              如果需要更高质量论文元数据，下一步优先接 DBLP；Google Scholar 不建议直接爬取。
-            </div>
-          </div>
-        </GovernanceCard>
+        <GovernanceSection
+          title="攻击路径"
+          subtitle="按步骤展示从入口进入到能力放大的主要风险链路"
+          icon={AlertTriangle}
+        >
+          <AttackPathPanel />
+        </GovernanceSection>
       </section>
+
+      <GovernanceSection
+        title="接口详情"
+        subtitle="按产品汇总官网入口、指纹信息、鉴权状态与接口范围，支持按需展开查看详情"
+        icon={Activity}
+      >
+        <InterfaceTable rows={CLAW_PRODUCTS} />
+      </GovernanceSection>
+
+      {error ? (
+        <div className="research-error">{error}</div>
+      ) : null}
     </div>
   );
 }
