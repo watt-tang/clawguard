@@ -480,7 +480,7 @@ export default function OpenclawRiskPage() {
           </div>
         </RiskChartCard>
 
-        <RiskChartCard title="运行态势" subtitle="把关键信号收在一个更直观的操作面板里" icon={Activity}>
+        <RiskChartCard title="运行态势" subtitle="观察当前运行状态与快照信息" icon={Activity}>
           <div className="risk-signal-grid">
             <div className="risk-signal-card">
               <span>最新稳定版</span>

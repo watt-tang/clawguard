@@ -6244,6 +6244,33 @@ select {
   padding: 4px 0 0;
 }
 
+.cg-api-toolbar {
+  padding: 0 22px 14px;
+}
+
+.cg-api-auth-box {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 14px;
+  border: 1px solid rgba(126, 12, 110, 0.1);
+  border-radius: 14px;
+  background: rgba(126, 12, 110, 0.04);
+  color: var(--cg-text-secondary);
+  font-size: 12px;
+}
+
+.cg-api-auth-box.is-unlocked {
+  border-color: rgba(15, 118, 110, 0.12);
+  background: rgba(15, 118, 110, 0.05);
+}
+
+.cg-is-masked {
+  color: #64748b;
+  letter-spacing: 0.08em;
+}
+
 .cg-api-table {
   overflow-x: auto;
 }
@@ -6386,6 +6413,11 @@ select {
   .cg-kpi-strip {
     grid-template-columns: repeat(3, minmax(0, 1fr));
     grid-auto-flow: column;
+  }
+
+  .cg-api-auth-box {
+    align-items: flex-start;
+    flex-direction: column;
   }
 
   .cg-api-table-head,

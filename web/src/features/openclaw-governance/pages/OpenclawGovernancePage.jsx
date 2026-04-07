@@ -4,6 +4,8 @@ import {
   AlertTriangle,
   ArrowUpRight,
   Clock3,
+  LogIn,
+  LogOut,
   Network,
   Radar,
   ShieldCheck,
@@ -11,6 +13,7 @@ import {
 } from "lucide-react";
 import { useEChart } from "../../../hooks/useEChart.js";
 import { fetchGovernanceOverview } from "../services/dataService.js";
+import { maskField } from "../../openclaw-exposure/utils/ipMask.js";
 
 const CLAW_SUMMARY = {
   totalProducts: 17,
@@ -483,9 +486,162 @@ function ProductLink({ row }) {
   );
 }
 
-function InterfaceTable({ rows }) {
+function maskPort(port) {
+  if (!port || port === "-") return port || "-";
+  return "****";
+}
+
+function maskFingerprint(fingerprint) {
+  if (!fingerprint || fingerprint === "None" || fingerprint === "Unknown" || fingerprint === "Not open source") {
+    return fingerprint || "-";
+  }
+  return maskField(fingerprint);
+}
+
+function maskInterfaceItems(items) {
+  if (!Array.isArray(items) || !items.length) return [];
+  return items.map(() => "***");
+}
+
+function LoginModal({ onLogin, onRegister, onClose }) {
+  const [mode, setMode] = useState("login");
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [phone, setPhone] = useState("");
+  const [inviteCode, setInviteCode] = useState("");
+  const [error, setError] = useState("");
+
+  function handleSubmit(event) {
+    event.preventDefault();
+    if (mode === "register" && password !== confirmPassword) {
+      setError("两次输入的密码不一致");
+      return;
+    }
+
+    const result = mode === "login"
+      ? onLogin(username, password)
+      : onRegister(username, password, phone, inviteCode);
+
+    if (!result.ok) {
+      setError(result.message);
+      return;
+    }
+
+    setError("");
+  }
+
+  return (
+    <div className="oc-modal-overlay" onClick={onClose}>
+      <div className="oc-modal" onClick={(event) => event.stopPropagation()}>
+        <div className="oc-modal-title">{mode === "login" ? "登录查看完整接口信息" : "注册账号"}</div>
+        <p className="oc-modal-desc">
+          {mode === "login"
+            ? "登录后可解锁真实指纹、端口和接口详情。"
+            : "注册后自动登录并解锁完整接口信息。"}
+        </p>
+
+        <div className="oc-modal-switch">
+          <button
+            type="button"
+            className={`oc-modal-switch-btn${mode === "login" ? " is-active" : ""}`}
+            onClick={() => {
+              setMode("login");
+              setError("");
+            }}
+          >
+            登录
+          </button>
+          <button
+            type="button"
+            className={`oc-modal-switch-btn${mode === "register" ? " is-active" : ""}`}
+            onClick={() => {
+              setMode("register");
+              setError("");
+            }}
+          >
+            注册
+          </button>
+        </div>
+
+        <form onSubmit={handleSubmit} className="oc-modal-form">
+          <input className="oc-input" placeholder="用户名" value={username} onChange={(event) => setUsername(event.target.value)} autoFocus />
+          <input
+            type="password"
+            className="oc-input"
+            placeholder="密码"
+            value={password}
+            onChange={(event) => setPassword(event.target.value)}
+          />
+          {mode === "register" ? (
+            <input className="oc-input" placeholder="手机号" value={phone} onChange={(event) => setPhone(event.target.value)} />
+          ) : null}
+          {mode === "register" ? (
+            <input
+              className="oc-input"
+              placeholder="邀请码"
+              value={inviteCode}
+              onChange={(event) => setInviteCode(event.target.value)}
+            />
+          ) : null}
+          {mode === "register" ? (
+            <input
+              type="password"
+              className="oc-input"
+              placeholder="确认密码"
+              value={confirmPassword}
+              onChange={(event) => setConfirmPassword(event.target.value)}
+            />
+          ) : null}
+          {mode === "register" ? <div className="oc-modal-tip">注册需填写手机号和邀请码；密码至少 6 位。</div> : null}
+          {error ? <div className="oc-modal-error">{error}</div> : null}
+          <button type="submit" className="oc-primary-btn">
+            {mode === "login" ? "登录" : "注册并登录"}
+          </button>
+        </form>
+      </div>
+    </div>
+  );
+}
+
+function InterfaceTable({ rows, auth }) {
+  const { isLoggedIn, login, register, logout } = auth;
+  const [showLogin, setShowLogin] = useState(false);
+
+  function handleLogin(username, password) {
+    const result = login(username, password);
+    if (result.ok) setShowLogin(false);
+    return result;
+  }
+
+  function handleRegister(username, password, phone, inviteCode) {
+    const result = register(username, password, phone, inviteCode);
+    if (result.ok) setShowLogin(false);
+    return result;
+  }
+
   return (
     <div className="cg-api-table-wrap">
+      <div className="cg-api-toolbar">
+        {isLoggedIn ? (
+          <div className="cg-api-auth-box is-unlocked">
+            <span>已登录，接口详情、指纹和端口已解锁。</span>
+            <button type="button" className="oc-ghost-btn" onClick={logout}>
+              <LogOut size={13} />
+              退出登录
+            </button>
+          </div>
+        ) : (
+          <div className="cg-api-auth-box">
+            <span>当前处于脱敏展示模式，指纹 / 端口和接口详情已打码。</span>
+            <button type="button" className="oc-link-btn" onClick={() => setShowLogin(true)}>
+              <LogIn size={13} />
+              登录后解锁
+            </button>
+          </div>
+        )}
+      </div>
+
       <div className="cg-api-table">
         <div className="cg-api-table-head">
           <span>产品</span>
@@ -506,8 +662,12 @@ function InterfaceTable({ rows }) {
                 <ProductLink row={row} />
               </div>
               <div className="cg-api-signature">
-                <span>Port {row.port}</span>
-                <code>{row.fingerprint}</code>
+                <span className={!isLoggedIn && row.port && row.port !== "-" ? "cg-is-masked" : ""}>
+                  Port {isLoggedIn ? row.port : maskPort(row.port)}
+                </span>
+                <code className={!isLoggedIn && row.fingerprint && row.fingerprint !== "None" ? "cg-is-masked" : ""}>
+                  {isLoggedIn ? row.fingerprint : maskFingerprint(row.fingerprint)}
+                </code>
               </div>
               <div>
                 <span className={`cg-risk-badge is-${row.authTone}`}>{row.auth}</span>
@@ -516,13 +676,15 @@ function InterfaceTable({ rows }) {
                 <span className={`cg-risk-badge is-${row.riskTone}`}>{row.risk}</span>
               </div>
               <div className="cg-api-detail">
-                <div className="cg-api-summary">{row.interfaceSummary}</div>
+                <div className={`cg-api-summary${!isLoggedIn ? " cg-is-masked" : ""}`}>
+                  {isLoggedIn ? row.interfaceSummary : maskField(row.interfaceSummary)}
+                </div>
                 {row.interfaces.length ? (
                   <details className="cg-api-disclosure">
-                    <summary>展开</summary>
+                    <summary>{isLoggedIn ? "展开" : "登录后展开"}</summary>
                     <div className="cg-api-interface-list">
-                      {row.interfaces.map((item) => (
-                        <code key={`${row.name}-${item}`}>{item}</code>
+                      {(isLoggedIn ? row.interfaces : maskInterfaceItems(row.interfaces)).map((item, index) => (
+                        <code key={`${row.name}-${index}`}>{item}</code>
                       ))}
                     </div>
                   </details>
@@ -532,11 +694,13 @@ function InterfaceTable({ rows }) {
           ))}
         </div>
       </div>
+
+      {showLogin ? <LoginModal onLogin={handleLogin} onRegister={handleRegister} onClose={() => setShowLogin(false)} /> : null}
     </div>
   );
 }
 
-export default function OpenclawGovernancePage() {
+export default function OpenclawGovernancePage({ auth }) {
   const [overview, setOverview] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -652,7 +816,7 @@ export default function OpenclawGovernancePage() {
         subtitle="按产品汇总官网入口、指纹信息、鉴权状态与接口范围，支持按需展开查看详情"
         icon={Activity}
       >
-        <InterfaceTable rows={CLAW_PRODUCTS} />
+        <InterfaceTable rows={CLAW_PRODUCTS} auth={auth} />
       </GovernanceSection>
 
       {error ? (
