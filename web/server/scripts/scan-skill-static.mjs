@@ -19,6 +19,7 @@ const REPO_VENV_PYTHON_WINDOWS = path.resolve(REPO_ROOT, ".venv-skill-scan", "Sc
 const REPO_VENV_PYTHON_POSIX = path.resolve(REPO_ROOT, ".venv-skill-scan", "bin", "python");
 const SCANNER1_SCRIPT = path.resolve(REPO_ROOT, "scanners", "scanner1", "scripts", "scan_skill.py");
 const SCANNER2_SCRIPT = path.resolve(REPO_ROOT, "scanners", "scanner2", "unified_cli.py");
+const MAX_SKILL_CANDIDATES_TO_VALIDATE = Number(process.env.SKILL_SCAN_MAX_SKILL_CANDIDATES || 8);
 const PYTHON_CANDIDATES = [
   [REPO_VENV_PYTHON_WINDOWS, []],
   [REPO_VENV_PYTHON_POSIX, []],
@@ -27,6 +28,15 @@ const PYTHON_CANDIDATES = [
   ["python", []],
 ];
 const HIGH_SEVERITIES = new Set(["HIGH", "CRITICAL"]);
+const MEDIUM_PLUS_SEVERITIES = new Set(["CRITICAL", "HIGH", "MEDIUM"]);
+const SEVERITY_RANK = {
+  UNKNOWN: -1,
+  SAFE: 0,
+  LOW: 1,
+  MEDIUM: 2,
+  HIGH: 3,
+  CRITICAL: 4,
+};
 const RETRYABLE_ERROR_PATTERNS = [
   /timed out/i,
   /connection was reset/i,
@@ -57,6 +67,7 @@ function parseArgs(argv) {
     concurrency: DEFAULT_CONCURRENCY,
     cacheMaxRepos: MAX_CACHE_REPOS,
     limitRepos: null,
+    forceRescanRisky: false,
   };
 
   for (let index = 2; index < argv.length; index += 1) {
@@ -87,12 +98,25 @@ function parseArgs(argv) {
       index += 1;
       continue;
     }
+    if (current === "--force-rescan-risky") {
+      options.forceRescanRisky = true;
+      continue;
+    }
     throw new Error(`Unknown argument: ${current}`);
   }
 
   options.concurrency = Math.max(1, options.concurrency);
   options.cacheMaxRepos = Math.max(10, options.cacheMaxRepos);
   return options;
+}
+
+function normalizeSeverity(value) {
+  const normalized = String(value || "").trim().toUpperCase();
+  return Object.prototype.hasOwnProperty.call(SEVERITY_RANK, normalized) ? normalized : "UNKNOWN";
+}
+
+function severityRank(value) {
+  return SEVERITY_RANK[normalizeSeverity(value)];
 }
 
 function log(message) {
@@ -280,6 +304,7 @@ function normalizeScanner1Report(report) {
       summary: report?.summary || {},
       topFindings: findings.slice(0, 8),
     },
+    highFindingTitles: highFindings.slice(0, 8).map((item) => String(item.message || "").trim()).filter(Boolean),
   };
 }
 
@@ -311,46 +336,162 @@ function normalizeScanner2Report(report, fallback) {
       summary,
       topFindings: findings.slice(0, 8),
     },
+    highFindingTitles: highFindings
+      .slice(0, 8)
+      .map((item) => String(item.title || item.description || item.category || "").trim())
+      .filter(Boolean),
   };
 }
 
-async function scanRepository(repoPath) {
+function shouldRunScanner2(scanner1Result, candidateCount) {
+  if (candidateCount > 1) return true;
+  return scanner1Result.danger || MEDIUM_PLUS_SEVERITIES.has(normalizeSeverity(scanner1Result.maxSeverity));
+}
+
+function chooseBestSkillCandidate(candidateRows, repoCachePath) {
+  if (!candidateRows.length) return null;
+  const repoRoot = String(repoCachePath || "");
+
+  const sorted = [...candidateRows].sort((left, right) => {
+    const leftDanger = left.result?.danger ? 1 : 0;
+    const rightDanger = right.result?.danger ? 1 : 0;
+    if (leftDanger !== rightDanger) return leftDanger - rightDanger;
+
+    const rankDiff = severityRank(left.result?.maxSeverity) - severityRank(right.result?.maxSeverity);
+    if (rankDiff !== 0) return rankDiff;
+
+    const findingDiff = Number(left.result?.findingCount || 0) - Number(right.result?.findingCount || 0);
+    if (findingDiff !== 0) return findingDiff;
+
+    const leftDepth = left.path === repoRoot ? 0 : String(left.path || "").split(path.sep).length;
+    const rightDepth = right.path === repoRoot ? 0 : String(right.path || "").split(path.sep).length;
+    if (leftDepth !== rightDepth) return leftDepth - rightDepth;
+
+    return String(left.path || "").localeCompare(String(right.path || ""));
+  });
+
+  return sorted[0];
+}
+
+function classifyRiskLabel(scanResult, analysisMeta = {}) {
+  const maxSeverity = normalizeSeverity(scanResult.maxSeverity);
+  if (scanResult.danger && !analysisMeta.ambiguousStructure) {
+    return "dangerous";
+  }
+  if (
+    scanResult.danger ||
+    maxSeverity === "MEDIUM" ||
+    analysisMeta.ambiguousStructure ||
+    analysisMeta.scannerDisagreement
+  ) {
+    return "uncertain";
+  }
+  return "safe";
+}
+
+async function runScanner1OnPath(targetPath) {
   const scanner1Run = await retryOperation(
-    async () => runPythonScript(SCANNER1_SCRIPT, [repoPath], {
+    async () => runPythonScript(SCANNER1_SCRIPT, [targetPath], {
       cwd: REPO_ROOT,
       timeoutMs: 420000,
     }),
     { attempts: 2 },
   );
   const scanner1Report = JSON.parse(scanner1Run.stdout);
-  const scanner1Result = normalizeScanner1Report(scanner1Report);
+  return normalizeScanner1Report(scanner1Report);
+}
 
-  if (!scanner1Result.danger) {
-    return scanner1Result;
+async function runScanner2OnPath(targetPath, fallbackResult) {
+  const scanner2Run = await runPythonScript(
+    SCANNER2_SCRIPT,
+    [targetPath, "--auth-state", "guest", "--enable-scanner", "scanner2"],
+    {
+      cwd: REPO_ROOT,
+      timeoutMs: 420000,
+    },
+  );
+  const scanner2Report = JSON.parse(scanner2Run.stdout);
+  return normalizeScanner2Report(scanner2Report, fallbackResult);
+}
+
+async function scanRepository(targetInfo, options = {}) {
+  const candidatePaths = Array.isArray(targetInfo?.candidatePaths) ? targetInfo.candidatePaths : [];
+  const selectedPath = String(targetInfo?.selectedPath || targetInfo?.path || "");
+  const repoCachePath = String(targetInfo?.repoCachePath || "");
+  const candidateCount = candidatePaths.length || (selectedPath ? 1 : 0);
+  const validateAllCandidates = Boolean(options.forceRescanRisky);
+  const candidateScanPaths = validateAllCandidates
+    ? candidatePaths.slice(0, MAX_SKILL_CANDIDATES_TO_VALIDATE)
+    : [selectedPath];
+
+  const candidateRows = [];
+  for (const candidatePath of candidateScanPaths) {
+    const scanner1Result = await runScanner1OnPath(candidatePath);
+    let finalResult = scanner1Result;
+    let scanner2Error = null;
+    if (shouldRunScanner2(scanner1Result, candidateCount)) {
+      try {
+        finalResult = await runScanner2OnPath(candidatePath, scanner1Result);
+      } catch (error) {
+        scanner2Error = error.message;
+      }
+    }
+    candidateRows.push({
+      path: candidatePath,
+      scanner1Result,
+      result: finalResult,
+      scanner2Error,
+    });
   }
 
-  try {
-    const scanner2Run = await runPythonScript(
-      SCANNER2_SCRIPT,
-      [repoPath, "--auth-state", "guest", "--enable-scanner", "scanner2"],
-      {
-        cwd: REPO_ROOT,
-        timeoutMs: 420000,
-      },
+  const winner = chooseBestSkillCandidate(candidateRows, repoCachePath);
+  if (!winner) {
+    throw new Error("No valid skill target path resolved for scanning");
+  }
+
+  const hasDangerousCandidate = candidateRows.some((item) => item.result?.danger);
+  const hasSafeCandidate = candidateRows.some((item) => !item.result?.danger);
+  const ambiguousStructure = candidateRows.length > 1 && hasDangerousCandidate && hasSafeCandidate;
+  const scannerDisagreement = Boolean(winner.scanner2Error && winner.scanner1Result?.danger);
+  const riskLabel = classifyRiskLabel(winner.result, { ambiguousStructure, scannerDisagreement });
+  const selectedRelative = winner.path && repoCachePath
+    ? path.relative(repoCachePath, winner.path) || "."
+    : winner.path;
+
+  const riskParts = [winner.result.riskSourceText];
+  if (candidateRows.length > 1) {
+    riskParts.push(
+      `multi-skill candidates=${candidateRows.length}; selected=${selectedRelative}; strategy=lowest-risk-candidate`,
     );
-    const scanner2Report = JSON.parse(scanner2Run.stdout);
-    return normalizeScanner2Report(scanner2Report, scanner1Result);
-  } catch (error) {
-    return {
-      ...scanner1Result,
-      scanner: "scanner1",
-      riskSourceText: `${scanner1Result.riskSourceText} | scanner2 upgrade failed: ${error.message}`,
-      compactReport: {
-        ...scanner1Result.compactReport,
-        scanner2Error: error.message,
-      },
-    };
   }
+  if (ambiguousStructure) {
+    riskParts.push("candidate scans disagree across nested SKILL.md paths; label downgraded to uncertain");
+  }
+  if (winner.scanner2Error) {
+    riskParts.push(`scanner2 upgrade failed: ${winner.scanner2Error}`);
+  }
+
+  return {
+    ...winner.result,
+    scanner: winner.scanner2Error ? "scanner1" : winner.result.scanner,
+    selectedPath: winner.path,
+    riskLabel,
+    riskSourceText: riskParts.filter(Boolean).join(" | "),
+    compactReport: {
+      ...winner.result.compactReport,
+      candidateSelection: {
+        selectedPath: winner.path,
+        selectedPathRelative: selectedRelative,
+        candidatesEvaluated: candidateRows.map((item) => ({
+          path: item.path,
+          maxSeverity: item.result?.maxSeverity,
+          findingCount: item.result?.findingCount,
+          danger: item.result?.danger,
+          scanner2Error: item.scanner2Error,
+        })),
+      },
+    },
+  };
 }
 
 async function touchDirectory(dirPath) {
@@ -362,12 +503,7 @@ async function touchDirectory(dirPath) {
   }
 }
 
-async function resolveSkillTargetPath(repoCachePath) {
-  const rootSkillPath = path.join(repoCachePath, "SKILL.md");
-  if (fs.existsSync(rootSkillPath)) {
-    return repoCachePath;
-  }
-
+async function collectSkillCandidates(repoCachePath) {
   const matches = [];
   async function walk(currentPath) {
     const entries = await fsp.readdir(currentPath, { withFileTypes: true });
@@ -376,18 +512,38 @@ async function resolveSkillTargetPath(repoCachePath) {
       if (entry.isDirectory()) {
         if (entry.name === ".git" || entry.name === "node_modules") continue;
         await walk(fullPath);
-        if (matches.length) return;
         continue;
       }
       if (entry.isFile() && entry.name === "SKILL.md") {
         matches.push(currentPath);
-        return;
       }
     }
   }
-
   await walk(repoCachePath);
-  return matches[0] || null;
+
+  const unique = Array.from(new Set(matches.map((item) => path.resolve(item))));
+  unique.sort((left, right) => {
+    const leftDepth = left === repoCachePath ? 0 : left.split(path.sep).length;
+    const rightDepth = right === repoCachePath ? 0 : right.split(path.sep).length;
+    if (leftDepth !== rightDepth) return leftDepth - rightDepth;
+    return left.localeCompare(right);
+  });
+  return unique;
+}
+
+async function resolveSkillTargetPath(repoCachePath) {
+  const candidatePaths = await collectSkillCandidates(repoCachePath);
+  if (!candidatePaths.length) {
+    return null;
+  }
+
+  return {
+    path: candidatePaths[0],
+    selectedPath: candidatePaths[0],
+    candidatePaths,
+    candidateCount: candidatePaths.length,
+    matchedStrategy: candidatePaths.length > 1 ? "multi-skill-candidate" : "single-skill-root",
+  };
 }
 
 async function pruneCacheDirs(maxRepos, activePaths) {
@@ -662,6 +818,42 @@ async function finalizeBatch(batchId) {
   );
 }
 
+async function resetRiskyResultsForBatch(batchId) {
+  const deleted = await prisma.$executeRawUnsafe(
+    `
+      DELETE FROM skillstaticscanresult
+      WHERE batchId = ?
+        AND (
+          riskLabel = 'dangerous'
+          OR COALESCE(NULLIF(riskLabel, ''), 'unknown') IN ('unknown', 'uncertain')
+        )
+    `,
+    batchId,
+  );
+  return Number(deleted || 0);
+}
+
+async function recalculateBatchProgress(batchId) {
+  const rows = await prisma.$queryRawUnsafe(
+    `
+      SELECT
+        CAST(SUM(CASE WHEN status = 'completed' THEN 1 ELSE 0 END) AS SIGNED) AS completedSkills,
+        CAST(SUM(CASE WHEN status = 'failed' THEN 1 ELSE 0 END) AS SIGNED) AS failedSkills,
+        CAST(SUM(CASE WHEN status = 'skipped' THEN 1 ELSE 0 END) AS SIGNED) AS skippedSkills
+      FROM skillstaticscanresult
+      WHERE batchId = ?
+    `,
+    batchId,
+  );
+
+  const row = rows[0] || {};
+  const completedSkills = Number(row.completedSkills || 0);
+  const failedSkills = Number(row.failedSkills || 0);
+  const skippedSkills = Number(row.skippedSkills || 0);
+  await updateBatchProgress(batchId, completedSkills, failedSkills, skippedSkills);
+  return { completedSkills, failedSkills, skippedSkills };
+}
+
 function buildStoredResult(scanResult, repositoryUrl, repoCachePath) {
   return {
     scannedTargetPath: repoCachePath,
@@ -675,7 +867,7 @@ function buildStoredResult(scanResult, repositoryUrl, repoCachePath) {
     scannerRunsText: scanResult.scanner,
     rawReportJson: scanResult.compactReport,
     errorMessage: null,
-    riskLabel: scanResult.danger ? "dangerous" : "safe",
+    riskLabel: scanResult.riskLabel || (scanResult.danger ? "dangerous" : "safe"),
     riskSourceText: scanResult.riskSourceText,
     repositoryUrl,
   };
@@ -697,7 +889,7 @@ function buildFailedResult(repositoryUrl, repoCachePath, error) {
       error: error.message,
     },
     errorMessage: error.message,
-    riskLabel: "dangerous",
+    riskLabel: "uncertain",
     riskSourceText: `scan failed: ${error.message}`,
     repositoryUrl,
   };
@@ -731,12 +923,29 @@ async function main() {
 
   const batch = await getOrCreateBatch(options);
   const batchId = Number(batch.id);
-  const pendingGroups = await getPendingGroups(batchId, options.limitRepos);
-  const existingRepoResults = await getExistingRepoResultMap(batchId);
+  if (options.forceRescanRisky) {
+    const deletedRows = await resetRiskyResultsForBatch(batchId);
+    const refreshedProgress = await recalculateBatchProgress(batchId);
+    log(
+      `force-rescan-risky enabled: deleted=${deletedRows} ` +
+      `completed=${refreshedProgress.completedSkills} failed=${refreshedProgress.failedSkills} skipped=${refreshedProgress.skippedSkills}`,
+    );
+  }
 
-  let completedSkills = Number(batch.completedSkills || 0);
-  let failedSkills = Number(batch.failedSkills || 0);
-  let skippedSkills = Number(batch.skippedSkills || 0);
+  const pendingGroups = await getPendingGroups(batchId, options.limitRepos);
+  const existingRepoResults = options.forceRescanRisky
+    ? new Map()
+    : await getExistingRepoResultMap(batchId);
+
+  const refreshedBatchRows = await prisma.$queryRawUnsafe(
+    "SELECT completedSkills, failedSkills, skippedSkills FROM skillstaticscanbatch WHERE id = ? LIMIT 1",
+    batchId,
+  );
+  const refreshedBatch = refreshedBatchRows[0] || batch;
+
+  let completedSkills = Number(refreshedBatch.completedSkills || 0);
+  let failedSkills = Number(refreshedBatch.failedSkills || 0);
+  let skippedSkills = Number(refreshedBatch.skippedSkills || 0);
   const totalPendingSkills = pendingGroups.reduce((sum, group) => sum + group.skillIds.length, 0);
   let processedRepos = 0;
   let processedSkills = 0;
@@ -792,8 +1001,8 @@ async function main() {
         }
 
         repoCachePath = await ensureRepoClone(group.repositoryUrl, activePaths, options.cacheMaxRepos);
-        const skillTargetPath = await resolveSkillTargetPath(repoCachePath);
-        if (!skillTargetPath) {
+        const skillTargetInfo = await resolveSkillTargetPath(repoCachePath);
+        if (!skillTargetInfo) {
           const skippedResult = buildSkippedResult(group.repositoryUrl, repoCachePath, "skipped repository without SKILL.md");
           await insertBatchResults(batchId, group.repositoryUrl, group.skillIds, skippedResult);
           existingRepoResults.set(group.repositoryUrl, skippedResult);
@@ -808,9 +1017,18 @@ async function main() {
           continue;
         }
 
-        const scanResult = await scanRepository(skillTargetPath);
+        const scanResult = await scanRepository(
+          {
+            ...skillTargetInfo,
+            repoCachePath,
+          },
+          {
+            forceRescanRisky: options.forceRescanRisky,
+          },
+        );
         const storedResult = buildStoredResult(scanResult, group.repositoryUrl, repoCachePath);
-        storedResult.scannedTargetPath = skillTargetPath;
+        storedResult.scannedTargetPath = scanResult.selectedPath || skillTargetInfo.path;
+        storedResult.matchedStrategy = skillTargetInfo.matchedStrategy;
         await insertBatchResults(batchId, group.repositoryUrl, group.skillIds, storedResult);
         existingRepoResults.set(group.repositoryUrl, storedResult);
         completedSkills += group.skillIds.length;

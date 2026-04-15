@@ -56,6 +56,9 @@ function buildUnknownReason(riskSourceText) {
   if (message.includes("without skill.md")) return "missing-skill-md";
   if (message.includes("invalid repositoryurl")) return "invalid-repository";
   if (message.includes("unsupported host")) return "unsupported-host";
+  if (message.includes("multi-skill candidates")) return "multi-skill-ambiguous";
+  if (message.includes("candidate scans disagree")) return "candidate-disagreement";
+  if (message.includes("scanner2 upgrade failed")) return "partial-scan";
   return "other";
 }
 
@@ -144,7 +147,7 @@ async function queryOverview(query = {}) {
         SELECT riskSourceText
         FROM skillstaticscanresult
         WHERE batchId = ?
-          AND COALESCE(NULLIF(riskLabel, ''), 'unknown') = 'unknown'
+          AND COALESCE(NULLIF(riskLabel, ''), 'unknown') IN ('unknown', 'uncertain')
       `,
       latestBatch.id,
     ),
@@ -194,7 +197,7 @@ async function queryOverview(query = {}) {
   }
 
   const unknownTotal = riskRows
-    .filter((row) => String(row.riskLabel || "") === "unknown")
+    .filter((row) => ["unknown", "uncertain"].includes(String(row.riskLabel || "")))
     .reduce((sum, row) => sum + toNumber(row.total), 0);
 
   const unknownClusters = Array.from(unknownReasonMap.entries())
