@@ -1,0 +1,58 @@
+services:
+  mysql:
+    image: mysql:8.4
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: Tj060801
+      MYSQL_DATABASE: clawguard
+      TZ: Asia/Shanghai
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+      - --skip-name-resolve
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./db/clawguard.sql:/docker-entrypoint-initdb.d/01-clawguard.sql:ro
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - mysqladmin ping -h 127.0.0.1 -uroot -p$$MYSQL_ROOT_PASSWORD --silent
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 60s
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      API_PORT: 8787
+      DATABASE_URL: mysql://root:Tj060801@mysql:3306/clawguard?charset=utf8mb4
+      EXPOSURE_DATA_DIR: /app/web/clawdbot_alive
+      GEOLITE2_CITY_DB: /app/web/geoip/GeoLite2-City.mmdb
+      GEOLITE2_ASN_DB: /app/web/geoip/GeoLite2-ASN.mmdb
+      OPENCLAW_RISK_CACHE_DIR: /app/runtime-cache/openclaw-risk
+      SECURITY_RESEARCH_CACHE_DIR: /app/runtime-cache/security-research
+      TZ: Asia/Shanghai
+    ports:
+      - "8787:8787"
+    volumes:
+      - app_cache:/app/runtime-cache
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - node -e "fetch('http://127.0.0.1:8787/api/health').then((res)=>process.exit(res.ok?0:1)).catch(()=>process.exit(1))"
+      interval: 15s
+      timeout: 5s
+      retries: 20
+      start_period: 30s
+
+volumes:
+  mysql_data:
+  app_cache:

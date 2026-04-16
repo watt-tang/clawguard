@@ -388,9 +388,7 @@ async function ensureOpenclawRiskTables() {
       KEY OpenclawRiskIssue_projectScope_idx (projectScope),
       KEY OpenclawRiskIssue_venue_idx (venue),
       KEY OpenclawRiskIssue_status_idx (status),
-      KEY OpenclawRiskIssue_publishedAt_idx (publishedAt),
-      CONSTRAINT OpenclawRiskIssue_snapshotId_fkey
-        FOREIGN KEY (snapshotId) REFERENCES OpenclawRiskSnapshot(id) ON DELETE CASCADE ON UPDATE CASCADE
+      KEY OpenclawRiskIssue_publishedAt_idx (publishedAt)
     ) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
   `);
 
@@ -414,6 +412,20 @@ async function ensureOpenclawRiskTables() {
   if (!issueColumnNames.has("authors")) {
     await prisma.$executeRawUnsafe(`UPDATE OpenclawRiskIssue SET authors = JSON_ARRAY() WHERE authors IS NULL`);
     await prisma.$executeRawUnsafe(`ALTER TABLE OpenclawRiskIssue MODIFY COLUMN authors JSON NOT NULL`);
+  }
+
+  const existingIssueForeignKeys = await prisma.$queryRawUnsafe(`
+    SELECT CONSTRAINT_NAME
+    FROM information_schema.REFERENTIAL_CONSTRAINTS
+    WHERE CONSTRAINT_SCHEMA = DATABASE() AND TABLE_NAME = 'OpenclawRiskIssue'
+  `);
+  const issueForeignKeyNames = new Set(existingIssueForeignKeys.map((row) => row.CONSTRAINT_NAME));
+  if (!issueForeignKeyNames.has("OpenclawRiskIssue_snapshotId_fkey")) {
+    await prisma.$executeRawUnsafe(`
+      ALTER TABLE OpenclawRiskIssue
+      ADD CONSTRAINT OpenclawRiskIssue_snapshotId_fkey
+      FOREIGN KEY (snapshotId) REFERENCES OpenclawRiskSnapshot(id) ON DELETE CASCADE ON UPDATE CASCADE
+    `);
   }
 }
 

@@ -1,6 +1,9 @@
-﻿import "dotenv/config";
+import "dotenv/config";
+import fs from "node:fs";
+import path from "node:path";
 import cors from "cors";
 import express from "express";
+import { fileURLToPath } from "node:url";
 import {
   getChinaDistribution,
   getExposureList,
@@ -24,6 +27,12 @@ import {
 import { getSkillIntelligenceOverview } from "./services/skillIntelligenceService.mjs";
 import { searchSkills } from "./services/skillSearchService.mjs";
 import { prisma } from "./lib/prisma.mjs";
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const projectRoot = path.resolve(__dirname, "..");
+const distDir = path.join(projectRoot, "dist");
+const indexHtmlPath = path.join(distDir, "index.html");
+const hasBuiltFrontend = fs.existsSync(indexHtmlPath);
 
 const app = express();
 const port = Number(process.env.API_PORT || 8787);
@@ -161,12 +170,27 @@ app.post("/api/security-research/refresh", async (_req, res) => {
   }
 });
 
+if (hasBuiltFrontend) {
+  app.use(express.static(distDir));
+
+  app.get("/{*path}", (req, res, next) => {
+    if (req.path.startsWith("/api/")) {
+      next();
+      return;
+    }
+
+    res.sendFile(indexHtmlPath);
+  });
+}
+
 app.listen(port, () => {
-  console.log(`[exposure-api] listening on http://127.0.0.1:${port}`);
+  console.log(
+    `[exposure-api] listening on http://127.0.0.1:${port}${hasBuiltFrontend ? " with built frontend" : ""}`
+  );
 });
 
-initializeOpenclawRiskScheduler();
-initializeSecurityResearchScheduler();
+// disabled on server/local sync: initializeOpenclawRiskScheduler();
+// disabled on server/local sync: initializeSecurityResearchScheduler();
 
 process.on("SIGINT", async () => {
   await prisma.$disconnect();

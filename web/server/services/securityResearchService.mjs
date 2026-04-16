@@ -1050,6 +1050,7 @@ async function persistSnapshot(aggregate, triggerSource = "manual") {
 }
 
 async function getLatestCompletedSnapshotBase() {
+  await ensureResearchTables();
   return prisma.securityResearchSnapshot.findFirst({
     where: { status: "completed" },
     orderBy: [{ createdAt: "desc" }, { id: "desc" }],

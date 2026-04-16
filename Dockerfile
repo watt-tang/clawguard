@@ -1,0 +1,50 @@
+FROM node:22-bookworm-slim AS build
+
+WORKDIR /app/web
+
+COPY web/package.json web/package-lock.json ./
+RUN npm ci
+
+COPY web/index.html ./
+COPY web/vite.config.js ./
+COPY web/src ./src
+COPY web/public ./public
+COPY web/server ./server
+COPY web/scripts ./scripts
+COPY web/prisma ./prisma
+COPY web/geoip ./geoip
+COPY web/clawdbot_alive ./clawdbot_alive
+
+RUN npm run db:generate
+RUN npm run build
+
+FROM node:22-bookworm-slim AS runtime
+
+WORKDIR /app/web
+
+ENV NODE_ENV=production
+ENV API_PORT=8787
+
+RUN apt-get update \
+  && apt-get install -y --no-install-recommends openssl \
+  && rm -rf /var/lib/apt/lists/*
+
+COPY web/package.json web/package-lock.json ./
+RUN npm ci --omit=dev && npm cache clean --force
+
+COPY --from=build /app/web/dist ./dist
+COPY --from=build /app/web/server ./server
+COPY --from=build /app/web/prisma ./prisma
+COPY --from=build /app/web/generated ./generated
+COPY --from=build /app/web/geoip ./geoip
+COPY --from=build /app/web/clawdbot_alive ./clawdbot_alive
+COPY --from=build /app/web/public ./public
+COPY --from=build /app/web/scripts ./scripts
+COPY --from=build /app/web/index.html ./
+COPY --from=build /app/web/vite.config.js ./
+
+RUN mkdir -p /app/runtime-cache
+
+EXPOSE 8787
+
+CMD ["npm", "run", "start"]
