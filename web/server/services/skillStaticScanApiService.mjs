@@ -33,6 +33,69 @@ function sanitizeRelativePath(value, fallback = "file") {
   return parts.length ? parts.join(path.sep) : fallback;
 }
 
+function previewProcessOutput(value) {
+  return String(value || "")
+    .replace(/\s+/g, " ")
+    .trim()
+    .slice(0, 500);
+}
+
+function extractJsonObject(text) {
+  const value = String(text || "").trim();
+  if (!value) {
+    throw new Error("Scanner returned empty output.");
+  }
+
+  try {
+    return JSON.parse(value);
+  } catch {
+    // Some scanner dependencies print warnings/progress to stdout before the
+    // machine-readable report. Recover the first balanced JSON object.
+  }
+
+  let start = -1;
+  let depth = 0;
+  let inString = false;
+  let escaped = false;
+
+  for (let index = 0; index < value.length; index += 1) {
+    const char = value[index];
+
+    if (start < 0) {
+      if (char === "{") {
+        start = index;
+        depth = 1;
+      }
+      continue;
+    }
+
+    if (escaped) {
+      escaped = false;
+      continue;
+    }
+    if (char === "\\") {
+      escaped = inString;
+      continue;
+    }
+    if (char === "\"") {
+      inString = !inString;
+      continue;
+    }
+    if (inString) continue;
+
+    if (char === "{") {
+      depth += 1;
+    } else if (char === "}") {
+      depth -= 1;
+      if (depth === 0) {
+        return JSON.parse(value.slice(start, index + 1));
+      }
+    }
+  }
+
+  throw new Error(`Scanner returned non-JSON output: ${previewProcessOutput(value) || "no stdout"}`);
+}
+
 function runProcess(command, args, options = {}) {
   const { cwd = REPO_ROOT, env = process.env, timeoutMs = 300000, input = null } = options;
   return new Promise((resolve, reject) => {
@@ -261,15 +324,14 @@ async function runUnifiedScanner(targetPath, options) {
 
   const started = Date.now();
   const { stdout } = await runPython(args, { cwd: REPO_ROOT, timeoutMs: options.timeoutMs + 30000 });
-  let report = null;
   try {
-    report = JSON.parse(stdout);
-  } catch {
-    throw new Error("Scanner returned non-JSON output.");
+    const report = extractJsonObject(stdout);
+    report.duration_ms = Number(report.duration_ms || Date.now() - started);
+    report.scanned_at = report.scanned_at || nowIso();
+    return report;
+  } catch (error) {
+    throw new Error(error?.message || "Scanner returned non-JSON output.");
   }
-  report.duration_ms = Number(report.duration_ms || Date.now() - started);
-  report.scanned_at = report.scanned_at || nowIso();
-  return report;
 }
 
 export async function runSkillStaticScan(payload = {}) {
