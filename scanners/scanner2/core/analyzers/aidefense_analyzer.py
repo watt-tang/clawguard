@@ -24,6 +24,8 @@ Integrates with Cisco AI Defense API (https://api.aidefense.cisco.com) for:
 - Malicious content analysis
 """
 
+from __future__ import annotations
+
 import asyncio
 import hashlib
 import json

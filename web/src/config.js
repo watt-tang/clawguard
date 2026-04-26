@@ -1,4 +1,4 @@
-﻿/** Global data and route configuration */
+/** Global data and route configuration */
 
 /** API endpoints */
 export const DATA_PATHS = {

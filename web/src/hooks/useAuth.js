@@ -23,7 +23,7 @@ function loadSession() {
       username: normalizeUsername(parsed.username),
       role,
       defaultApiKey: role === "admin"
-        ? String(parsed.defaultApiKey || AUTH_CONFIG.ADMIN_DEFAULT_API_KEY || "").trim()
+        ? String(AUTH_CONFIG.ADMIN_DEFAULT_API_KEY || parsed.defaultApiKey || "").trim()
         : String(parsed.defaultApiKey || "").trim(),
     };
   } catch {
@@ -57,7 +57,7 @@ function loadUsers() {
         phone: normalizePhone(item.phone),
         role: item.role === "admin" ? "admin" : "user",
         defaultApiKey: item.role === "admin"
-          ? String(item.defaultApiKey || AUTH_CONFIG.ADMIN_DEFAULT_API_KEY || "").trim()
+          ? String(AUTH_CONFIG.ADMIN_DEFAULT_API_KEY || item.defaultApiKey || "").trim()
           : String(item.defaultApiKey || "").trim(),
       }));
 

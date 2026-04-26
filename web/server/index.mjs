@@ -26,6 +26,15 @@ import {
 } from "./services/securityResearchService.mjs";
 import { getSkillIntelligenceOverview } from "./services/skillIntelligenceService.mjs";
 import { searchSkills } from "./services/skillSearchService.mjs";
+import {
+  getSkillStaticScanStatus,
+  runSkillStaticScan,
+} from "./services/skillStaticScanApiService.mjs";
+import {
+  SandboxBusyError,
+  getDynamicSandboxCapacity,
+  runSkillDynamicSandbox,
+} from "./services/skillDynamicSandboxService.mjs";
 import { prisma } from "./lib/prisma.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -38,7 +47,7 @@ const app = express();
 const port = Number(process.env.API_PORT || 8787);
 
 app.use(cors({ origin: true, credentials: true }));
-app.use(express.json({ limit: "5mb" }));
+app.use(express.json({ limit: process.env.API_JSON_LIMIT || "75mb" }));
 
 app.get("/api/health", (_req, res) => {
   res.json({ ok: true, now: new Date().toISOString() });
@@ -158,6 +167,67 @@ app.get("/api/skill/search", async (req, res) => {
     res.json(data);
   } catch (error) {
     res.status(500).json({ message: error.message || "Failed to search skills." });
+  }
+});
+
+app.post("/api/skill/scan", async (req, res) => {
+  try {
+    const data = await runSkillStaticScan(req.body || {});
+    res.json(data);
+  } catch (error) {
+    res.status(500).json({
+      ok: false,
+      message: error?.message || "静态扫描执行失败。",
+    });
+  }
+});
+
+app.get("/api/skill/scan/status", (req, res) => {
+  const scanId = String(req.query?.scanId || "").trim();
+  const data = getSkillStaticScanStatus(scanId);
+  if (!data) {
+    res.status(404).json({ ok: false, message: "Scan result not found." });
+    return;
+  }
+
+  res.json({ ok: true, ...data });
+});
+
+app.get("/api/skill/dynamic-sandbox/capacity", (_req, res) => {
+  res.json({ ok: true, capacity: getDynamicSandboxCapacity() });
+});
+
+app.post("/api/skill/dynamic-sandbox", async (req, res) => {
+  const authState = String(req.get("x-clawguard-auth") || req.body?.authState || "").trim();
+  if (authState !== "authenticated") {
+    res.status(401).json({ ok: false, code: "LOGIN_REQUIRED", message: "请先登录后再使用动态沙箱检测。" });
+    return;
+  }
+
+  try {
+    const data = await runSkillDynamicSandbox(req.body);
+    res.json({
+      ...data,
+      capacity: getDynamicSandboxCapacity(),
+      warning: "恢复出来的链条只是可能的攻击路径，风险等级仅供参考。",
+    });
+  } catch (error) {
+    if (error instanceof SandboxBusyError || error?.statusCode === 429) {
+      res.status(429).json({
+        ok: false,
+        code: "SANDBOX_BUSY",
+        message: error.message || "动态沙箱繁忙，请稍后再试。",
+        capacity: getDynamicSandboxCapacity(),
+      });
+      return;
+    }
+
+    res.status(500).json({
+      ok: false,
+      code: error?.code || "SANDBOX_FAILED",
+      message: error?.message || "动态沙箱执行失败。",
+      capacity: getDynamicSandboxCapacity(),
+    });
   }
 });
 

@@ -8,12 +8,11 @@ RUN npm ci
 COPY web/index.html ./
 COPY web/vite.config.js ./
 COPY web/src ./src
-COPY web/public ./public
 COPY web/server ./server
 COPY web/scripts ./scripts
 COPY web/prisma ./prisma
 COPY web/geoip ./geoip
-COPY web/clawdbot_alive ./clawdbot_alive
+RUN mkdir -p ./public/data/mock ./public/data/geo ./clawdbot_alive
 
 RUN npm run db:generate
 RUN npm run build
@@ -25,8 +24,9 @@ WORKDIR /app/web
 ENV NODE_ENV=production
 ENV API_PORT=8787
 
-RUN apt-get update \
-  && apt-get install -y --no-install-recommends openssl \
+RUN sed -i 's|http://deb.debian.org/debian|http://mirrors.aliyun.com/debian|g; s|http://deb.debian.org/debian-security|http://mirrors.aliyun.com/debian-security|g' /etc/apt/sources.list.d/debian.sources \
+  && apt-get update \
+  && apt-get install -y --no-install-recommends openssl python3 \
   && rm -rf /var/lib/apt/lists/*
 
 COPY web/package.json web/package-lock.json ./
@@ -42,6 +42,8 @@ COPY --from=build /app/web/public ./public
 COPY --from=build /app/web/scripts ./scripts
 COPY --from=build /app/web/index.html ./
 COPY --from=build /app/web/vite.config.js ./
+COPY scanners /app/scanners
+COPY provloom /app/provloom
 
 RUN mkdir -p /app/runtime-cache
 
