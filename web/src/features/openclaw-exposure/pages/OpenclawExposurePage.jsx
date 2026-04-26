@@ -15,8 +15,27 @@ import {
   fetchWorldDist,
 } from "../services/dataService.js";
 import { PAGE_SIZE_OPTIONS } from "../../../config.js";
+import { getClawExposureProduct } from "../../../../shared/clawExposureProducts.mjs";
 
-export default function OpenclawExposurePage({ auth }) {
+const DEFAULT_LIST_QUERY = {
+  page: 1,
+  pageSize: PAGE_SIZE_OPTIONS[0],
+  ip: "",
+  location: "",
+  operator: "",
+};
+
+const DEFAULT_PANEL_DEMAND = {
+  world: true,
+  china: false,
+  trend: false,
+  version: false,
+  detail: false,
+};
+
+export default function OpenclawExposurePage({ auth, product }) {
+  const activeProduct = getClawExposureProduct(product?.key);
+  const productKey = activeProduct.key;
   const [stats, setStats] = useState(null);
   const [statsLoading, setStatsLoading] = useState(true);
 
@@ -34,27 +53,32 @@ export default function OpenclawExposurePage({ auth }) {
 
   const [listData, setListData] = useState(null);
   const [listLoading, setListLoading] = useState(false);
-  const [listQuery, setListQuery] = useState({
-    page: 1,
-    pageSize: PAGE_SIZE_OPTIONS[0],
-    ip: "",
-    location: "",
-    operator: "",
-  });
+  const [listQuery, setListQuery] = useState(DEFAULT_LIST_QUERY);
 
   const [readyForSecondaryRequests, setReadyForSecondaryRequests] = useState(false);
-  const [panelDemand, setPanelDemand] = useState({
-    world: true,
-    china: false,
-    trend: false,
-    version: false,
-    detail: false,
-  });
+  const [panelDemand, setPanelDemand] = useState(DEFAULT_PANEL_DEMAND);
+
+  useEffect(() => {
+    setStats(null);
+    setWorldDist(null);
+    setChinaDist(null);
+    setExposureTrend(null);
+    setVersionTrend(null);
+    setListData(null);
+    setStatsLoading(true);
+    setWorldLoading(true);
+    setChinaLoading(true);
+    setTrendLoading(true);
+    setVersionLoading(true);
+    setListLoading(false);
+    setListQuery(DEFAULT_LIST_QUERY);
+    setPanelDemand(DEFAULT_PANEL_DEMAND);
+  }, [productKey]);
 
   useEffect(() => {
     let alive = true;
 
-    fetchStats()
+    fetchStats(productKey)
       .then((data) => {
         if (alive) {
           setStats(data);
@@ -68,7 +92,7 @@ export default function OpenclawExposurePage({ auth }) {
     return () => {
       alive = false;
     };
-  }, []);
+  }, [productKey]);
 
   useEffect(() => {
     let timeoutId = null;
@@ -96,7 +120,7 @@ export default function OpenclawExposurePage({ auth }) {
     let alive = true;
     setWorldLoading(true);
 
-    fetchWorldDist()
+    fetchWorldDist(productKey)
       .then((data) => {
         if (alive) {
           setWorldDist(data);
@@ -110,7 +134,7 @@ export default function OpenclawExposurePage({ auth }) {
     return () => {
       alive = false;
     };
-  }, [readyForSecondaryRequests, panelDemand.world]);
+  }, [readyForSecondaryRequests, panelDemand.world, productKey]);
 
   useEffect(() => {
     if (!readyForSecondaryRequests || !panelDemand.china) return undefined;
@@ -118,7 +142,7 @@ export default function OpenclawExposurePage({ auth }) {
     let alive = true;
     setChinaLoading(true);
 
-    fetchChinaDist()
+    fetchChinaDist(productKey)
       .then((data) => {
         if (alive) {
           setChinaDist(data);
@@ -132,7 +156,7 @@ export default function OpenclawExposurePage({ auth }) {
     return () => {
       alive = false;
     };
-  }, [readyForSecondaryRequests, panelDemand.china]);
+  }, [readyForSecondaryRequests, panelDemand.china, productKey]);
 
   useEffect(() => {
     if (!readyForSecondaryRequests || !panelDemand.trend) return undefined;
@@ -140,7 +164,7 @@ export default function OpenclawExposurePage({ auth }) {
     let alive = true;
     setTrendLoading(true);
 
-    fetchExposureTrend()
+    fetchExposureTrend(productKey)
       .then((data) => {
         if (alive) {
           setExposureTrend(data);
@@ -154,7 +178,7 @@ export default function OpenclawExposurePage({ auth }) {
     return () => {
       alive = false;
     };
-  }, [readyForSecondaryRequests, panelDemand.trend]);
+  }, [readyForSecondaryRequests, panelDemand.trend, productKey]);
 
   useEffect(() => {
     if (!readyForSecondaryRequests || !panelDemand.version) return undefined;
@@ -162,7 +186,7 @@ export default function OpenclawExposurePage({ auth }) {
     let alive = true;
     setVersionLoading(true);
 
-    fetchVersionTrend()
+    fetchVersionTrend(productKey)
       .then((data) => {
         if (alive) {
           setVersionTrend(data);
@@ -176,7 +200,7 @@ export default function OpenclawExposurePage({ auth }) {
     return () => {
       alive = false;
     };
-  }, [readyForSecondaryRequests, panelDemand.version]);
+  }, [readyForSecondaryRequests, panelDemand.version, productKey]);
 
   useEffect(() => {
     if (!readyForSecondaryRequests || !panelDemand.detail) return undefined;
@@ -185,6 +209,7 @@ export default function OpenclawExposurePage({ auth }) {
     setListLoading(true);
 
     fetchExposureList({
+      productKey,
       isLoggedIn: auth?.isLoggedIn,
       page: listQuery.page,
       page_size: listQuery.pageSize,
@@ -208,6 +233,7 @@ export default function OpenclawExposurePage({ auth }) {
   }, [
     readyForSecondaryRequests,
     panelDemand.detail,
+    productKey,
     auth?.isLoggedIn,
     listQuery.page,
     listQuery.pageSize,
@@ -240,10 +266,10 @@ export default function OpenclawExposurePage({ auth }) {
     <div className="oc-page">
       <div className="oc-page-header">
         <div className="oc-page-header-main">
-          <div className="oc-page-tag">公网暴露监测</div>
-          <h2 className="oc-page-title">OpenClaw 公网暴露检测</h2>
+          <div className="oc-page-tag">{activeProduct.name} 公网暴露监测</div>
+          <h2 className="oc-page-title">{activeProduct.pageTitle}</h2>
           <p className="oc-page-desc">
-            持续采集公网活跃 OpenClaw 节点，覆盖全球分布、境内覆盖、版本演化与暴露服务详情，服务于 OpenClaw 生态安全分析与资产梳理场景。
+            {activeProduct.description}
           </p>
         </div>
         {stats ? (
@@ -297,6 +323,7 @@ export default function OpenclawExposurePage({ auth }) {
           }}
           loading={listLoading}
           auth={auth}
+          product={activeProduct}
           onPageChange={handlePageChange}
           onPageSizeChange={handlePageSizeChange}
           onFilterChange={handleFilterChange}

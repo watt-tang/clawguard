@@ -226,11 +226,13 @@ export default function ExposureDetailTable({
   filters,
   loading,
   auth,
+  product,
   onPageChange,
   onPageSizeChange,
   onFilterChange,
 }) {
   const { isLoggedIn, login, register, logout } = auth;
+  const productKey = product?.key || "openclaw";
   const [showLogin, setShowLogin] = useState(false);
   const [exportingAll, setExportingAll] = useState(false);
 
@@ -283,6 +285,7 @@ export default function ExposureDetailTable({
     setExportingAll(true);
     try {
       const data = await fetchExposureList({
+        productKey,
         isLoggedIn,
         page: 1,
         page_size: 0,
@@ -291,16 +294,16 @@ export default function ExposureDetailTable({
         operator: isLoggedIn ? searchOperator : "",
       });
       const content = buildCsvContent(data?.rows ?? [], isLoggedIn);
-      downloadCsv(content, `openclaw-exposure-${new Date().toISOString().slice(0, 10)}.csv`);
+      downloadCsv(content, `${productKey}-exposure-${new Date().toISOString().slice(0, 10)}.csv`);
     } finally {
       setExportingAll(false);
     }
-  }, [isLoggedIn, searchIp, searchGeo, searchOperator]);
+  }, [productKey, isLoggedIn, searchIp, searchGeo, searchOperator]);
 
   const handleDownloadPage = useCallback(() => {
     const content = buildCsvContent(rows ?? [], isLoggedIn);
-    downloadCsv(content, `openclaw-exposure-page${page}-${new Date().toISOString().slice(0, 10)}.csv`);
-  }, [rows, isLoggedIn, page]);
+    downloadCsv(content, `${productKey}-exposure-page${page}-${new Date().toISOString().slice(0, 10)}.csv`);
+  }, [productKey, rows, isLoggedIn, page]);
 
   const handleLogin = useCallback(
     (username, password) => {

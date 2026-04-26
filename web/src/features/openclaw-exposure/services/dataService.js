@@ -1,4 +1,5 @@
 ﻿import { DATA_PATHS, FALLBACK_DATA_PATHS } from "../../../config.js";
+import { DEFAULT_CLAW_EXPOSURE_PRODUCT_KEY } from "../../../../shared/clawExposureProducts.mjs";
 
 async function fetchJson(url) {
   const res = await fetch(url);
@@ -26,24 +27,49 @@ function withQuery(baseUrl, query = {}) {
   return `${baseUrl}?${qs}`;
 }
 
-export function fetchStats() {
-  return fetchWithFallback(DATA_PATHS.STATS, FALLBACK_DATA_PATHS.STATS);
+function productQuery(productKey) {
+  const normalizedKey = String(productKey || DEFAULT_CLAW_EXPOSURE_PRODUCT_KEY).toLowerCase();
+  return normalizedKey === DEFAULT_CLAW_EXPOSURE_PRODUCT_KEY ? {} : { product: normalizedKey };
 }
 
-export function fetchWorldDist() {
-  return fetchWithFallback(DATA_PATHS.WORLD_DIST, FALLBACK_DATA_PATHS.WORLD_DIST);
+function fallbackForDefaultProduct(productKey, fallbackUrl) {
+  const normalizedKey = String(productKey || DEFAULT_CLAW_EXPOSURE_PRODUCT_KEY).toLowerCase();
+  return normalizedKey === DEFAULT_CLAW_EXPOSURE_PRODUCT_KEY ? fallbackUrl : null;
 }
 
-export function fetchChinaDist() {
-  return fetchWithFallback(DATA_PATHS.CHINA_DIST, FALLBACK_DATA_PATHS.CHINA_DIST);
+export function fetchStats(productKey = DEFAULT_CLAW_EXPOSURE_PRODUCT_KEY) {
+  return fetchWithFallback(
+    withQuery(DATA_PATHS.STATS, productQuery(productKey)),
+    fallbackForDefaultProduct(productKey, FALLBACK_DATA_PATHS.STATS)
+  );
 }
 
-export function fetchExposureTrend() {
-  return fetchWithFallback(DATA_PATHS.EXPOSURE_TREND, FALLBACK_DATA_PATHS.EXPOSURE_TREND);
+export function fetchWorldDist(productKey = DEFAULT_CLAW_EXPOSURE_PRODUCT_KEY) {
+  return fetchWithFallback(
+    withQuery(DATA_PATHS.WORLD_DIST, productQuery(productKey)),
+    fallbackForDefaultProduct(productKey, FALLBACK_DATA_PATHS.WORLD_DIST)
+  );
 }
 
-export function fetchVersionTrend() {
-  return fetchWithFallback(DATA_PATHS.VERSION_TREND, FALLBACK_DATA_PATHS.VERSION_TREND);
+export function fetchChinaDist(productKey = DEFAULT_CLAW_EXPOSURE_PRODUCT_KEY) {
+  return fetchWithFallback(
+    withQuery(DATA_PATHS.CHINA_DIST, productQuery(productKey)),
+    fallbackForDefaultProduct(productKey, FALLBACK_DATA_PATHS.CHINA_DIST)
+  );
+}
+
+export function fetchExposureTrend(productKey = DEFAULT_CLAW_EXPOSURE_PRODUCT_KEY) {
+  return fetchWithFallback(
+    withQuery(DATA_PATHS.EXPOSURE_TREND, productQuery(productKey)),
+    fallbackForDefaultProduct(productKey, FALLBACK_DATA_PATHS.EXPOSURE_TREND)
+  );
+}
+
+export function fetchVersionTrend(productKey = DEFAULT_CLAW_EXPOSURE_PRODUCT_KEY) {
+  return fetchWithFallback(
+    withQuery(DATA_PATHS.VERSION_TREND, productQuery(productKey)),
+    fallbackForDefaultProduct(productKey, FALLBACK_DATA_PATHS.VERSION_TREND)
+  );
 }
 
 function applyLocalFilterAndPage(payload, query = {}) {
@@ -77,6 +103,7 @@ function applyLocalFilterAndPage(payload, query = {}) {
 }
 
 export async function fetchExposureList({
+  productKey = DEFAULT_CLAW_EXPOSURE_PRODUCT_KEY,
   isLoggedIn = false,
   page = 1,
   page_size = 20,
@@ -85,6 +112,7 @@ export async function fetchExposureList({
   operator = "",
 } = {}) {
   const query = {
+    ...productQuery(productKey),
     is_logged_in: isLoggedIn ? 1 : 0,
     page,
     page_size,
@@ -97,6 +125,16 @@ export async function fetchExposureList({
   try {
     return await fetchJson(url);
   } catch {
+    if (String(productKey || DEFAULT_CLAW_EXPOSURE_PRODUCT_KEY).toLowerCase() !== DEFAULT_CLAW_EXPOSURE_PRODUCT_KEY) {
+      return {
+        total: 0,
+        page,
+        page_size,
+        latestSnapshot: "",
+        sourceDir: "",
+        rows: [],
+      };
+    }
     const fallback = await fetchJson(FALLBACK_DATA_PATHS.EXPOSURE_DATA);
     return applyLocalFilterAndPage(fallback, query);
   }

@@ -12,7 +12,7 @@ const PAGE_META = {
   [PAGE_IDS.HOME]: { label: "平台首页", category: "页面" },
   "openclaw-governance": { label: "Claw 系列产品安全总览", category: "治理" },
   "openclaw-risk": { label: "OpenClaw 风险漏洞追踪", category: "漏洞" },
-  [PAGE_IDS.OPENCLAW_EXPOSURE]: { label: "OpenClaw 公网暴露监测", category: "暴露" },
+  [PAGE_IDS.OPENCLAW_EXPOSURE]: { label: "Claw 系列公网暴露监测", category: "暴露" },
   "skill-governance": { label: "Skill 生态后门投毒治理", category: "Skill" },
   "openclaw-deploy": { label: "学术安全前沿", category: "研究" },
 };
@@ -114,11 +114,11 @@ function createExposureEntries(stats) {
   return [
     makeEntry({
       id: "exposure-current",
-      title: "当前暴露规模",
+      title: "Claw 系列当前暴露规模",
       subtitle: `当前暴露 ${stats.currentExposed || 0}，高风险 ${stats.highRiskCount || 0}`,
       pageId: PAGE_IDS.OPENCLAW_EXPOSURE,
       section: "公网暴露监测",
-      keywords: ["暴露", "高风险", "国家覆盖", stats.countryCoverage],
+      keywords: ["OpenClaw", "GoClaw", "IronClaw", "PicoClaw", "TinyClaw", "ZeroClaw", "暴露", "高风险", "国家覆盖", stats.countryCoverage],
       intent: "查看全球分布、趋势和明细",
     }),
     makeEntry({

@@ -44,45 +44,45 @@ app.get("/api/health", (_req, res) => {
   res.json({ ok: true, now: new Date().toISOString() });
 });
 
-app.get("/api/exposure/stats", async (_req, res) => {
+app.get("/api/exposure/stats", async (req, res) => {
   try {
-    const data = await getExposureStats();
+    const data = await getExposureStats(req.query);
     res.json(data);
   } catch (error) {
     res.status(500).json({ message: error.message || "Failed to fetch stats." });
   }
 });
 
-app.get("/api/exposure/world-distribution", async (_req, res) => {
+app.get("/api/exposure/world-distribution", async (req, res) => {
   try {
-    const data = await getWorldDistribution();
+    const data = await getWorldDistribution(req.query);
     res.json(data);
   } catch (error) {
     res.status(500).json({ message: error.message || "Failed to fetch world distribution." });
   }
 });
 
-app.get("/api/exposure/china-distribution", async (_req, res) => {
+app.get("/api/exposure/china-distribution", async (req, res) => {
   try {
-    const data = await getChinaDistribution();
+    const data = await getChinaDistribution(req.query);
     res.json(data);
   } catch (error) {
     res.status(500).json({ message: error.message || "Failed to fetch china distribution." });
   }
 });
 
-app.get("/api/exposure/trend", async (_req, res) => {
+app.get("/api/exposure/trend", async (req, res) => {
   try {
-    const data = await getExposureTrend();
+    const data = await getExposureTrend(req.query);
     res.json(data);
   } catch (error) {
     res.status(500).json({ message: error.message || "Failed to fetch trend." });
   }
 });
 
-app.get("/api/exposure/version-trend", async (_req, res) => {
+app.get("/api/exposure/version-trend", async (req, res) => {
   try {
-    const data = await getVersionTrend();
+    const data = await getVersionTrend(req.query);
     res.json(data);
   } catch (error) {
     res.status(500).json({ message: error.message || "Failed to fetch version trend." });

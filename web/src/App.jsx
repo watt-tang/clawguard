@@ -17,6 +17,11 @@ import {
 import GlobalSearchBar from "./components/GlobalSearchBar.jsx";
 import { PAGE_IDS } from "./config.js";
 import { useAuth } from "./hooks/useAuth.js";
+import {
+  CLAW_EXPOSURE_PRODUCTS,
+  DEFAULT_CLAW_EXPOSURE_PRODUCT_KEY,
+  getClawExposureProduct,
+} from "../shared/clawExposureProducts.mjs";
 import OpenclawExposurePage from "./features/openclaw-exposure/pages/OpenclawExposurePage.jsx";
 import OpenclawGovernancePage from "./features/openclaw-governance/pages/OpenclawGovernancePage.jsx";
 import OpenclawRiskPage from "./features/openclaw-risk/pages/OpenclawRiskPage.jsx";
@@ -48,9 +53,9 @@ const RAW_MODULES = [
   },
   {
     icon: Globe,
-    label: "OpenClaw 公网暴露监测",
+    label: "Claw系列公网暴露监测",
     pageId: PAGE_IDS.OPENCLAW_EXPOSURE,
-    description: "查看全球分布、趋势分析与公网暴露服务详情。",
+    description: "默认展示 OpenClaw，并支持切换查看 GoClaw、IronClaw、PicoClaw、TinyClaw 与 ZeroClaw。",
     status: "已上线",
   },
   {
@@ -75,7 +80,7 @@ const PRIMARY_HOME_PAGE_IDS = [PAGE_IDS.OPENCLAW_EXPOSURE, "skill-governance"];
 
 const STATUS_TICKERS = [
   "系统状态 NORMAL",
-  "公网暴露监测链路在线",
+  "Claw 系列公网暴露监测链路在线",
   "Skill 风险扫描策略已加载",
   "全局导航入口已分层",
 ];
@@ -256,22 +261,60 @@ function ModuleTab({ module, active, onClick }) {
   );
 }
 
-function ModuleIntro({ activeModule }) {
+function ProductSwitchCard({ selectedProductKey, onProductChange }) {
+  const selectedProduct = getClawExposureProduct(selectedProductKey);
+
+  return (
+    <div className="module-product-switch-card">
+      <div className="module-product-switch-icon">
+        <Globe size={16} strokeWidth={2} />
+      </div>
+      <div className="module-product-switch-main">
+        <label className="module-product-switch-label" htmlFor="claw-product-switch">
+          切换其他产品
+        </label>
+        <select
+          id="claw-product-switch"
+          className="module-product-switch-select"
+          value={selectedProduct.key}
+          onChange={(event) => onProductChange(event.target.value)}
+        >
+          {CLAW_EXPOSURE_PRODUCTS.map((product) => (
+            <option key={product.key} value={product.key}>
+              {product.name}
+            </option>
+          ))}
+        </select>
+      </div>
+      <span className={`module-product-switch-risk is-${selectedProduct.riskTone || "review"}`}>
+        {selectedProduct.riskLabel}
+      </span>
+    </div>
+  );
+}
+
+function ModuleIntro({ activeModule, title, description, eyebrow, extra }) {
+  const displayTitle = title || activeModule.label;
+  const displayDescription = description || activeModule.description;
+
   return (
     <section className="module-intro-card">
-      <div>
+      <div className="module-intro-main">
         <div className="module-intro-eyebrow">
           <Sparkles size={13} strokeWidth={2} />
-          <span>OpenClaw Security Console</span>
+          <span>{eyebrow || "OpenClaw Security Console"}</span>
         </div>
-        <h1 className="module-intro-title">{activeModule.label}</h1>
-        <p className="module-intro-desc">{activeModule.description}</p>
+        <div className="module-intro-title-row">
+          <h1 className="module-intro-title">{displayTitle}</h1>
+          {extra}
+        </div>
+        <p className="module-intro-desc">{displayDescription}</p>
       </div>
 
       <div className="module-intro-meta">
         <span className="module-intro-path">控制台</span>
         <ChevronRight size={14} strokeWidth={2} />
-        <span className="module-intro-path is-current">{activeModule.label}</span>
+        <span className="module-intro-path is-current">{displayTitle}</span>
       </div>
     </section>
   );
@@ -417,42 +460,61 @@ function PlaceholderPage({ module }) {
 
 export default function App() {
   const [activePage, setActivePage] = useState(PAGE_IDS.HOME);
+  const [activeExposureProductKey, setActiveExposureProductKey] = useState(DEFAULT_CLAW_EXPOSURE_PRODUCT_KEY);
   const [showLoginModal, setShowLoginModal] = useState(false);
   const auth = useAuth();
   const navModules = MODULES.filter((module) => module.pageId !== PAGE_IDS.HOME);
+  const activeExposureProduct = useMemo(
+    () => getClawExposureProduct(activeExposureProductKey),
+    [activeExposureProductKey],
+  );
 
   const activeModule = useMemo(
     () => MODULES.find((module) => module.pageId === activePage) ?? MODULES[0],
     [activePage],
   );
+  const isExposurePage = activePage === PAGE_IDS.OPENCLAW_EXPOSURE;
+
+  function handleNavigate(pageId) {
+    if (pageId === PAGE_IDS.OPENCLAW_EXPOSURE && activePage !== PAGE_IDS.OPENCLAW_EXPOSURE) {
+      setActiveExposureProductKey(DEFAULT_CLAW_EXPOSURE_PRODUCT_KEY);
+    }
+    setActivePage(pageId);
+  }
 
   function renderPage() {
-    if (activePage === PAGE_IDS.HOME) {
-      return <DashboardHome modules={MODULES} onNavigate={setActivePage} />;
-    }
-
-    if (activePage === PAGE_IDS.OPENCLAW_EXPOSURE) {
-      return <OpenclawExposurePage auth={auth} />;
-    }
-
-    if (activePage === "openclaw-governance") {
-      return <OpenclawGovernancePage auth={auth} />;
-    }
-
-    if (activePage === "openclaw-risk") {
-      return <OpenclawRiskPage auth={auth} />;
-    }
-
-    if (activePage === "skill-governance") {
-      return <SkillGovernancePage auth={auth} />;
-    }
-
-    if (activePage === "openclaw-deploy") {
-      return <SecurityResearchPage auth={auth} />;
-    }
-
-    return <PlaceholderPage module={activeModule} />;
+  if (activePage === PAGE_IDS.HOME) {
+    return <DashboardHome modules={MODULES} onNavigate={handleNavigate} />;
   }
+
+  if (activePage === PAGE_IDS.OPENCLAW_EXPOSURE) {
+    return (
+      <OpenclawExposurePage
+        key={activeExposureProduct.key}
+        auth={auth}
+        product={activeExposureProduct}
+      />
+    );
+  }
+
+  if (activePage === "openclaw-governance") {
+    return <OpenclawGovernancePage auth={auth} />;
+  }
+
+  if (activePage === "openclaw-risk") {
+    return <OpenclawRiskPage auth={auth} />;
+  }
+
+  if (activePage === "skill-governance") {
+    return <SkillGovernancePage auth={auth} />;
+  }
+
+  if (activePage === "openclaw-deploy") {
+    return <SecurityResearchPage auth={auth} />;
+  }
+
+  return <PlaceholderPage module={activeModule} />;
+}
 
   function handleAuthAction() {
     if (auth.isLoggedIn) {
@@ -485,8 +547,8 @@ export default function App() {
         role={auth.user?.role}
         isLoggedIn={auth.isLoggedIn}
         modules={MODULES}
-        onGoHome={() => setActivePage(PAGE_IDS.HOME)}
-        onNavigate={setActivePage}
+        onGoHome={() => handleNavigate(PAGE_IDS.HOME)}
+        onNavigate={handleNavigate}
         onAuthAction={handleAuthAction}
       />
 
@@ -522,7 +584,7 @@ export default function App() {
                   key={module.pageId}
                   module={module}
                   active={module.pageId === activePage}
-                  onClick={setActivePage}
+                  onClick={handleNavigate}
                 />
               ))}
             </div>
@@ -530,7 +592,22 @@ export default function App() {
         ) : null}
 
         <main className="content-shell">
-          <ModuleIntro activeModule={activeModule} />
+          {activePage !== PAGE_IDS.HOME ? (
+            <ModuleIntro
+              activeModule={activeModule}
+              title={isExposurePage ? activeExposureProduct.navLabel : activeModule.label}
+              description={isExposurePage ? activeExposureProduct.description : activeModule.description}
+              eyebrow={isExposurePage ? "Claw Series Exposure Console" : undefined}
+              extra={
+                isExposurePage ? (
+                  <ProductSwitchCard
+                    selectedProductKey={activeExposureProduct.key}
+                    onProductChange={setActiveExposureProductKey}
+                  />
+                ) : null
+              }
+            />
+          ) : null}
           {renderPage()}
         </main>
       </div>
