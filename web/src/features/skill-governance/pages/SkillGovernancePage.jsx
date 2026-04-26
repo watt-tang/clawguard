@@ -5,8 +5,10 @@ import {
   AlertCircle,
   BarChart3,
   Box,
+  Braces,
   ChevronLeft,
   ChevronRight,
+  Cpu,
   Database,
   Eye,
   EyeOff,
@@ -15,7 +17,11 @@ import {
   FileSearch,
   FolderOpen,
   GitBranch,
+  Link2,
   LoaderCircle,
+  LockKeyhole,
+  Network,
+  PlayCircle,
   Search,
   ShieldAlert,
   ShieldCheck,
@@ -24,6 +30,7 @@ import {
   X,
 } from "lucide-react";
 import { PAGE_SIZE_OPTIONS } from "../../../config.js";
+import { getDynamicSandboxCapacity, runDynamicSandboxScan } from "../services/skillDynamicSandboxService.js";
 import { getSkillScanStatus, scanSkillByRepositoryUrl, scanSkillBySlug, scanSkillFiles } from "../services/skillScanService.js";
 import { getSkillIntelligenceOverview, peekSkillIntelligenceOverview } from "../services/skillIntelligenceService.js";
 import { searchSkills } from "../services/skillSearchService.js";
@@ -51,6 +58,14 @@ const CONCLUSION_META = {
   allow_with_caution: { tone: "low", badge: "谨慎放行", title: "整体风险较低，但仍建议保留关注", desc: "聚合结果未达到阻断阈值，建议保留审计记录，并对关键文件做抽样复核。" },
   partial_result: { tone: "medium", badge: "结果不完整", title: "部分扫描器未成功执行", desc: "当前报告可用于初步判断，但建议补齐失败或不可用的扫描器后再形成最终结论。" },
   clear: { tone: "clean", badge: "通过初筛", title: "未形成明确风险结论", desc: "本轮统一扫描未发现明确风险结论，但关键脚本、依赖来源和外链仍建议人工抽查。" },
+};
+const DYNAMIC_RISK_META = {
+  critical: { label: "严重", tone: "critical" },
+  high: { label: "高危", tone: "high" },
+  medium: { label: "中危", tone: "medium" },
+  low: { label: "低危", tone: "low" },
+  safe: { label: "低风险", tone: "clean" },
+  unknown: { label: "未知", tone: "medium" },
 };
 
 function formatBytes(value) {
@@ -153,6 +168,11 @@ function SeverityBadge({ severity }) {
   return <span className={`skill-severity-badge is-${level.toLowerCase()}`}>{SEVERITY_LABELS[level] || level}</span>;
 }
 
+function summarizeChainNode(node, index) {
+  if (!node || typeof node !== "object") return `步骤 ${index + 1}`;
+  return node.title || node.action || node.behavior || node.category || node.type || node.name || `步骤 ${index + 1}`;
+}
+
 function SkillDetectWorkspace({ auth }) {
   const isAuthenticated = Boolean(auth?.isLoggedIn);
   const authState = isAuthenticated ? "authenticated" : "guest";
@@ -173,8 +193,8 @@ function SkillDetectWorkspace({ auth }) {
   const [showApiKey, setShowApiKey] = useState(false);
   const [runtimeConfig, setRuntimeConfig] = useState({
     deepseekApiKey: "",
-    deepseekModel: "deepseek-chat",
-    deepseekBaseUrl: "https://api.deepseek.com/v1",
+    deepseekModel: "deepseek-ai/DeepSeek-V3",
+    deepseekBaseUrl: "https://api.siliconflow.cn/v1",
   });
 
   const zipInputRef = useRef(null);
@@ -969,6 +989,448 @@ function SkillPlaceholder({ title, desc, icon: Icon }) {
         </div>
       </div>
     </div>
+  );
+}
+
+function DynamicSandboxWorkspace({ auth }) {
+  const isAuthenticated = Boolean(auth?.isLoggedIn);
+  const [uploads, setUploads] = useState([]);
+  const [sourceUrl, setSourceUrl] = useState("");
+  const [dragging, setDragging] = useState(false);
+  const [inputJson, setInputJson] = useState("{\n  \"prompt\": \"请按 SKILL.md 的主要说明实际执行这个 Skill 的首要工作流。若文档要求注册、初始化、创建账号、申请 token 或调用外部 API，请在沙箱内执行对应第一步；不要只做安全观察或文档审计。\"\n}");
+  const [networkPolicy, setNetworkPolicy] = useState("default");
+  const [timeoutSeconds, setTimeoutSeconds] = useState(600);
+  const [enableLlm, setEnableLlm] = useState(true);
+  const [showApiKey, setShowApiKey] = useState(false);
+  const [llmConfig, setLlmConfig] = useState({
+    provider: "siliconflow",
+    apiKey: "",
+    model: "deepseek-ai/DeepSeek-V3",
+    baseUrl: "https://api.siliconflow.cn/v1",
+  });
+  const [capacity, setCapacity] = useState({ active: 0, limit: 30, available: 30 });
+  const [isRunning, setIsRunning] = useState(false);
+  const [runStartedAt, setRunStartedAt] = useState(null);
+  const [elapsedSeconds, setElapsedSeconds] = useState(0);
+  const [error, setError] = useState("");
+  const [result, setResult] = useState(null);
+  const fileInputRef = useRef(null);
+  const folderInputRef = useRef(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    getDynamicSandboxCapacity()
+      .then((nextCapacity) => {
+        if (!cancelled) setCapacity(nextCapacity);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  useEffect(() => {
+    const seededApiKey = String(auth?.user?.defaultApiKey || "").trim();
+    if (!seededApiKey) return;
+    setLlmConfig((current) => current.apiKey ? current : { ...current, apiKey: seededApiKey });
+  }, [auth?.user?.defaultApiKey]);
+
+  useEffect(() => {
+    if (!isRunning || !runStartedAt) {
+      return undefined;
+    }
+
+    const updateElapsed = () => {
+      setElapsedSeconds(Math.max(0, Math.floor((Date.now() - runStartedAt) / 1000)));
+    };
+    updateElapsed();
+    const timer = window.setInterval(updateElapsed, 1000);
+    return () => window.clearInterval(timer);
+  }, [isRunning, runStartedAt]);
+
+  const totalSize = useMemo(() => uploads.reduce((sum, item) => sum + item.size, 0), [uploads]);
+  const primaryChain = Array.isArray(result?.primaryChain) ? result.primaryChain : [];
+  const evidenceTimeline = Array.isArray(result?.evidenceTimeline) ? result.evidenceTimeline.slice(0, 8) : [];
+  const fileEvents = Array.isArray(result?.fileEvents) ? result.fileEvents : [];
+  const networkEvents = Array.isArray(result?.networkEvents) ? result.networkEvents : [];
+  const processEvents = Array.isArray(result?.processEvents) ? result.processEvents : [];
+  const toolCalls = Array.isArray(result?.toolCalls) ? result.toolCalls : [];
+  const llmEvents = Array.isArray(result?.llmEvents) ? result.llmEvents : [];
+  const riskKey = String(result?.riskLevel || "unknown").toLowerCase();
+  const riskMeta = DYNAMIC_RISK_META[riskKey] || DYNAMIC_RISK_META.unknown;
+
+  function appendUploads(fileList, sourceId) {
+    if (!fileList?.length) return;
+    setUploads((current) => [...makeUploadRecords(fileList, sourceId), ...current]);
+  }
+
+  function updateLlmConfig(field, value) {
+    setLlmConfig((current) => ({ ...current, [field]: value }));
+  }
+
+  function parseInputPayload() {
+    const clean = inputJson.trim();
+    if (!clean) return {};
+    const parsed = JSON.parse(clean);
+    if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
+      throw new Error("API 输入口必须是 JSON 对象。");
+    }
+    return parsed;
+  }
+
+  async function handleRunSandbox() {
+    if (!isAuthenticated) {
+      setError("请先登录后再使用动态沙箱检测。");
+      return;
+    }
+    if (!uploads.length && !sourceUrl.trim()) {
+      setError("请上传 ZIP/SKILL.md，或填写一个可下载的 URL。");
+      return;
+    }
+
+    let inputPayload = {};
+    try {
+      inputPayload = parseInputPayload();
+    } catch (parseError) {
+      setError(parseError instanceof Error ? parseError.message : "API 输入 JSON 解析失败。");
+      return;
+    }
+
+    setIsRunning(true);
+    setRunStartedAt(Date.now());
+    setElapsedSeconds(0);
+    setError("");
+    setResult(null);
+    try {
+      const response = await runDynamicSandboxScan({
+        uploadRecords: uploads,
+        sourceUrl,
+        inputPayload,
+        options: {
+          authState: "authenticated",
+          timeoutSeconds,
+          networkPolicy,
+          analysisMode: "rule_plus_epg",
+          llmConfig: {
+            enabled: enableLlm,
+            provider: llmConfig.provider,
+            apiKey: llmConfig.apiKey,
+            model: llmConfig.model,
+            baseUrl: llmConfig.baseUrl,
+          },
+        },
+      });
+      setResult(response.result || null);
+      if (response.capacity) setCapacity(response.capacity);
+    } catch (runError) {
+      if (runError?.capacity) setCapacity(runError.capacity);
+      setError(runError?.code === "SANDBOX_BUSY"
+        ? "服务器内部动态沙箱已达到 30 并发上限，请稍等一会儿再提交。"
+        : runError instanceof Error ? runError.message : "动态沙箱检测失败。");
+    } finally {
+      setIsRunning(false);
+      getDynamicSandboxCapacity().then(setCapacity).catch(() => {});
+    }
+  }
+
+  function handleDrop(event) {
+    event.preventDefault();
+    setDragging(false);
+    appendUploads(event.dataTransfer.files, "dynamic-drag");
+  }
+
+  return (
+    <section className="dynamic-sandbox-shell">
+      {!isAuthenticated ? (
+        <div className="dynamic-login-gate">
+          <div className="dynamic-login-icon"><LockKeyhole size={22} strokeWidth={1.9} /></div>
+          <div>
+            <div className="skill-card-title">动态沙箱检测需要登录</div>
+            <div className="skill-card-desc">请先通过右上角账号入口登录。登录后才会开放上传、URL 调度和 ProvLoom 沙箱执行能力。</div>
+          </div>
+        </div>
+      ) : null}
+
+      <div className="dynamic-warning">
+        <AlertCircle size={18} strokeWidth={1.8} />
+        <span>恢复出来的链条只是可能的攻击路径，风险等级仅供参考；请结合样本上下文和人工复核后再做处置决定。</span>
+      </div>
+
+      {isRunning ? (
+        <div className="dynamic-running-banner" role="status" aria-live="polite">
+          <div className="dynamic-running-spinner">
+            <LoaderCircle size={24} strokeWidth={1.9} className="skill-spin" />
+          </div>
+          <div className="dynamic-running-copy">
+            <strong>动态检测已启动，请耐心等待</strong>
+            <span>ProvLoom 正在隔离沙箱中执行样本并收集行为证据，最长执行时间为 10 分钟。</span>
+          </div>
+          <div className="dynamic-running-facts">
+            <span>已等待 {formatDurationMs(elapsedSeconds * 1000)}</span>
+            <span>并发 {capacity.active}/{capacity.limit}</span>
+          </div>
+        </div>
+      ) : null}
+
+      <div className="dynamic-layout">
+        <div className="skill-upload-card dynamic-input-panel">
+          <div
+            className={`skill-dropzone${dragging ? " is-dragging" : ""}`}
+            onDragEnter={(event) => { event.preventDefault(); setDragging(true); }}
+            onDragOver={(event) => { event.preventDefault(); setDragging(true); }}
+            onDragLeave={(event) => { event.preventDefault(); setDragging(false); }}
+            onDrop={handleDrop}
+            onClick={() => fileInputRef.current?.click()}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(event) => {
+              if (event.key === "Enter" || event.key === " ") {
+                event.preventDefault();
+                fileInputRef.current?.click();
+              }
+            }}
+          >
+            <div className="skill-dropzone-icon"><UploadCloud size={28} strokeWidth={1.8} /></div>
+            <div className="skill-dropzone-title">上传动态检测样本</div>
+            <div className="skill-dropzone-desc">支持 ZIP、SKILL.md、Markdown 清单和目录上传。ZIP 会在后端解包后交给 ProvLoom 沙箱。</div>
+            <div className="skill-dropzone-actions">
+              <button className="oc-primary-btn" type="button" onClick={(event) => { event.stopPropagation(); fileInputRef.current?.click(); }}>
+                选择文件
+              </button>
+              <button className="oc-ghost-btn" type="button" onClick={(event) => { event.stopPropagation(); folderInputRef.current?.click(); }}>
+                上传目录
+              </button>
+            </div>
+            <input ref={fileInputRef} className="skill-hidden-input" type="file" multiple accept=".zip,.md,.txt,.json,.yaml,.yml" onChange={(event) => appendUploads(event.target.files, "dynamic-file")} />
+            <input ref={folderInputRef} className="skill-hidden-input" type="file" multiple webkitdirectory="true" directory="true" onChange={(event) => appendUploads(event.target.files, "dynamic-folder")} />
+          </div>
+
+          <label className="dynamic-field">
+            <span><Link2 size={14} strokeWidth={2} /> URL 输入口</span>
+            <input className="oc-input" value={sourceUrl} onChange={(event) => setSourceUrl(event.target.value)} placeholder="https://example.com/SKILL.md 或 https://example.com/skill.zip" />
+          </label>
+
+          <label className="dynamic-field">
+            <span><Braces size={14} strokeWidth={2} /> API 输入口 JSON</span>
+            <textarea className="dynamic-textarea" value={inputJson} onChange={(event) => setInputJson(event.target.value)} spellCheck={false} />
+          </label>
+
+          <div className="dynamic-control-grid">
+            <label className="dynamic-field">
+              <span>网络策略</span>
+              <select className="oc-select" value={networkPolicy} onChange={(event) => setNetworkPolicy(event.target.value)}>
+                <option value="default">允许默认网络</option>
+                <option value="disabled">禁用网络</option>
+              </select>
+            </label>
+            <label className="dynamic-field">
+              <span>超时秒数</span>
+              <input className="oc-input" type="number" min="1" max="600" value={timeoutSeconds} onChange={(event) => setTimeoutSeconds(Number(event.target.value))} />
+            </label>
+          </div>
+
+          <div className="dynamic-llm-panel">
+            <label className="dynamic-check-row">
+              <input type="checkbox" checked={enableLlm} onChange={(event) => setEnableLlm(event.target.checked)} />
+              <span>启用 LLM 辅助触发与运行时适配（默认开启，会调用 SiliconFlow API）</span>
+            </label>
+            {enableLlm ? (
+              <div className="skill-runtime-grid">
+                <label className="skill-runtime-field">
+                  <span>Provider</span>
+                  <input className="oc-input" value={llmConfig.provider} onChange={(event) => updateLlmConfig("provider", event.target.value)} />
+                </label>
+                <label className="skill-runtime-field">
+                  <span>模型</span>
+                  <input className="oc-input" value={llmConfig.model} onChange={(event) => updateLlmConfig("model", event.target.value)} />
+                </label>
+                <label className="skill-runtime-field">
+                  <span>Base URL</span>
+                  <input className="oc-input" value={llmConfig.baseUrl} onChange={(event) => updateLlmConfig("baseUrl", event.target.value)} />
+                </label>
+                <label className="skill-runtime-field">
+                  <span>API Key</span>
+                  <div className="skill-secret-input-wrap">
+                    <input className="oc-input skill-secret-input" type={showApiKey ? "text" : "password"} value={llmConfig.apiKey} onChange={(event) => updateLlmConfig("apiKey", event.target.value)} />
+                    <button type="button" className="skill-secret-toggle-btn" onClick={() => setShowApiKey((current) => !current)} aria-label={showApiKey ? "隐藏 API Key" : "显示 API Key"}>
+                      {showApiKey ? <EyeOff size={16} strokeWidth={2} /> : <Eye size={16} strokeWidth={2} />}
+                    </button>
+                  </div>
+                </label>
+              </div>
+            ) : null}
+          </div>
+
+          <div className="dynamic-submit-row">
+            <div className="dynamic-capacity">
+              <Cpu size={16} strokeWidth={1.8} />
+              <span>并发 {capacity.active}/{capacity.limit}</span>
+            </div>
+            <button className="oc-primary-btn" type="button" onClick={handleRunSandbox} disabled={!isAuthenticated || isRunning}>
+              {isRunning ? <LoaderCircle size={16} className="skill-spin" /> : <PlayCircle size={16} />}
+              <span>{isRunning ? `沙箱运行中 ${formatDurationMs(elapsedSeconds * 1000)}` : "启动动态检测"}</span>
+            </button>
+          </div>
+
+          {error ? (
+            <div className="skill-empty-state skill-error-state">
+              <AlertCircle size={18} strokeWidth={1.8} />
+              <span>{error}</span>
+            </div>
+          ) : null}
+        </div>
+
+        <div className="skill-upload-list dynamic-upload-list">
+          <div className="skill-card-head">
+            <div>
+              <div className="skill-card-title">样本队列</div>
+              <div className="skill-card-desc">当前会话准备提交给动态沙箱的本地文件。</div>
+            </div>
+            <span className="oc-badge oc-badge-review">{uploads.length} 个文件 / {formatBytes(totalSize)}</span>
+          </div>
+          {uploads.length ? uploads.slice(0, 12).map((item) => (
+            <div key={item.id} className="skill-upload-row">
+              <div className="skill-upload-main">
+                <div className="skill-upload-name">{item.name}</div>
+                <div className="skill-upload-meta">
+                  <span>{item.type}</span>
+                  <span>{formatBytes(item.size)}</span>
+                  {item.path ? <span className="is-mono">{item.path}</span> : null}
+                </div>
+              </div>
+              <button className="skill-row-remove" type="button" onClick={() => setUploads((current) => current.filter((upload) => upload.id !== item.id))} aria-label={`删除 ${item.name}`}>
+                <X size={14} strokeWidth={2} />
+              </button>
+            </div>
+          )) : (
+            <div className="skill-empty-state">
+              <FileArchive size={20} strokeWidth={1.8} />
+              <span>还没有本地样本，可以只使用 URL 输入口提交远程 SKILL.md 或 ZIP。</span>
+            </div>
+          )}
+          {uploads.length > 12 ? <div className="skill-inline-empty">还有 {uploads.length - 12} 个文件将在提交时一并上传。</div> : null}
+        </div>
+      </div>
+
+      <div className="skill-upload-list dynamic-result-panel">
+        <div className="skill-card-head">
+          <div>
+            <div className="skill-card-title">动态检测结果</div>
+            <div className="skill-card-desc">呈现 ProvLoom 沙箱执行后的行为事件、可能攻击路径和风险参考值。</div>
+          </div>
+          {result ? <span className={`skill-result-hero-badge is-${riskMeta.tone}`}>{riskMeta.label}</span> : null}
+        </div>
+
+        {isRunning ? (
+          <div className="skill-empty-state dynamic-result-waiting">
+            <LoaderCircle size={20} strokeWidth={1.8} className="skill-spin" />
+            <span>ProvLoom 正在沙箱内执行样本，请保持页面打开。检测完成后结果会自动显示在这里。</span>
+          </div>
+        ) : null}
+
+        {!isRunning && !result ? (
+          <div className="skill-empty-state">
+            <ShieldAlert size={20} strokeWidth={1.8} />
+            <span>尚未执行动态检测。提交样本后，这里会显示风险分数、事件分布和可能攻击链。</span>
+          </div>
+        ) : null}
+
+        {result ? (
+          <>
+            <section className={`skill-result-hero is-${riskMeta.tone}`}>
+              <div className="skill-result-hero-main">
+                <div className={`skill-result-hero-icon is-${riskMeta.tone}`}>
+                  <Network size={22} strokeWidth={1.9} />
+                </div>
+                <div className="skill-result-hero-copy">
+                  <span className={`skill-result-hero-badge is-${riskMeta.tone}`}>{riskMeta.label} / 仅供参考</span>
+                  <h3 className="skill-result-hero-title">{result.riskLevelName || riskMeta.label}</h3>
+                  <p className="skill-result-hero-desc">{result.riskSummary || "沙箱已返回执行痕迹，请结合事件和样本语义继续复核。"}</p>
+                  <div className="skill-result-meta">
+                    <span>执行 ID：{result.executionId}</span>
+                    <span>退出码：{result.exitCode ?? "--"}</span>
+                    <span>超时：{result.timedOut ? "是" : "否"}</span>
+                    <span>镜像：{result.sandboxImage || "--"}</span>
+                  </div>
+                </div>
+              </div>
+              <div className="skill-result-hero-side">
+                <div className="skill-result-hero-stat"><span className="skill-result-hero-stat-label">风险分</span><strong>{result.riskScore ?? 0}</strong></div>
+                <div className="skill-result-hero-stat"><span className="skill-result-hero-stat-label">行为数</span><strong>{(result.detectedBehaviors || []).length}</strong></div>
+              </div>
+            </section>
+
+            <div className="skill-result-summary-grid">
+              <div className="skill-metric-card"><span className="skill-summary-label">文件事件</span><strong>{fileEvents.length}</strong></div>
+              <div className="skill-metric-card"><span className="skill-summary-label">网络事件</span><strong>{networkEvents.length}</strong></div>
+              <div className="skill-metric-card"><span className="skill-summary-label">进程事件</span><strong>{processEvents.length}</strong></div>
+              <div className="skill-metric-card"><span className="skill-summary-label">工具调用</span><strong>{toolCalls.length}</strong></div>
+              <div className="skill-metric-card"><span className="skill-summary-label">LLM 调用</span><strong>{llmEvents.length}</strong><span className="skill-metric-hint">API 消耗参考</span></div>
+              <div className="skill-metric-card"><span className="skill-summary-label">内存峰值</span><strong>{result.resourceUsage?.memory_peak_human || "--"}</strong></div>
+            </div>
+
+            <div className="dynamic-result-grid">
+              <div className="skill-insight-card">
+                <div className="skill-insight-head">
+                  <div className="skill-insight-icon"><GitBranch size={18} strokeWidth={1.8} /></div>
+                  <div>
+                    <div className="skill-card-title">可能攻击路径</div>
+                    <div className="skill-card-desc">链条为沙箱恢复出的可能路径，不代表确定攻击事实。</div>
+                  </div>
+                </div>
+                {primaryChain.length ? (
+                  <div className="dynamic-chain">
+                    {primaryChain.slice(0, 8).map((node, index) => (
+                      <div key={`${summarizeChainNode(node, index)}-${index}`} className="dynamic-chain-step">
+                        <span>{index + 1}</span>
+                        <div>
+                          <strong>{summarizeChainNode(node, index)}</strong>
+                          <p>{node.detail || node.description || node.evidence || node.reason || "沙箱事件链路节点"}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="skill-inline-empty">本次没有恢复出明确链条，可查看事件时间线继续判断。</div>
+                )}
+              </div>
+
+              <div className="skill-insight-card">
+                <div className="skill-insight-head">
+                  <div className="skill-insight-icon"><FileSearch size={18} strokeWidth={1.8} /></div>
+                  <div>
+                    <div className="skill-card-title">证据时间线</div>
+                    <div className="skill-card-desc">保留前 8 条关键证据，便于快速定位触发行为。</div>
+                  </div>
+                </div>
+                {evidenceTimeline.length ? (
+                  <div className="dynamic-timeline">
+                    {evidenceTimeline.map((event, index) => (
+                      <div key={`${event.timestamp || index}-${event.action || index}`} className="dynamic-timeline-row">
+                        <span>{event.category || "event"}</span>
+                        <div>
+                          <strong>{event.action || "行为事件"}</strong>
+                          <p>{event.detail || JSON.stringify(event.metadata || {})}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="skill-inline-empty">暂无关键证据时间线。</div>
+                )}
+              </div>
+            </div>
+
+            <div className="dynamic-behavior-strip">
+              {(result.detectedBehaviors || []).slice(0, 12).map((behavior) => (
+                <span key={behavior}>{behavior}</span>
+              ))}
+              {!(result.detectedBehaviors || []).length ? <span>未归纳出明确行为标签</span> : null}
+            </div>
+          </>
+        ) : null}
+      </div>
+    </section>
   );
 }
 
@@ -1807,9 +2269,8 @@ export default function SkillGovernancePage({ auth }) {
       {activeTab === "skill-detect" ? <SkillDetectWorkspace auth={auth} /> : activeTab === "intelligence" ? (
         <SkillIntelligencePanelV3 />
       ) : (
-        <SkillPlaceholder title="文件沙箱分析" desc="用于承接 Skill 文件的静态分析、行为观察与投毒链路回放，辅助识别高风险样本。" icon={Box} />
+        <DynamicSandboxWorkspace auth={auth} />
       )}
     </div>
   );
 }
-
