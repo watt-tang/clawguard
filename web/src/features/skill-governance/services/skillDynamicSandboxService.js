@@ -1,3 +1,5 @@
+import { getAuthHeaders } from "../../../lib/authSession.js";
+
 const DYNAMIC_SANDBOX_ENDPOINT = "/api/skill/dynamic-sandbox";
 const DYNAMIC_SANDBOX_CAPACITY_ENDPOINT = "/api/skill/dynamic-sandbox/capacity";
 
@@ -43,10 +45,10 @@ export async function runDynamicSandboxScan({ uploadRecords = [], sourceUrl = ""
 
   const response = await fetch(DYNAMIC_SANDBOX_ENDPOINT, {
     method: "POST",
-    headers: {
+    headers: getAuthHeaders({
       "Content-Type": "application/json",
       "X-ClawGuard-Auth": options.authState === "authenticated" ? "authenticated" : "guest",
-    },
+    }),
     body: JSON.stringify({
       files,
       sourceUrl: String(sourceUrl || "").trim(),

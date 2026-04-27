@@ -15,13 +15,11 @@ import {
 import {
   getOpenclawRiskIssues,
   getOpenclawRiskOverview,
-  initializeOpenclawRiskScheduler,
   triggerOpenclawRiskRefresh,
 } from "./services/openclawRiskService.mjs";
 import {
   getSecurityResearchOverview,
   getSecurityResearchPapers,
-  initializeSecurityResearchScheduler,
   triggerSecurityResearchRefresh,
 } from "./services/securityResearchService.mjs";
 import { getSkillIntelligenceOverview } from "./services/skillIntelligenceService.mjs";
@@ -35,6 +33,11 @@ import {
   getDynamicSandboxCapacity,
   runSkillDynamicSandbox,
 } from "./services/skillDynamicSandboxService.mjs";
+import {
+  getCurrentUserFromRequest,
+  loginUser,
+  registerUser,
+} from "./services/authService.mjs";
 import { prisma } from "./lib/prisma.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -51,6 +54,38 @@ app.use(express.json({ limit: process.env.API_JSON_LIMIT || "75mb" }));
 
 app.get("/api/health", (_req, res) => {
   res.json({ ok: true, now: new Date().toISOString() });
+});
+
+app.post("/api/auth/register", async (req, res) => {
+  try {
+    const data = await registerUser(req.body || {});
+    res.json({ ok: true, ...data });
+  } catch (error) {
+    res.status(400).json({ ok: false, message: error.message || "注册失败。" });
+  }
+});
+
+app.post("/api/auth/login", async (req, res) => {
+  try {
+    const data = await loginUser(req.body || {});
+    res.json({ ok: true, ...data });
+  } catch (error) {
+    res.status(400).json({ ok: false, message: error.message || "登录失败。" });
+  }
+});
+
+app.post("/api/auth/logout", (_req, res) => {
+  res.json({ ok: true });
+});
+
+app.get("/api/auth/me", async (req, res) => {
+  const user = await getCurrentUserFromRequest(req);
+  if (!user) {
+    res.status(401).json({ ok: false, message: "当前未登录或登录已失效。" });
+    return;
+  }
+
+  res.json({ ok: true, user });
 });
 
 app.get("/api/exposure/stats", async (req, res) => {
@@ -198,8 +233,8 @@ app.get("/api/skill/dynamic-sandbox/capacity", (_req, res) => {
 });
 
 app.post("/api/skill/dynamic-sandbox", async (req, res) => {
-  const authState = String(req.get("x-clawguard-auth") || req.body?.authState || "").trim();
-  if (authState !== "authenticated") {
+  const user = await getCurrentUserFromRequest(req);
+  if (!user) {
     res.status(401).json({ ok: false, code: "LOGIN_REQUIRED", message: "请先登录后再使用动态沙箱检测。" });
     return;
   }
@@ -209,7 +244,7 @@ app.post("/api/skill/dynamic-sandbox", async (req, res) => {
     res.json({
       ...data,
       capacity: getDynamicSandboxCapacity(),
-      warning: "恢复出来的链条只是可能的攻击路径，风险等级仅供参考。",
+      warning: "恢复出的链条仅为可能攻击路径，风险等级仅供参考。",
     });
   } catch (error) {
     if (error instanceof SandboxBusyError || error?.statusCode === 429) {
@@ -258,9 +293,6 @@ app.listen(port, () => {
     `[exposure-api] listening on http://127.0.0.1:${port}${hasBuiltFrontend ? " with built frontend" : ""}`
   );
 });
-
-// disabled on server/local sync: initializeOpenclawRiskScheduler();
-// disabled on server/local sync: initializeSecurityResearchScheduler();
 
 process.on("SIGINT", async () => {
   await prisma.$disconnect();

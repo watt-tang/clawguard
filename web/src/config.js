@@ -41,7 +41,6 @@ export const PAGE_IDS = {
 export const PAGE_SIZE_OPTIONS = [20, 50, 100];
 
 export const AUTH_CONFIG = {
-  REGISTER_INVITE_CODE: "CLAWGUARD2026",
   ADMIN_DEFAULT_API_KEY: import.meta.env.VITE_ADMIN_DEFAULT_API_KEY || "",
 };
 

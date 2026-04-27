@@ -511,17 +511,20 @@ function LoginModal({ onLogin, onRegister, onClose }) {
   const [phone, setPhone] = useState("");
   const [inviteCode, setInviteCode] = useState("");
   const [error, setError] = useState("");
+  const [submitting, setSubmitting] = useState(false);
 
-  function handleSubmit(event) {
+  async function handleSubmit(event) {
     event.preventDefault();
     if (mode === "register" && password !== confirmPassword) {
       setError("两次输入的密码不一致");
       return;
     }
 
+    setSubmitting(true);
     const result = mode === "login"
-      ? onLogin(username, password)
-      : onRegister(username, password, phone, inviteCode);
+      ? await onLogin(username, password)
+      : await onRegister(username, password, phone, inviteCode);
+    setSubmitting(false);
 
     if (!result.ok) {
       setError(result.message);
@@ -595,7 +598,7 @@ function LoginModal({ onLogin, onRegister, onClose }) {
           ) : null}
           {mode === "register" ? <div className="oc-modal-tip">注册需填写手机号和邀请码；密码至少 6 位。</div> : null}
           {error ? <div className="oc-modal-error">{error}</div> : null}
-          <button type="submit" className="oc-primary-btn">
+          <button type="submit" className="oc-primary-btn" disabled={submitting}>
             {mode === "login" ? "登录" : "注册并登录"}
           </button>
         </form>
@@ -608,14 +611,14 @@ function InterfaceTable({ rows, auth }) {
   const { isLoggedIn, login, register, logout } = auth;
   const [showLogin, setShowLogin] = useState(false);
 
-  function handleLogin(username, password) {
-    const result = login(username, password);
+  async function handleLogin(username, password) {
+    const result = await login(username, password);
     if (result.ok) setShowLogin(false);
     return result;
   }
 
-  function handleRegister(username, password, phone, inviteCode) {
-    const result = register(username, password, phone, inviteCode);
+  async function handleRegister(username, password, phone, inviteCode) {
+    const result = await register(username, password, phone, inviteCode);
     if (result.ok) setShowLogin(false);
     return result;
   }

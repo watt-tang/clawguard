@@ -137,17 +137,20 @@ function AppLoginModal({ onLogin, onRegister, onClose }) {
   const [phone, setPhone] = useState("");
   const [inviteCode, setInviteCode] = useState("");
   const [error, setError] = useState("");
+  const [submitting, setSubmitting] = useState(false);
 
-  function handleSubmit(event) {
+  async function handleSubmit(event) {
     event.preventDefault();
     if (mode === "register" && password !== confirmPassword) {
       setError("两次输入的密码不一致");
       return;
     }
 
+    setSubmitting(true);
     const result = mode === "login"
-      ? onLogin(username, password)
-      : onRegister(username, password, phone, inviteCode);
+      ? await onLogin(username, password)
+      : await onRegister(username, password, phone, inviteCode);
+    setSubmitting(false);
 
     if (!result.ok) {
       setError(result.message);
@@ -228,7 +231,7 @@ function AppLoginModal({ onLogin, onRegister, onClose }) {
           ) : null}
           {mode === "register" ? <div className="oc-modal-tip">注册需填写手机号和邀请码；密码至少 6 位。</div> : null}
           {error ? <div className="oc-modal-error">{error}</div> : null}
-          <button type="submit" className="oc-primary-btn">
+          <button type="submit" className="oc-primary-btn" disabled={submitting}>
             {mode === "login" ? "登录" : "注册并登录"}
           </button>
         </form>
@@ -516,24 +519,24 @@ export default function App() {
   return <PlaceholderPage module={activeModule} />;
 }
 
-  function handleAuthAction() {
+  async function handleAuthAction() {
     if (auth.isLoggedIn) {
-      auth.logout();
+      await auth.logout();
       return;
     }
     setShowLoginModal(true);
   }
 
-  function handleAppLogin(username, password) {
-    const result = auth.login(username, password);
+  async function handleAppLogin(username, password) {
+    const result = await auth.login(username, password);
     if (result.ok) {
       setShowLoginModal(false);
     }
     return result;
   }
 
-  function handleAppRegister(username, password, phone, inviteCode) {
-    const result = auth.register(username, password, phone, inviteCode);
+  async function handleAppRegister(username, password, phone, inviteCode) {
+    const result = await auth.register(username, password, phone, inviteCode);
     if (result.ok) {
       setShowLoginModal(false);
     }

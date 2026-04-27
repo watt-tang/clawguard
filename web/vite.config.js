@@ -752,6 +752,10 @@ export default defineConfig({
     host: "0.0.0.0",
     port: 5173,
     proxy: {
+      "/api/auth": {
+        target: process.env.EXPOSURE_API_PROXY || "http://127.0.0.1:8787",
+        changeOrigin: true,
+      },
       "/api/exposure": {
         target: process.env.EXPOSURE_API_PROXY || "http://127.0.0.1:8787",
         changeOrigin: true,
@@ -769,6 +773,10 @@ export default defineConfig({
         changeOrigin: true,
       },
       "/api/skill/intelligence": {
+        target: process.env.EXPOSURE_API_PROXY || "http://127.0.0.1:8787",
+        changeOrigin: true,
+      },
+      "/api/skill/dynamic-sandbox": {
         target: process.env.EXPOSURE_API_PROXY || "http://127.0.0.1:8787",
         changeOrigin: true,
       },

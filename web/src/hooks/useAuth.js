@@ -1,179 +1,108 @@
-import { useCallback, useState } from "react";
-import { AUTH_CONFIG } from "../config.js";
+import { useCallback, useEffect, useState } from "react";
+import {
+  clearAuthSession,
+  getStoredAuthToken,
+  getStoredAuthUser,
+  storeAuthSession,
+} from "../lib/authSession.js";
 
-const SESSION_KEY = "cg_auth";
-const USERS_KEY = "cg_users";
+async function parseResponse(response) {
+  return response.json().catch(() => null);
+}
 
-const ADMIN_ACCOUNT = {
-  username: "tan",
-  password: "123456",
-  phone: "",
-  role: "admin",
-  defaultApiKey: String(AUTH_CONFIG.ADMIN_DEFAULT_API_KEY || "").trim(),
-};
+async function requestAuth(endpoint, payload = undefined, token = "") {
+  const response = await fetch(endpoint, {
+    method: payload === undefined ? "GET" : "POST",
+    headers: {
+      ...(payload === undefined ? {} : { "Content-Type": "application/json" }),
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
+    ...(payload === undefined ? {} : { body: JSON.stringify(payload) }),
+  });
 
-function loadSession() {
-  try {
-    const raw = sessionStorage.getItem(SESSION_KEY);
-    if (!raw) return null;
-    const parsed = JSON.parse(raw);
-    if (!parsed?.username || !parsed?.role) return null;
-    const role = parsed.role === "admin" ? "admin" : "user";
-    return {
-      username: normalizeUsername(parsed.username),
-      role,
-      defaultApiKey: role === "admin"
-        ? String(AUTH_CONFIG.ADMIN_DEFAULT_API_KEY || parsed.defaultApiKey || "").trim()
-        : String(parsed.defaultApiKey || "").trim(),
-    };
-  } catch {
-    return null;
+  const data = await parseResponse(response);
+  if (!response.ok || !data?.ok) {
+    throw new Error(data?.message || "认证请求失败。");
   }
+  return data;
 }
 
-function normalizeUsername(username) {
-  return String(username ?? "").trim().toLowerCase();
-}
-
-function normalizePhone(phone) {
-  return String(phone ?? "")
-    .trim()
-    .replace(/\s+/g, "")
-    .replace(/-/g, "");
-}
-
-function loadUsers() {
-  try {
-    const raw = localStorage.getItem(USERS_KEY);
-    if (!raw) return [ADMIN_ACCOUNT];
-    const parsed = JSON.parse(raw);
-    if (!Array.isArray(parsed)) return [ADMIN_ACCOUNT];
-
-    const normalized = parsed
-      .filter((item) => item?.username && item?.password)
-      .map((item) => ({
-        username: normalizeUsername(item.username),
-        password: String(item.password),
-        phone: normalizePhone(item.phone),
-        role: item.role === "admin" ? "admin" : "user",
-        defaultApiKey: item.role === "admin"
-          ? String(AUTH_CONFIG.ADMIN_DEFAULT_API_KEY || item.defaultApiKey || "").trim()
-          : String(item.defaultApiKey || "").trim(),
-      }));
-
-    const hasAdmin = normalized.some((item) => item.username === ADMIN_ACCOUNT.username);
-    return hasAdmin ? normalized : [ADMIN_ACCOUNT, ...normalized];
-  } catch {
-    return [ADMIN_ACCOUNT];
-  }
-}
-
-function persistUsers(users) {
-  localStorage.setItem(USERS_KEY, JSON.stringify(users));
-}
-
-/**
- * 认证状态 hook
- * 使用 sessionStorage 持久化，页面关闭后清除
- * @returns {{
- * isLoggedIn: boolean,
- * user: {username: string, role: string} | null,
- * login: Function,
- * register: Function,
- * logout: Function
- * }}
- */
 export function useAuth() {
-  const [session, setSession] = useState(() => loadSession());
-  const [users, setUsers] = useState(() => loadUsers());
+  const [session, setSession] = useState(() => getStoredAuthUser());
+  const [isLoading, setIsLoading] = useState(true);
 
-  const login = useCallback((username, password) => {
-    const normalizedUsername = normalizeUsername(username);
-    const normalizedPassword = String(password ?? "").trim();
+  useEffect(() => {
+    let active = true;
+    const token = getStoredAuthToken();
 
-    if (!normalizedUsername || !normalizedPassword) {
-      return { ok: false, message: "用户名和密码不能为空" };
+    if (!token) {
+      setIsLoading(false);
+      return () => {
+        active = false;
+      };
     }
 
-    const matchedUser = users.find(
-      (item) => item.username === normalizedUsername && item.password === normalizedPassword
-    );
-    if (!matchedUser) {
-      return { ok: false, message: "账号或密码错误" };
-    }
+    requestAuth("/api/auth/me", undefined, token)
+      .then((data) => {
+        if (!active) return;
+        storeAuthSession({ token, user: data.user });
+        setSession(data.user);
+      })
+      .catch(() => {
+        if (!active) return;
+        clearAuthSession();
+        setSession(null);
+      })
+      .finally(() => {
+        if (active) setIsLoading(false);
+      });
 
-    const user = {
-      username: matchedUser.username,
-      role: matchedUser.role,
-      defaultApiKey: String(matchedUser.defaultApiKey || "").trim(),
+    return () => {
+      active = false;
     };
-    sessionStorage.setItem(SESSION_KEY, JSON.stringify(user));
-    setSession(user);
-    return { ok: true, user };
-  }, [users]);
+  }, []);
 
-  const register = useCallback((username, password, phone, inviteCode) => {
-    const normalizedUsername = normalizeUsername(username);
-    const normalizedPassword = String(password ?? "").trim();
-    const normalizedPhone = normalizePhone(phone).replace(/^\+?86/, "");
-    const normalizedInviteCode = String(inviteCode ?? "").trim();
-    const expectedInviteCode = String(AUTH_CONFIG.REGISTER_INVITE_CODE ?? "").trim();
+  const login = useCallback(async (username, password) => {
+    try {
+      const data = await requestAuth("/api/auth/login", { username, password });
+      storeAuthSession({ token: data.token, user: data.user });
+      setSession(data.user);
+      return { ok: true, user: data.user };
+    } catch (error) {
+      return { ok: false, message: error.message || "登录失败。" };
+    }
+  }, []);
 
-    if (!normalizedUsername || !normalizedPassword) {
-      return { ok: false, message: "用户名和密码不能为空" };
+  const register = useCallback(async (username, password, phone, inviteCode) => {
+    try {
+      const data = await requestAuth("/api/auth/register", { username, password, phone, inviteCode });
+      storeAuthSession({ token: data.token, user: data.user });
+      setSession(data.user);
+      return { ok: true, user: data.user };
+    } catch (error) {
+      return { ok: false, message: error.message || "注册失败。" };
     }
-    if (!normalizedPhone) {
-      return { ok: false, message: "手机号不能为空" };
-    }
-    if (!normalizedInviteCode) {
-      return { ok: false, message: "邀请码不能为空" };
-    }
-    if (!expectedInviteCode) {
-      return { ok: false, message: "系统未配置邀请码，暂不可注册" };
-    }
-    if (normalizedInviteCode !== expectedInviteCode) {
-      return { ok: false, message: "邀请码错误" };
-    }
-    if (!/^[a-z0-9_]{3,20}$/.test(normalizedUsername)) {
-      return { ok: false, message: "用户名需为 3-20 位小写字母、数字或下划线" };
-    }
-    if (normalizedPassword.length < 6) {
-      return { ok: false, message: "密码长度至少 6 位" };
-    }
-    if (!/^1\d{10}$/.test(normalizedPhone)) {
-      return { ok: false, message: "手机号格式不正确，请输入 11 位手机号" };
-    }
-    if (users.some((item) => item.username === normalizedUsername)) {
-      return { ok: false, message: "该用户名已存在" };
-    }
-    if (users.some((item) => item.phone && item.phone === normalizedPhone)) {
-      return { ok: false, message: "该手机号已被注册" };
+  }, []);
+
+  const logout = useCallback(async () => {
+    const token = getStoredAuthToken();
+    try {
+      if (token) {
+        await requestAuth("/api/auth/logout", {}, token);
+      }
+    } catch {
+      // Ignore transport errors and clear local state anyway.
+    } finally {
+      clearAuthSession();
+      setSession(null);
     }
 
-    const nextUser = {
-      username: normalizedUsername,
-      password: normalizedPassword,
-      phone: normalizedPhone,
-      role: "user",
-      defaultApiKey: "",
-    };
-    const nextUsers = [...users, nextUser];
-    persistUsers(nextUsers);
-    setUsers(nextUsers);
-
-    const user = { username: nextUser.username, role: nextUser.role, defaultApiKey: "" };
-    sessionStorage.setItem(SESSION_KEY, JSON.stringify(user));
-    setSession(user);
-    return { ok: true, user };
-  }, [users]);
-
-  const logout = useCallback(() => {
-    sessionStorage.removeItem(SESSION_KEY);
-    setSession(null);
+    return { ok: true };
   }, []);
 
   return {
     isLoggedIn: session !== null,
+    isLoading,
     user: session,
     login,
     register,
