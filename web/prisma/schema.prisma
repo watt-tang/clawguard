@@ -11,20 +11,24 @@ datasource db {
 
 model ExposureSnapshot {
   id           Int              @id @default(autoincrement())
-  dateKey      String           @unique @db.VarChar(8)
-  snapshotDate DateTime         @unique @db.Date
+  productKey   String           @default("openclaw") @db.VarChar(32)
+  dateKey      String           @db.VarChar(8)
+  snapshotDate DateTime         @db.Date
   sourceFile   String           @db.VarChar(255)
   createdAt    DateTime         @default(now())
   updatedAt    DateTime         @updatedAt
   records      ExposureRecord[]
   dailyAgg     ExposureDailyAgg?
 
-  @@index([snapshotDate])
+  @@unique([productKey, dateKey])
+  @@unique([productKey, snapshotDate])
+  @@index([productKey, snapshotDate])
 }
 
 model ExposureRecord {
   id           BigInt           @id @default(autoincrement()) @db.UnsignedBigInt
   snapshotId   Int
+  productKey   String           @default("openclaw") @db.VarChar(32)
   snapshot     ExposureSnapshot @relation(fields: [snapshotId], references: [id], onDelete: Cascade)
   snapshotDate DateTime         @db.Date
   ip           String           @db.VarChar(45)
@@ -49,16 +53,20 @@ model ExposureRecord {
   @@unique([snapshotId, ip])
   @@index([snapshotId])
   @@index([snapshotDate])
+  @@index([productKey, snapshotDate])
   @@index([ip])
-  @@index([ip, snapshotDate])
+  @@index([productKey, ip, snapshotDate])
   @@index([country])
   @@index([scope])
   @@index([version])
+  @@index([productKey, version])
   @@index([operator])
+  @@index([productKey, operator])
 }
 
 model ExposureDailyAgg {
-  snapshotDate              DateTime          @id @db.Date
+  productKey                String            @default("openclaw") @db.VarChar(32)
+  snapshotDate              DateTime          @db.Date
   snapshotId                Int?              @unique
   snapshot                  ExposureSnapshot? @relation(fields: [snapshotId], references: [id], onDelete: SetNull)
   exposedCount              Int
@@ -69,18 +77,20 @@ model ExposureDailyAgg {
   createdAt                 DateTime          @default(now())
   updatedAt                 DateTime          @updatedAt
 
-  @@index([snapshotDate])
+  @@id([productKey, snapshotDate])
+  @@index([productKey, snapshotDate])
 }
 
 model ExposureVersionDailyAgg {
   id           BigInt   @id @default(autoincrement()) @db.UnsignedBigInt
+  productKey   String   @default("openclaw") @db.VarChar(32)
   snapshotDate DateTime @db.Date
   version      String   @db.VarChar(64)
   count        Int
   createdAt    DateTime @default(now())
 
-  @@unique([snapshotDate, version])
-  @@index([snapshotDate])
+  @@unique([productKey, snapshotDate, version])
+  @@index([productKey, snapshotDate])
   @@index([version])
 }
 

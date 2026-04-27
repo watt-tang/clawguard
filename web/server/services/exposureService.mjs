@@ -224,8 +224,8 @@ function writeCache(key, data, ttlMs = CACHE_TTL_MS) {
   return data;
 }
 
-function buildCacheKey(endpoint, latestSnapshot) {
-  return `${endpoint}:${latestSnapshot?.dateKey || "none"}`;
+function buildCacheKey(endpoint, latestSnapshot, productKey = DEFAULT_CLAW_EXPOSURE_PRODUCT_KEY) {
+  return `${endpoint}:${productKey}:${latestSnapshot?.dateKey || "none"}`;
 }
 
 function normalizeExposureProductKey(query = {}) {
@@ -555,20 +555,20 @@ async function toResponseRow(row, latestDateKey, isLoggedIn) {
   };
 }
 
-async function findLatestSnapshot() {
+async function findLatestSnapshot(productKey = DEFAULT_CLAW_EXPOSURE_PRODUCT_KEY) {
   return prisma.exposureSnapshot.findFirst({
+    where: { productKey },
     orderBy: { snapshotDate: "desc" },
   });
 }
 
 export async function getExposureStats(query = {}) {
   const productKey = normalizeExposureProductKey(query);
-  if (!isDefaultExposureProduct(productKey)) {
-    return getProductExposureStats(productKey);
-  }
-
-  const latest = await findLatestSnapshot();
+  const latest = await findLatestSnapshot(productKey);
   if (!latest) {
+    if (!isDefaultExposureProduct(productKey)) {
+      return getProductExposureStats(productKey);
+    }
     return {
       historyTotal: 0,
       currentExposed: 0,
@@ -583,12 +583,17 @@ export async function getExposureStats(query = {}) {
     };
   }
 
-  const cacheKey = buildCacheKey("stats", latest);
+  const cacheKey = buildCacheKey("stats", latest, productKey);
   const cached = readCache(cacheKey);
   if (cached) return cached;
 
   const latestAgg = await prisma.exposureDailyAgg.findUnique({
-    where: { snapshotId: latest.id },
+    where: {
+      productKey_snapshotDate: {
+        productKey,
+        snapshotDate: latest.snapshotDate,
+      },
+    },
   });
 
   let historyTotal = latestAgg?.cumulativeDistinctIpCount;
@@ -598,7 +603,11 @@ export async function getExposureStats(query = {}) {
 
   if (!latestAgg) {
     const [historyRows, scopeRows] = await Promise.all([
-      prisma.$queryRaw`SELECT COUNT(DISTINCT ip) AS count FROM ExposureRecord`,
+      prisma.$queryRaw`
+        SELECT COUNT(DISTINCT ip) AS count
+        FROM ExposureRecord
+        WHERE productKey = ${productKey}
+      `,
       prisma.$queryRaw`
         SELECT
           SUM(CASE WHEN scope LIKE ${DOMESTIC_SCOPE_LIKE} THEN 1 ELSE 0 END) AS domesticCount,
@@ -642,19 +651,22 @@ export async function getExposureStats(query = {}) {
     vendorCount: toInt(coverageRows?.[0]?.operatorCount),
     highRiskCount,
     updatedAt: formatDateTime(latestAgg?.updatedAt || latest.updatedAt),
+    product: productKey,
+    sourceFile: latest.sourceFile,
   });
 }
 
 export async function getWorldDistribution(query = {}) {
   const productKey = normalizeExposureProductKey(query);
-  if (!isDefaultExposureProduct(productKey)) {
-    return getProductWorldDistribution(productKey);
+  const latest = await findLatestSnapshot(productKey);
+  if (!latest) {
+    if (!isDefaultExposureProduct(productKey)) {
+      return getProductWorldDistribution(productKey);
+    }
+    return { topCountries: [] };
   }
 
-  const latest = await findLatestSnapshot();
-  if (!latest) return { topCountries: [] };
-
-  const cacheKey = buildCacheKey("world-distribution", latest);
+  const cacheKey = buildCacheKey("world-distribution", latest, productKey);
   const cached = readCache(cacheKey);
   if (cached) return cached;
 
@@ -676,14 +688,15 @@ export async function getWorldDistribution(query = {}) {
 
 export async function getChinaDistribution(query = {}) {
   const productKey = normalizeExposureProductKey(query);
-  if (!isDefaultExposureProduct(productKey)) {
-    return getProductChinaDistribution(productKey);
+  const latest = await findLatestSnapshot(productKey);
+  if (!latest) {
+    if (!isDefaultExposureProduct(productKey)) {
+      return getProductChinaDistribution(productKey);
+    }
+    return { provinces: [] };
   }
 
-  const latest = await findLatestSnapshot();
-  if (!latest) return { provinces: [] };
-
-  const cacheKey = buildCacheKey("china-distribution", latest);
+  const cacheKey = buildCacheKey("china-distribution", latest, productKey);
   const cached = readCache(cacheKey);
   if (cached) return cached;
 
@@ -712,11 +725,12 @@ export async function getChinaDistribution(query = {}) {
   return writeCache(cacheKey, { provinces });
 }
 
-async function buildExposureTrendFromRaw(snapshots) {
+async function buildExposureTrendFromRaw(snapshots, productKey) {
   const dates = snapshots.map((item) => formatDate(item.snapshotDate));
 
   const dailyGroups = await prisma.exposureRecord.groupBy({
     by: ["snapshotDate"],
+    where: { productKey },
     _count: { _all: true },
   });
 
@@ -728,6 +742,7 @@ async function buildExposureTrendFromRaw(snapshots) {
     FROM (
       SELECT MIN(snapshotDate) AS first_seen
       FROM ExposureRecord
+      WHERE productKey = ${productKey}
       GROUP BY ip
     ) t
     GROUP BY first_seen
@@ -748,20 +763,20 @@ async function buildExposureTrendFromRaw(snapshots) {
 
 export async function getExposureTrend(query = {}) {
   const productKey = normalizeExposureProductKey(query);
-  if (!isDefaultExposureProduct(productKey)) {
-    return getProductExposureTrend(productKey);
-  }
-
-  const latest = await findLatestSnapshot();
+  const latest = await findLatestSnapshot(productKey);
   if (!latest) {
+    if (!isDefaultExposureProduct(productKey)) {
+      return getProductExposureTrend(productKey);
+    }
     return { dates: [], daily: [], cumulative: [], newAdded: [] };
   }
 
-  const cacheKey = buildCacheKey("trend", latest);
+  const cacheKey = buildCacheKey("trend", latest, productKey);
   const cached = readCache(cacheKey);
   if (cached) return cached;
 
   const snapshots = await prisma.exposureSnapshot.findMany({
+    where: { productKey },
     orderBy: { snapshotDate: "asc" },
     select: { snapshotDate: true },
   });
@@ -771,6 +786,7 @@ export async function getExposureTrend(query = {}) {
   }
 
   const aggRows = await prisma.exposureDailyAgg.findMany({
+    where: { productKey },
     orderBy: { snapshotDate: "asc" },
     select: {
       snapshotDate: true,
@@ -803,16 +819,17 @@ export async function getExposureTrend(query = {}) {
     return writeCache(cacheKey, { dates, daily, cumulative, newAdded });
   }
 
-  const fallback = await buildExposureTrendFromRaw(snapshots);
+  const fallback = await buildExposureTrendFromRaw(snapshots, productKey);
   return writeCache(cacheKey, fallback);
 }
 
-async function buildVersionTrendFromRaw(snapshots) {
+async function buildVersionTrendFromRaw(snapshots, productKey) {
   const dates = snapshots.map((item) => formatDate(item.snapshotDate));
   const dateIndexMap = new Map(dates.map((date, idx) => [date, idx]));
 
   const groups = await prisma.exposureRecord.groupBy({
     by: ["snapshotDate", "version"],
+    where: { productKey },
     _count: { _all: true },
   });
 
@@ -835,20 +852,20 @@ async function buildVersionTrendFromRaw(snapshots) {
 
 export async function getVersionTrend(query = {}) {
   const productKey = normalizeExposureProductKey(query);
-  if (!isDefaultExposureProduct(productKey)) {
-    return getProductVersionTrend(productKey);
-  }
-
-  const latest = await findLatestSnapshot();
+  const latest = await findLatestSnapshot(productKey);
   if (!latest) {
+    if (!isDefaultExposureProduct(productKey)) {
+      return getProductVersionTrend(productKey);
+    }
     return { dates: [], versions: {} };
   }
 
-  const cacheKey = buildCacheKey("version-trend", latest);
+  const cacheKey = buildCacheKey("version-trend", latest, productKey);
   const cached = readCache(cacheKey);
   if (cached) return cached;
 
   const snapshots = await prisma.exposureSnapshot.findMany({
+    where: { productKey },
     orderBy: { snapshotDate: "asc" },
     select: { snapshotDate: true },
   });
@@ -861,6 +878,7 @@ export async function getVersionTrend(query = {}) {
   const dateIndexMap = new Map(dates.map((date, idx) => [date, idx]));
 
   const aggRows = await prisma.exposureVersionDailyAgg.findMany({
+    where: { productKey },
     orderBy: [{ snapshotDate: "asc" }, { version: "asc" }],
     select: {
       snapshotDate: true,
@@ -887,18 +905,17 @@ export async function getVersionTrend(query = {}) {
     return writeCache(cacheKey, { dates, versions });
   }
 
-  const fallback = await buildVersionTrendFromRaw(snapshots);
+  const fallback = await buildVersionTrendFromRaw(snapshots, productKey);
   return writeCache(cacheKey, fallback);
 }
 
 export async function getExposureList(query = {}) {
   const productKey = normalizeExposureProductKey(query);
-  if (!isDefaultExposureProduct(productKey)) {
-    return getProductExposureList(productKey, query);
-  }
-
-  const latest = await findLatestSnapshot();
+  const latest = await findLatestSnapshot(productKey);
   if (!latest) {
+    if (!isDefaultExposureProduct(productKey)) {
+      return getProductExposureList(productKey, query);
+    }
     return {
       total: 0,
       page: 1,
@@ -919,7 +936,7 @@ export async function getExposureList(query = {}) {
   const location = String(query.location || "").trim();
   const operator = String(query.operator || query.vendor || "").trim();
 
-  const where = { snapshotId: latest.id };
+  const where = { snapshotId: latest.id, productKey };
 
   if (ip) {
     where.ip = { contains: ip };
@@ -979,7 +996,7 @@ export async function getExposureList(query = {}) {
     page,
     page_size: pageSize > 0 ? pageSize : rows.length,
     latestSnapshot: latest.dateKey,
-    sourceDir: DEFAULT_SOURCE_DIR,
+    sourceDir: isDefaultExposureProduct(productKey) ? DEFAULT_SOURCE_DIR : "database",
     rows,
   };
 }

@@ -28,8 +28,8 @@ function chunk(array, size) {
 
 async function main() {
   const snapshots = await prisma.exposureSnapshot.findMany({
-    orderBy: { snapshotDate: "asc" },
-    select: { id: true, snapshotDate: true, dateKey: true },
+    orderBy: [{ productKey: "asc" }, { snapshotDate: "asc" }],
+    select: { id: true, productKey: true, snapshotDate: true, dateKey: true },
   });
 
   if (!snapshots.length) {
@@ -40,34 +40,35 @@ async function main() {
   const [dailyRows, firstSeenRows, versionRows] = await Promise.all([
     prisma.$queryRaw`
       SELECT
+        productKey,
         snapshotDate,
         COUNT(*) AS exposedCount,
         SUM(CASE WHEN scope LIKE ${DOMESTIC_SCOPE_LIKE} THEN 1 ELSE 0 END) AS domesticCount
       FROM ExposureRecord
-      GROUP BY snapshotDate
-      ORDER BY snapshotDate ASC
+      GROUP BY productKey, snapshotDate
+      ORDER BY productKey ASC, snapshotDate ASC
     `,
     prisma.$queryRaw`
-      SELECT first_seen AS snapshotDate, COUNT(*) AS count
+      SELECT productKey, first_seen AS snapshotDate, COUNT(*) AS count
       FROM (
-        SELECT MIN(snapshotDate) AS first_seen
+        SELECT productKey, ip, MIN(snapshotDate) AS first_seen
         FROM ExposureRecord
-        GROUP BY ip
+        GROUP BY productKey, ip
       ) t
-      GROUP BY first_seen
-      ORDER BY first_seen ASC
+      GROUP BY productKey, first_seen
+      ORDER BY productKey ASC, first_seen ASC
     `,
     prisma.$queryRaw`
-      SELECT snapshotDate, version, COUNT(*) AS count
+      SELECT productKey, snapshotDate, version, COUNT(*) AS count
       FROM ExposureRecord
-      GROUP BY snapshotDate, version
-      ORDER BY snapshotDate ASC, version ASC
+      GROUP BY productKey, snapshotDate, version
+      ORDER BY productKey ASC, snapshotDate ASC, version ASC
     `,
   ]);
 
   const dailyMap = new Map(
     dailyRows.map((row) => [
-      formatDate(row.snapshotDate),
+      `${row.productKey}:${formatDate(row.snapshotDate)}`,
       {
         exposedCount: toInt(row.exposedCount),
         domesticCount: toInt(row.domesticCount),
@@ -75,18 +76,23 @@ async function main() {
     ])
   );
 
-  const firstSeenMap = new Map(firstSeenRows.map((row) => [formatDate(row.snapshotDate), toInt(row.count)]));
+  const firstSeenMap = new Map(
+    firstSeenRows.map((row) => [`${row.productKey}:${formatDate(row.snapshotDate)}`, toInt(row.count)])
+  );
 
   const dailyAggRows = [];
-  let runningDistinct = 0;
+  const cumulativeByProduct = new Map();
 
   for (const snapshot of snapshots) {
     const date = formatDate(snapshot.snapshotDate);
-    const daily = dailyMap.get(date) || { exposedCount: 0, domesticCount: 0 };
-    const newDistinct = firstSeenMap.get(date) || 0;
-    runningDistinct += newDistinct;
+    const productDateKey = `${snapshot.productKey}:${date}`;
+    const daily = dailyMap.get(productDateKey) || { exposedCount: 0, domesticCount: 0 };
+    const newDistinct = firstSeenMap.get(productDateKey) || 0;
+    const runningDistinct = (cumulativeByProduct.get(snapshot.productKey) || 0) + newDistinct;
+    cumulativeByProduct.set(snapshot.productKey, runningDistinct);
 
     dailyAggRows.push({
+      productKey: snapshot.productKey,
       snapshotDate: snapshot.snapshotDate,
       snapshotId: snapshot.id,
       exposedCount: daily.exposedCount,
@@ -98,6 +104,7 @@ async function main() {
   }
 
   const versionAggRows = versionRows.map((row) => ({
+    productKey: row.productKey,
     snapshotDate: row.snapshotDate,
     version: row.version || "unknown",
     count: toInt(row.count),

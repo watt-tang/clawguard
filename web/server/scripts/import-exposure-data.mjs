@@ -16,6 +16,7 @@ const snapshotPattern = /^server_clawdbot_(\d{8})_ip_18789_alive\.txt$/;
 const batchSize = Number(process.env.EXPOSURE_IMPORT_BATCH_SIZE || 1000);
 
 const defaults = {
+  productKey: "openclaw",
   host: "-",
   service: "18789 / OpenClaw",
   serviceDesc: "OpenClaw service",
@@ -175,8 +176,8 @@ async function main() {
     throw new Error(`No snapshot files matched in ${snapshotsDir}`);
   }
 
-  await prisma.exposureVersionDailyAgg.deleteMany();
-  await prisma.exposureDailyAgg.deleteMany();
+  await prisma.exposureVersionDailyAgg.deleteMany({ where: { productKey: defaults.productKey } });
+  await prisma.exposureDailyAgg.deleteMany({ where: { productKey: defaults.productKey } });
 
   const seenIps = new Set();
   let totalInserted = 0;
@@ -185,12 +186,19 @@ async function main() {
     const snapshotDate = parseDateKey(file.dateKey);
 
     const snapshot = await prisma.exposureSnapshot.upsert({
-      where: { dateKey: file.dateKey },
+      where: {
+        productKey_dateKey: {
+          productKey: defaults.productKey,
+          dateKey: file.dateKey,
+        },
+      },
       update: {
+        productKey: defaults.productKey,
         snapshotDate,
         sourceFile: file.name,
       },
       create: {
+        productKey: defaults.productKey,
         dateKey: file.dateKey,
         snapshotDate,
         sourceFile: file.name,
@@ -215,6 +223,7 @@ async function main() {
 
       return {
         snapshotId: snapshot.id,
+        productKey: defaults.productKey,
         snapshotDate,
         ip,
         country: geo.country,
@@ -263,8 +272,14 @@ async function main() {
     }
 
     await prisma.exposureDailyAgg.upsert({
-      where: { snapshotDate },
+      where: {
+        productKey_snapshotDate: {
+          productKey: defaults.productKey,
+          snapshotDate,
+        },
+      },
       update: {
+        productKey: defaults.productKey,
         snapshotId: snapshot.id,
         exposedCount,
         domesticCount,
@@ -273,6 +288,7 @@ async function main() {
         cumulativeDistinctIpCount,
       },
       create: {
+        productKey: defaults.productKey,
         snapshotDate,
         snapshotId: snapshot.id,
         exposedCount,
@@ -284,6 +300,7 @@ async function main() {
     });
 
     const versionRows = Array.from(versionCounter.entries()).map(([version, count]) => ({
+      productKey: defaults.productKey,
       snapshotDate,
       version,
       count,

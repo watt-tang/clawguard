@@ -15,6 +15,7 @@
     "db:push": "prisma db push",
     "db:migrate:operator": "node server/scripts/migrate-vendor-to-operator.mjs",
     "db:import:exposure": "node server/scripts/import-exposure-data.mjs",
+    "db:import:product": "node server/scripts/import-product-exposure.mjs",
     "db:rebuild:agg": "node server/scripts/rebuild-exposure-aggregates.mjs",
     "skill:scan:static": "node server/scripts/scan-skill-static.mjs",
     "skill:rescan:risky": "node server/scripts/rescan-risky-skills.mjs",
