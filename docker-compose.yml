@@ -35,6 +35,7 @@ services:
       API_PORT: 8787
       DATABASE_URL: ${DATABASE_URL:?set DATABASE_URL in .env}
       EXPOSURE_DATA_DIR: /app/web/clawdbot_alive
+      CLAW_PRODUCT_DATA_DIR: /app/product-data
       GEOLITE2_CITY_DB: /app/web/geoip/GeoLite2-City.mmdb
       GEOLITE2_ASN_DB: /app/web/geoip/GeoLite2-ASN.mmdb
       OPENCLAW_RISK_CACHE_DIR: /app/runtime-cache/openclaw-risk
@@ -51,6 +52,7 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
       - /usr/bin/docker:/usr/bin/docker:ro
       - ./runtime-cache:/root/clawguard/runtime-cache
+      - /root/clawguard/data:/app/product-data:ro
       - app_cache:/app/runtime-cache
     healthcheck:
       test:
