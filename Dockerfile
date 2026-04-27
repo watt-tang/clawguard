@@ -8,6 +8,7 @@ RUN npm ci
 COPY web/index.html ./
 COPY web/vite.config.js ./
 COPY web/src ./src
+COPY web/shared ./shared
 COPY web/server ./server
 COPY web/scripts ./scripts
 COPY web/prisma ./prisma
@@ -34,6 +35,7 @@ RUN npm ci --omit=dev && npm cache clean --force
 
 COPY --from=build /app/web/dist ./dist
 COPY --from=build /app/web/server ./server
+COPY --from=build /app/web/shared ./shared
 COPY --from=build /app/web/prisma ./prisma
 COPY --from=build /app/web/generated ./generated
 COPY --from=build /app/web/geoip ./geoip
