@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { Fragment, useEffect, useMemo, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import {
@@ -171,6 +171,115 @@ function SeverityBadge({ severity }) {
 function summarizeChainNode(node, index) {
   if (!node || typeof node !== "object") return `步骤 ${index + 1}`;
   return node.title || node.action || node.behavior || node.category || node.type || node.name || `步骤 ${index + 1}`;
+}
+
+const EXECUTION_NAME_REPLACEMENTS = [
+  [new RegExp(["Pro", "vLoom"].join(""), "gi"), "隔离执行环境"],
+  [new RegExp(["pro", "vloom"].join(""), "g"), "runtime"],
+  [/\/opt\/skill_sandbox/gi, "/runtime/workspace"],
+  [new RegExp(String.raw`/app/${["pro", "vloom"].join("")}`, "g"), "/runtime/engine"],
+  [new RegExp(String.raw`\\.${["pro", "vloom"].join("")}`, "g"), ".runtime"],
+];
+
+const DYNAMIC_ROLE_LABELS = {
+  source: "起点",
+  relay: "中继",
+  sink: "终点",
+};
+
+const DYNAMIC_NODE_TYPE_LABELS = {
+  file: "文件",
+  data: "数据",
+  process: "进程",
+  tool_call: "工具调用",
+  network_endpoint: "网络端点",
+  llm_step: "模型步骤",
+};
+
+const DYNAMIC_EDGE_LABELS = {
+  flows_to: "数据流转",
+  causes: "触发后续步骤",
+  reads: "读取",
+  writes: "写入",
+  connects: "外联",
+  llm_mediated: "模型中转",
+};
+
+function sanitizeExecutionText(value) {
+  let text = String(value ?? "").trim();
+  if (!text) return "";
+  EXECUTION_NAME_REPLACEMENTS.forEach(([pattern, replacement]) => {
+    text = text.replace(pattern, replacement);
+  });
+  return text;
+}
+
+function formatDynamicRole(role) {
+  return DYNAMIC_ROLE_LABELS[String(role || "").toLowerCase()] || "节点";
+}
+
+function formatDynamicNodeType(nodeType) {
+  return DYNAMIC_NODE_TYPE_LABELS[String(nodeType || "").toLowerCase()] || "行为节点";
+}
+
+function formatDynamicEdge(edgeType) {
+  return DYNAMIC_EDGE_LABELS[String(edgeType || "").toLowerCase()] || "关联";
+}
+
+function buildDynamicChainGraph(result) {
+  const primaryChain = Array.isArray(result?.primaryChain) ? result.primaryChain.slice(0, 8) : [];
+  const graphExport = result && typeof result.graphExport === "object" ? result.graphExport : {};
+  const graphNodes = Array.isArray(graphExport.nodes) ? graphExport.nodes : [];
+  const graphEdges = Array.isArray(graphExport.edges) ? graphExport.edges : [];
+  const graphNodeMap = new Map(graphNodes.map((node) => [node.node_id, node]));
+  const chainIds = new Set(primaryChain.map((node) => node.node_id));
+
+  const nodes = primaryChain.map((node, index) => {
+    const graphNode = graphNodeMap.get(node.node_id);
+    const related = graphEdges
+      .flatMap((edge) => {
+        if (edge.source_node_id === node.node_id && !chainIds.has(edge.target_node_id)) {
+          const target = graphNodeMap.get(edge.target_node_id);
+          return target ? [{ id: edge.edge_id, label: `${formatDynamicEdge(edge.edge_type)} -> ${sanitizeExecutionText(target.label || edge.target_node_id)}` }] : [];
+        }
+        if (edge.target_node_id === node.node_id && !chainIds.has(edge.source_node_id)) {
+          const source = graphNodeMap.get(edge.source_node_id);
+          return source ? [{ id: edge.edge_id, label: `${sanitizeExecutionText(source.label || edge.source_node_id)} -> ${formatDynamicEdge(edge.edge_type)}` }] : [];
+        }
+        return [];
+      })
+      .slice(0, 2);
+
+    const detail = sanitizeExecutionText(
+      node.detail
+      || node.description
+      || node.evidence
+      || node.reason
+      || graphNode?.metadata?.selected_sink_reason
+      || graphNode?.metadata?.path
+      || node.label
+      || summarizeChainNode(node, index),
+    );
+
+    return {
+      id: node.node_id || `chain-node-${index}`,
+      title: sanitizeExecutionText(node.label || summarizeChainNode(node, index)),
+      detail,
+      role: String(node.role || "").toLowerCase(),
+      nodeType: String(node.node_type || graphNode?.node_type || "").toLowerCase(),
+      completeness: String(node.completeness || "").toLowerCase(),
+      related,
+      edgeType: String(node.edge_type || "").toLowerCase(),
+    };
+  });
+
+  return {
+    nodes,
+    summary: {
+      nodeCount: Number(graphExport.summary?.node_count || graphNodes.length || nodes.length),
+      edgeCount: Number(graphExport.summary?.edge_count || graphEdges.length || Math.max(nodes.length - 1, 0)),
+    },
+  };
 }
 
 function SkillDetectWorkspace({ auth }) {
@@ -1056,6 +1165,7 @@ function DynamicSandboxWorkspace({ auth }) {
   const processEvents = Array.isArray(result?.processEvents) ? result.processEvents : [];
   const toolCalls = Array.isArray(result?.toolCalls) ? result.toolCalls : [];
   const llmEvents = Array.isArray(result?.llmEvents) ? result.llmEvents : [];
+  const chainGraph = useMemo(() => buildDynamicChainGraph(result), [result]);
   const riskKey = String(result?.riskLevel || "unknown").toLowerCase();
   const riskMeta = DYNAMIC_RISK_META[riskKey] || DYNAMIC_RISK_META.unknown;
 
@@ -1146,7 +1256,7 @@ function DynamicSandboxWorkspace({ auth }) {
           <div className="dynamic-login-icon"><LockKeyhole size={22} strokeWidth={1.9} /></div>
           <div>
             <div className="skill-card-title">动态沙箱检测需要登录</div>
-            <div className="skill-card-desc">请先通过右上角账号入口登录。登录后才会开放上传、URL 调度和 ProvLoom 沙箱执行能力。</div>
+            <div className="skill-card-desc">请先通过右上角账号入口登录。登录后才会开放上传、URL 调度和隔离执行能力。</div>
           </div>
         </div>
       ) : null}
@@ -1163,7 +1273,7 @@ function DynamicSandboxWorkspace({ auth }) {
           </div>
           <div className="dynamic-running-copy">
             <strong>动态检测已启动，请耐心等待</strong>
-            <span>ProvLoom 正在隔离沙箱中执行样本并收集行为证据，最长执行时间为 10 分钟。</span>
+            <span>隔离执行环境正在隔离区中执行样本并收集行为证据，最长执行时间为 10 分钟。</span>
           </div>
           <div className="dynamic-running-facts">
             <span>已等待 {formatDurationMs(elapsedSeconds * 1000)}</span>
@@ -1192,7 +1302,7 @@ function DynamicSandboxWorkspace({ auth }) {
           >
             <div className="skill-dropzone-icon"><UploadCloud size={28} strokeWidth={1.8} /></div>
             <div className="skill-dropzone-title">上传动态检测样本</div>
-            <div className="skill-dropzone-desc">支持 ZIP、SKILL.md、Markdown 清单和目录上传。ZIP 会在后端解包后交给 ProvLoom 沙箱。</div>
+            <div className="skill-dropzone-desc">支持 ZIP、SKILL.md、Markdown 清单和目录上传。ZIP 会在后端解包后交给隔离执行环境。</div>
             <div className="skill-dropzone-actions">
               <button className="oc-primary-btn" type="button" onClick={(event) => { event.stopPropagation(); fileInputRef.current?.click(); }}>
                 选择文件
@@ -1316,7 +1426,7 @@ function DynamicSandboxWorkspace({ auth }) {
         <div className="skill-card-head">
           <div>
             <div className="skill-card-title">动态检测结果</div>
-            <div className="skill-card-desc">呈现 ProvLoom 沙箱执行后的行为事件、可能攻击路径和风险参考值。</div>
+            <div className="skill-card-desc">呈现隔离执行后的行为事件、链路图谱和风险参考值。</div>
           </div>
           {result ? <span className={`skill-result-hero-badge is-${riskMeta.tone}`}>{riskMeta.label}</span> : null}
         </div>
@@ -1324,7 +1434,7 @@ function DynamicSandboxWorkspace({ auth }) {
         {isRunning ? (
           <div className="skill-empty-state dynamic-result-waiting">
             <LoaderCircle size={20} strokeWidth={1.8} className="skill-spin" />
-            <span>ProvLoom 正在沙箱内执行样本，请保持页面打开。检测完成后结果会自动显示在这里。</span>
+            <span>隔离执行环境正在运行样本，请保持页面打开。检测完成后结果会自动显示在这里。</span>
           </div>
         ) : null}
 
@@ -1344,13 +1454,13 @@ function DynamicSandboxWorkspace({ auth }) {
                 </div>
                 <div className="skill-result-hero-copy">
                   <span className={`skill-result-hero-badge is-${riskMeta.tone}`}>{riskMeta.label} / 仅供参考</span>
-                  <h3 className="skill-result-hero-title">{result.riskLevelName || riskMeta.label}</h3>
-                  <p className="skill-result-hero-desc">{result.riskSummary || "沙箱已返回执行痕迹，请结合事件和样本语义继续复核。"}</p>
+                  <h3 className="skill-result-hero-title">{sanitizeExecutionText(result.riskLevelName || riskMeta.label)}</h3>
+                  <p className="skill-result-hero-desc">{sanitizeExecutionText(result.riskSummary || "隔离执行已返回行为轨迹，请结合事件和样本语义继续复核。")}</p>
                   <div className="skill-result-meta">
                     <span>执行 ID：{result.executionId}</span>
                     <span>退出码：{result.exitCode ?? "--"}</span>
                     <span>超时：{result.timedOut ? "是" : "否"}</span>
-                    <span>镜像：{result.sandboxImage || "--"}</span>
+                    <span>执行环境：{sanitizeExecutionText(result.executionEngine || "isolated-runtime")}</span>
                   </div>
                 </div>
               </div>
@@ -1378,17 +1488,39 @@ function DynamicSandboxWorkspace({ auth }) {
                     <div className="skill-card-desc">链条为沙箱恢复出的可能路径，不代表确定攻击事实。</div>
                   </div>
                 </div>
-                {primaryChain.length ? (
-                  <div className="dynamic-chain">
-                    {primaryChain.slice(0, 8).map((node, index) => (
-                      <div key={`${summarizeChainNode(node, index)}-${index}`} className="dynamic-chain-step">
-                        <span>{index + 1}</span>
-                        <div>
-                          <strong>{summarizeChainNode(node, index)}</strong>
-                          <p>{node.detail || node.description || node.evidence || node.reason || "沙箱事件链路节点"}</p>
-                        </div>
-                      </div>
-                    ))}
+                {chainGraph.nodes.length ? (
+                  <div className="dynamic-chain-visual">
+                    <div className="dynamic-chain-visual-header">
+                      <span className="dynamic-chain-visual-stat">链路节点 {chainGraph.nodes.length}</span>
+                      <span className="dynamic-chain-visual-stat">图谱节点 {chainGraph.summary.nodeCount}</span>
+                      <span className="dynamic-chain-visual-stat">图谱边 {chainGraph.summary.edgeCount}</span>
+                    </div>
+                    <div className="dynamic-chain-flow">
+                      {chainGraph.nodes.map((node, index) => (
+                        <Fragment key={node.id}>
+                          <article className={`dynamic-chain-card is-${node.role || "relay"}`}>
+                            <div className="dynamic-chain-card-top">
+                              <span className={`dynamic-chain-role is-${node.role || "relay"}`}>{formatDynamicRole(node.role)}</span>
+                              <span className="dynamic-chain-kind">{formatDynamicNodeType(node.nodeType)}</span>
+                            </div>
+                            <strong>{node.title || `节点 ${index + 1}`}</strong>
+                            <p>{node.detail || "链路节点说明暂缺。"}</p>
+                            {node.related.length ? (
+                              <div className="dynamic-chain-relations">
+                                {node.related.map((item) => (
+                                  <span key={item.id} className="dynamic-chain-relation">{item.label}</span>
+                                ))}
+                              </div>
+                            ) : null}
+                          </article>
+                          {index < chainGraph.nodes.length - 1 ? (
+                            <div className="dynamic-chain-arrow">
+                              <span>{formatDynamicEdge(chainGraph.nodes[index + 1]?.edgeType)}</span>
+                            </div>
+                          ) : null}
+                        </Fragment>
+                      ))}
+                    </div>
                   </div>
                 ) : (
                   <div className="skill-inline-empty">本次没有恢复出明确链条，可查看事件时间线继续判断。</div>
@@ -1410,7 +1542,7 @@ function DynamicSandboxWorkspace({ auth }) {
                         <span>{event.category || "event"}</span>
                         <div>
                           <strong>{event.action || "行为事件"}</strong>
-                          <p>{event.detail || JSON.stringify(event.metadata || {})}</p>
+                          <p>{sanitizeExecutionText(event.detail || JSON.stringify(event.metadata || {}))}</p>
                         </div>
                       </div>
                     ))}
@@ -1423,7 +1555,7 @@ function DynamicSandboxWorkspace({ auth }) {
 
             <div className="dynamic-behavior-strip">
               {(result.detectedBehaviors || []).slice(0, 12).map((behavior) => (
-                <span key={behavior}>{behavior}</span>
+                <span key={behavior}>{sanitizeExecutionText(behavior)}</span>
               ))}
               {!(result.detectedBehaviors || []).length ? <span>未归纳出明确行为标签</span> : null}
             </div>

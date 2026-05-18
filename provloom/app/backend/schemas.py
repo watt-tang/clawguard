@@ -176,6 +176,7 @@ class AnalyzeSkillResponse:
     root_cause_detail: str = "unknown"
     root_cause_v2: dict[str, Any] = field(default_factory=dict)
     graph_summary: dict[str, Any] = field(default_factory=dict)
+    graph_export: dict[str, Any] = field(default_factory=dict)
     final_decision: str = "unknown"
     triggered_factors: list[dict[str, Any]] = field(default_factory=list)
     suppression_factors: list[dict[str, Any]] = field(default_factory=list)

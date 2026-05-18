@@ -64,8 +64,7 @@ def main() -> int:
             "status": "completed",
             "skillPath": execution.skill_path,
             "skillFile": execution.skill_file,
-            "sandboxImage": execution.sandbox_image,
-            "runtimeName": execution.runtime_name,
+            "executionEngine": "isolated-runtime",
             "networkPolicy": request.get("networkPolicy") or "default",
             "analysisMode": request.get("analysisMode") or "rule_plus_epg",
             "exitCode": execution.exit_code,
@@ -92,6 +91,15 @@ def main() -> int:
             "rootCause": report.get("root_cause", "unknown"),
             "rootCauseDetail": report.get("root_cause_detail", "unknown"),
             "graphSummary": report.get("graph_summary", {}),
+            "graphExport": report.get(
+                "graph_export",
+                {
+                    "execution_id": execution_id,
+                    "nodes": [],
+                    "edges": [],
+                    "summary": report.get("graph_summary", {}),
+                },
+            ),
             "finalDecision": report.get("final_decision", "unknown"),
             "triggeredFactors": report.get("triggered_factors", []),
             "suppressionFactors": report.get("suppression_factors", []),
@@ -109,11 +117,16 @@ def main() -> int:
         print(json.dumps({"ok": True, "result": json_ready(result)}, ensure_ascii=False))
         return 0
     except Exception as exc:
-        print(json.dumps({
-            "ok": False,
-            "message": str(exc),
-            "traceback": traceback.format_exc(limit=12),
-        }, ensure_ascii=False))
+        print(
+            json.dumps(
+                {
+                    "ok": False,
+                    "message": str(exc),
+                    "traceback": traceback.format_exc(limit=12),
+                },
+                ensure_ascii=False,
+            )
+        )
         return 1
 
 
@@ -154,18 +167,18 @@ def prepare_skill_source(request: dict[str, Any], source_dir: Path) -> Path:
     if len(skill_files) == 1:
         return skill_files[0].parent
     if not skill_files:
-        raise ValueError("上传内容中没有找到 SKILL.md，无法进行 ProvLoom 动态沙箱分析。")
-    raise ValueError("上传内容包含多个 SKILL.md，请拆分为单个 Skill 后重试。")
+        raise ValueError("上传内容中没有找到 SKILL.md，无法进行动态执行分析。")
+    raise ValueError("上传内容中包含多个 SKILL.md，请拆分为单个 Skill 后重试。")
 
 
 def download_source(url: str, source_dir: Path) -> Path:
     if not url.startswith(("http://", "https://")):
-        raise ValueError("URL 输入口仅支持 http:// 或 https:// 地址。")
+        raise ValueError("URL 输入仅支持 http:// 或 https:// 地址。")
     filename = safe_name(url.rstrip("/").rsplit("/", 1)[-1] or "remote-skill")
     if "." not in filename:
         filename = f"{filename}.md"
     target = source_dir / filename
-    request = urllib.request.Request(url, headers={"User-Agent": "ClawGuard-ProvLoom/1.0"})
+    request = urllib.request.Request(url, headers={"User-Agent": "ClawGuard-DynamicRuntime/1.0"})
     with urllib.request.urlopen(request, timeout=30) as response:
         with target.open("wb") as output:
             shutil.copyfileobj(response, output, length=1024 * 1024)

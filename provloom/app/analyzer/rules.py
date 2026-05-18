@@ -659,6 +659,7 @@ def _augment_with_epg(
         normalized_events_path=normalized_path,
         telemetry_report=telemetry_report,
     )
+    graph_export = graph.to_dict()
     export_graph(graph, Path(execution.artifacts_dir) / "epg.json")
     primary_chain = extract_primary_attack_chain(
         graph,
@@ -667,7 +668,8 @@ def _augment_with_epg(
     )
     _write_json_artifact(Path(execution.artifacts_dir) / "attack-chain.json", primary_chain)
     result["primary_chain"] = primary_chain
-    result["graph_summary"] = graph.to_dict()["summary"]
+    result["graph_summary"] = graph_export["summary"]
+    result["graph_export"] = graph_export
 
 
 def _infer_root_cause_detail(

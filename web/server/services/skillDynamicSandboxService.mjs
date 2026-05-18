@@ -10,6 +10,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const projectRoot = path.resolve(__dirname, "../..");
 const defaultProvloomRoot = path.resolve(projectRoot, "../provloom");
 const defaultWorkRoot = "/root/clawguard/runtime-cache/skill-dynamic";
+const PYTHON_CANDIDATES = buildPythonCandidates();
 
 const MAX_CONCURRENT = normalizePositiveInt(process.env.SKILL_DYNAMIC_CONCURRENCY_LIMIT, 30, {
   min: 1,
@@ -57,13 +58,15 @@ export async function runSkillDynamicSandbox(payload = {}) {
     );
 
     try {
-      const { stdout, stderr } = await execFileAsync("python3", [scriptPath, requestPath], {
+      const { stdout, stderr } = await runBridgeScript(scriptPath, requestPath, {
         cwd: provloomRoot,
         timeout: (request.timeoutSeconds + 90) * 1000,
         maxBuffer: 80 * 1024 * 1024,
         env: {
           ...process.env,
           PYTHONPATH: provloomRoot,
+          PYTHONIOENCODING: "utf-8",
+          PYTHONUTF8: "1",
           TMPDIR: path.join(workRoot, "tmp"),
         },
       });
@@ -172,6 +175,33 @@ function parseBridgeResponse(stdout, stderr, throwOnEmpty = true) {
     throw error;
   }
   return data;
+}
+
+async function runBridgeScript(scriptPath, requestPath, options = {}) {
+  let lastError = null;
+
+  for (const [command, args] of PYTHON_CANDIDATES) {
+    try {
+      return await execFileAsync(command, [...args, scriptPath, requestPath], options);
+    } catch (error) {
+      if (error?.code === "ENOENT") {
+        lastError = error;
+        continue;
+      }
+      throw error;
+    }
+  }
+
+  throw lastError || new Error("No usable Python runtime found for dynamic execution.");
+}
+
+function buildPythonCandidates() {
+  const explicit = String(process.env.SKILL_DYNAMIC_PYTHON_BIN || "").trim();
+  if (explicit) return [[explicit, []]];
+  if (process.platform === "win32") {
+    return [["py", ["-3"]], ["python", []], ["python3", []]];
+  }
+  return [["python3", []], ["python", []]];
 }
 
 function normalizePositiveInt(value, fallback, { min = 1, max = Number.MAX_SAFE_INTEGER } = {}) {
