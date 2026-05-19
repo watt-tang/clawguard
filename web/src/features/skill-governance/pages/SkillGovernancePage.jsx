@@ -37,9 +37,9 @@ import { getSkillIntelligenceOverview, peekSkillIntelligenceOverview } from "../
 import { searchSkills } from "../services/skillSearchService.js";
 
 const TABS = [
-  { id: "intelligence", label: "基础情报" },
-  { id: "sandbox", label: "文件沙箱" },
-  { id: "skill-detect", label: "Skill 扫描" },
+  { id: "intelligence", label: "基础情报概览" },
+  { id: "sandbox", label: "动态沙箱检测" },
+  { id: "skill-detect", label: "静态Skill检测" },
 ];
 
 const SOURCE_OPTIONS = [
@@ -2546,4 +2546,6 @@ export default function SkillGovernancePage({ auth }) {
     </div>
   );
 }
+
+
 

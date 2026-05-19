@@ -27,8 +27,9 @@ const EDGE_LABELS = {
 // 这组常量可以直接手动调，控制图的整体疏密和悬浮卡位置。
 const GRAPH_HEIGHT = 356;
 const CENTER_Y = 176;
-const TOP_LABEL_Y = 44;
-const BOTTOM_LABEL_Y = 220;
+// Node card offsets relative to center line (negative = above, positive = below).
+const TOP_LABEL_OFFSET_Y = -142;
+const BOTTOM_LABEL_OFFSET_Y = 56;
 const EDGE_PADDING = 84;
 const LABEL_WIDTH = 170;
 const TOOLTIP_WIDTH = 272;
@@ -92,7 +93,7 @@ function buildChartModel(nodes = []) {
       nodeTypeLabel: formatNodeType(node.nodeType),
       edgeLabel: formatEdge(node.edgeType),
       tooltipLines: buildTooltipLines(node),
-      labelY: isTop ? TOP_LABEL_Y : BOTTOM_LABEL_Y,
+      labelOffsetY: isTop ? TOP_LABEL_OFFSET_Y : BOTTOM_LABEL_OFFSET_Y,
       tooltipLeft,
       tooltipTop: isTop ? 12 : CENTER_Y + 34,
       tooltipArrowOffset: x - tooltipLeft,
@@ -203,7 +204,7 @@ export default function DynamicChainGraphChart({ chainGraph }) {
                 >
                   <div
                     className={`dynamic-chain-node-copy is-${node.isTop ? "top" : "bottom"}`}
-                    style={{ top: `${node.labelY}px`, width: `${LABEL_WIDTH}px` }}
+                    style={{ top: `${node.labelOffsetY}px`, width: `${LABEL_WIDTH}px` }}
                   >
                     <span>{node.roleLabel}</span>
                     <strong>{node.titleShort || "节点"}</strong>
@@ -212,7 +213,7 @@ export default function DynamicChainGraphChart({ chainGraph }) {
 
                   <div
                     className={`dynamic-chain-node-stem is-${node.isTop ? "top" : "bottom"}`}
-                    style={{ height: `${node.isTop ? CENTER_Y - node.labelY - 12 : node.labelY - CENTER_Y - 12}px` }}
+                    style={{ height: `${Math.max(12, Math.abs(node.labelOffsetY) - 12)}px` }}
                   />
 
                   <button

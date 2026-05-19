@@ -1532,7 +1532,7 @@ select {
 
 .module-nav-label {
   color: var(--cg-primary);
-  font-size: 11px;
+  font-size: 14px;
   font-weight: 800;
   letter-spacing: 0.16em;
   text-transform: uppercase;

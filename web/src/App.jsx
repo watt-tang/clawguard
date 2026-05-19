@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+﻿import { useMemo, useState } from "react";
 import {
   Activity,
   AlertTriangle,
@@ -27,7 +27,6 @@ import OpenclawGovernancePage from "./features/openclaw-governance/pages/Opencla
 import OpenclawRiskPage from "./features/openclaw-risk/pages/OpenclawRiskPage.jsx";
 import SecurityResearchPage from "./features/security-research/pages/SecurityResearchPage.jsx";
 import SkillGovernancePage from "./features/skill-governance/pages/SkillGovernancePage.jsx";
-import nkuLogo from "./pic/南开logo.png";
 
 const RAW_MODULES = [
   {
@@ -102,8 +101,7 @@ function TopUtilityBar({ userName, role, isLoggedIn, modules, onGoHome, onNaviga
             <University size={14} strokeWidth={2} />
           </div>
           <div className="utility-brand-text">
-            <strong>南开大学</strong>
-            <span>ClawGuard 平台</span>
+            <strong>ClawGuard 平台</strong>
           </div>
         </div>
       </div>
@@ -408,7 +406,6 @@ function DashboardHome({ modules, onNavigate }) {
       </div>
 
       <section className="oc-home-hero">
-        <img className="oc-home-logo-watermark" src={nkuLogo} alt="" aria-hidden="true" />
         <div className="oc-home-hero-layout">
           <div className="oc-home-hero-main">
             <div className="oc-home-badge">Platform Gateway</div>
@@ -466,7 +463,16 @@ export default function App() {
   const [activeExposureProductKey, setActiveExposureProductKey] = useState(DEFAULT_CLAW_EXPOSURE_PRODUCT_KEY);
   const [showLoginModal, setShowLoginModal] = useState(false);
   const auth = useAuth();
-  const navModules = MODULES.filter((module) => module.pageId !== PAGE_IDS.HOME);
+  const navOrder = [
+    "openclaw-governance",
+    PAGE_IDS.OPENCLAW_EXPOSURE,
+    "skill-governance",
+    "openclaw-risk",
+    "openclaw-deploy",
+  ];
+  const navModules = MODULES
+    .filter((module) => module.pageId !== PAGE_IDS.HOME)
+    .sort((a, b) => navOrder.indexOf(a.pageId) - navOrder.indexOf(b.pageId));
   const activeExposureProduct = useMemo(
     () => getClawExposureProduct(activeExposureProductKey),
     [activeExposureProductKey],
@@ -625,3 +631,5 @@ export default function App() {
     </div>
   );
 }
+
+
