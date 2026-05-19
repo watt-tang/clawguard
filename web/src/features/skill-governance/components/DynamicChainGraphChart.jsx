@@ -25,7 +25,8 @@ const EDGE_LABELS = {
 };
 
 // 这组常量可以直接手动调，控制图的整体疏密和悬浮卡位置。
-const GRAPH_HEIGHT = 356;
+// Slightly taller canvas to keep more headroom for alternating labels/tooltips.
+const GRAPH_HEIGHT = 404;
 const CENTER_Y = 176;
 // Node card offsets relative to center line (negative = above, positive = below).
 const TOP_LABEL_OFFSET_Y = -142;
