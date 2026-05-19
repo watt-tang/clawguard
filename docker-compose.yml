@@ -45,6 +45,7 @@ services:
       PROVLOOM_ROOT: /app/provloom
       VITE_ADMIN_DEFAULT_API_KEY: ${VITE_ADMIN_DEFAULT_API_KEY:-}
       PROVLOOM_LLM_API_KEY: ${PROVLOOM_LLM_API_KEY:-}
+      OPENCLAW_VERSION_TREND_CSV: /root/clawguard/data/C2_daily_version_alive.csv
       TZ: Asia/Shanghai
     ports:
       - "8787:8787"
@@ -54,6 +55,7 @@ services:
       - ./runtime-cache:/root/clawguard/runtime-cache
       - /root/clawguard/data:/app/product-data:ro
       - app_cache:/app/runtime-cache
+      - /root/clawguard/data:/root/clawguard/data:ro
     healthcheck:
       test:
         - CMD-SHELL
