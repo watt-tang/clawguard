@@ -9,7 +9,7 @@ const execFileAsync = promisify(execFile);
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const projectRoot = path.resolve(__dirname, "../..");
 const defaultProvloomRoot = path.resolve(projectRoot, "../provloom");
-const defaultWorkRoot = "/root/clawguard/runtime-cache/skill-dynamic";
+const defaultWorkRoot = buildDefaultWorkRoot();
 const PYTHON_CANDIDATES = buildPythonCandidates();
 
 const MAX_CONCURRENT = normalizePositiveInt(process.env.SKILL_DYNAMIC_CONCURRENCY_LIMIT, 30, {
@@ -18,6 +18,13 @@ const MAX_CONCURRENT = normalizePositiveInt(process.env.SKILL_DYNAMIC_CONCURRENC
 });
 
 let activeRuns = 0;
+
+function buildDefaultWorkRoot() {
+  if (process.platform === "win32") {
+    return path.resolve(projectRoot, "..", "runtime-cache", "skill-dynamic");
+  }
+  return "/root/clawguard/runtime-cache/skill-dynamic";
+}
 
 export class SandboxBusyError extends Error {
   constructor(limit = MAX_CONCURRENT) {

@@ -157,7 +157,7 @@ def prepare_skill_source(request: dict[str, Any], source_dir: Path) -> Path:
             if not target.exists():
                 downloaded.rename(target)
 
-    skill_files = sorted(source_dir.rglob("SKILL.md"))
+    skill_files = find_exact_skill_files(source_dir)
     if not skill_files:
         markdown_files = sorted(source_dir.rglob("*.md"))
         if len(markdown_files) == 1:
@@ -195,6 +195,10 @@ def extract_zip(zip_path: Path, target_dir: Path) -> None:
             target.parent.mkdir(parents=True, exist_ok=True)
             with archive.open(member) as src, target.open("wb") as dst:
                 shutil.copyfileobj(src, dst, length=1024 * 1024)
+
+
+def find_exact_skill_files(root_dir: Path) -> list[Path]:
+    return sorted(path for path in root_dir.rglob("*") if path.is_file() and path.name == "SKILL.md")
 
 
 def safe_relative_path(value: str) -> Path:

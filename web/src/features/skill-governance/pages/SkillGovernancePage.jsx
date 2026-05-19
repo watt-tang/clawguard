@@ -30,6 +30,7 @@ import {
   X,
 } from "lucide-react";
 import { PAGE_SIZE_OPTIONS } from "../../../config.js";
+import DynamicChainGraphChart from "../components/DynamicChainGraphChart.jsx";
 import { getDynamicSandboxCapacity, runDynamicSandboxScan } from "../services/skillDynamicSandboxService.js";
 import { getSkillScanStatus, scanSkillByRepositoryUrl, scanSkillBySlug, scanSkillFiles } from "../services/skillScanService.js";
 import { getSkillIntelligenceOverview, peekSkillIntelligenceOverview } from "../services/skillIntelligenceService.js";
@@ -232,17 +233,113 @@ function buildDynamicChainGraph(result) {
   const graphNodes = Array.isArray(graphExport.nodes) ? graphExport.nodes : [];
   const graphEdges = Array.isArray(graphExport.edges) ? graphExport.edges : [];
   const graphNodeMap = new Map(graphNodes.map((node) => [node.node_id, node]));
-  const chainIds = new Set(primaryChain.map((node) => node.node_id));
+  const keyNodeTypes = new Set(["file", "tool_call", "network_endpoint", "llm_step", "process", "data"]);
+  const nodeDegree = new Map();
 
-  const nodes = primaryChain.map((node, index) => {
-    const graphNode = graphNodeMap.get(node.node_id);
+  graphEdges.forEach((edge) => {
+    nodeDegree.set(edge.source_node_id, (nodeDegree.get(edge.source_node_id) || 0) + 1);
+    nodeDegree.set(edge.target_node_id, (nodeDegree.get(edge.target_node_id) || 0) + 1);
+  });
+
+  const typeWeight = {
+    file: 6,
+    tool_call: 5,
+    network_endpoint: 5,
+    llm_step: 4,
+    process: 3,
+    data: 2,
+  };
+
+  const scoreNode = (node) => {
+    const nodeType = String(node?.node_type || "").toLowerCase();
+    const base = typeWeight[nodeType] || 1;
+    const degree = nodeDegree.get(node?.node_id) || 0;
+    const metadataBonus = node?.metadata?.selected_source_reason || node?.metadata?.selected_sink_reason ? 2 : 0;
+    return base * 10 + degree + metadataBonus;
+  };
+
+  const rankedGraphNodes = graphNodes
+    .filter((node) => keyNodeTypes.has(String(node?.node_type || "").toLowerCase()))
+    .sort((left, right) => scoreNode(right) - scoreNode(left));
+
+  const selectedIds = [];
+  const selectedIdSet = new Set();
+
+  const pushSelected = (nodeId) => {
+    if (!nodeId || selectedIdSet.has(nodeId)) return;
+    selectedIdSet.add(nodeId);
+    selectedIds.push(nodeId);
+  };
+
+  primaryChain.forEach((node) => pushSelected(node.node_id));
+
+  if (!selectedIds.length) {
+    [
+      rankedGraphNodes.find((node) => String(node?.node_type || "").toLowerCase() === "file"),
+      rankedGraphNodes.find((node) => String(node?.node_type || "").toLowerCase() === "tool_call"),
+      rankedGraphNodes.find((node) => String(node?.node_type || "").toLowerCase() === "llm_step"),
+      rankedGraphNodes.find((node) => String(node?.node_type || "").toLowerCase() === "network_endpoint"),
+    ]
+      .filter(Boolean)
+      .forEach((node) => pushSelected(node.node_id));
+
+    rankedGraphNodes.slice(0, 6).forEach((node) => pushSelected(node.node_id));
+  }
+
+  const visibleLimit = 6;
+  const limitedSelectedIds = selectedIds.slice(0, visibleLimit);
+  const limitedSelectedSet = new Set(limitedSelectedIds);
+  const outgoingMap = new Map();
+
+  graphEdges.forEach((edge) => {
+    if (!outgoingMap.has(edge.source_node_id)) outgoingMap.set(edge.source_node_id, []);
+    outgoingMap.get(edge.source_node_id).push(edge);
+  });
+
+  let orderedIds = limitedSelectedIds;
+  if (!primaryChain.length && limitedSelectedIds.length > 1) {
+    const startNodeId = limitedSelectedIds.find((nodeId) => String(graphNodeMap.get(nodeId)?.node_type || "").toLowerCase() === "file") || limitedSelectedIds[0];
+    const visited = new Set();
+    const ordered = [];
+    let cursor = startNodeId;
+
+    while (cursor) {
+      visited.add(cursor);
+      ordered.push(cursor);
+      const nextEdge = (outgoingMap.get(cursor) || []).find((edge) => limitedSelectedSet.has(edge.target_node_id) && !visited.has(edge.target_node_id));
+      if (nextEdge) {
+        cursor = nextEdge.target_node_id;
+        continue;
+      }
+      cursor = limitedSelectedIds.find((nodeId) => !visited.has(nodeId)) || null;
+    }
+
+    orderedIds = ordered;
+  }
+
+  const orderedIdSet = new Set(orderedIds);
+  const sequentialEdgeMap = new Map();
+
+  for (let index = 0; index < orderedIds.length - 1; index += 1) {
+    const sourceId = orderedIds[index];
+    const targetId = orderedIds[index + 1];
+    const edge = graphEdges.find((item) => item.source_node_id === sourceId && item.target_node_id === targetId)
+      || graphEdges.find((item) => item.source_node_id === targetId && item.target_node_id === sourceId);
+
+    if (edge) sequentialEdgeMap.set(targetId, edge);
+  }
+
+  const nodes = orderedIds.map((nodeId, index) => {
+    const chainNode = primaryChain.find((node) => node.node_id === nodeId);
+    const graphNode = graphNodeMap.get(nodeId);
+    const nodeType = String(chainNode?.node_type || graphNode?.node_type || "").toLowerCase();
     const related = graphEdges
       .flatMap((edge) => {
-        if (edge.source_node_id === node.node_id && !chainIds.has(edge.target_node_id)) {
+        if (edge.source_node_id === nodeId && !orderedIdSet.has(edge.target_node_id)) {
           const target = graphNodeMap.get(edge.target_node_id);
           return target ? [{ id: edge.edge_id, label: `${formatDynamicEdge(edge.edge_type)} -> ${sanitizeExecutionText(target.label || edge.target_node_id)}` }] : [];
         }
-        if (edge.target_node_id === node.node_id && !chainIds.has(edge.source_node_id)) {
+        if (edge.target_node_id === nodeId && !orderedIdSet.has(edge.source_node_id)) {
           const source = graphNodeMap.get(edge.source_node_id);
           return source ? [{ id: edge.edge_id, label: `${sanitizeExecutionText(source.label || edge.source_node_id)} -> ${formatDynamicEdge(edge.edge_type)}` }] : [];
         }
@@ -250,31 +347,45 @@ function buildDynamicChainGraph(result) {
       })
       .slice(0, 2);
 
+    const fallbackRole = index === 0 ? "source" : index === orderedIds.length - 1 ? "sink" : "relay";
+    const inferredRole = nodeType === "network_endpoint"
+      ? "sink"
+      : nodeType === "file"
+        ? index === orderedIds.length - 1 ? "relay" : "source"
+        : fallbackRole;
     const detail = sanitizeExecutionText(
-      node.detail
-      || node.description
-      || node.evidence
-      || node.reason
+      chainNode?.detail
+      || chainNode?.description
+      || chainNode?.evidence
+      || chainNode?.reason
+      || graphNode?.metadata?.selected_source_reason
       || graphNode?.metadata?.selected_sink_reason
       || graphNode?.metadata?.path
-      || node.label
-      || summarizeChainNode(node, index),
+      || graphNode?.metadata?.command
+      || graphNode?.metadata?.url
+      || graphNode?.label
+      || summarizeChainNode(chainNode || graphNode, index),
     );
 
     return {
-      id: node.node_id || `chain-node-${index}`,
-      title: sanitizeExecutionText(node.label || summarizeChainNode(node, index)),
+      id: nodeId || `chain-node-${index}`,
+      title: sanitizeExecutionText(chainNode?.label || graphNode?.label || summarizeChainNode(chainNode || graphNode, index)),
       detail,
-      role: String(node.role || "").toLowerCase(),
-      nodeType: String(node.node_type || graphNode?.node_type || "").toLowerCase(),
-      completeness: String(node.completeness || "").toLowerCase(),
+      role: String(chainNode?.role || inferredRole || "").toLowerCase(),
+      roleLabel: formatDynamicRole(chainNode?.role || inferredRole),
+      nodeType,
+      nodeTypeLabel: formatDynamicNodeType(nodeType),
+      completeness: String(chainNode?.completeness || "").toLowerCase(),
       related,
-      edgeType: String(node.edge_type || "").toLowerCase(),
+      edgeType: String(chainNode?.edge_type || sequentialEdgeMap.get(nodeId)?.edge_type || "").toLowerCase(),
+      edgeLabel: formatDynamicEdge(chainNode?.edge_type || sequentialEdgeMap.get(nodeId)?.edge_type),
     };
   });
 
   return {
     nodes,
+    hasRecoveredChain: primaryChain.length > 0,
+    hasGraphData: graphNodes.length > 0,
     summary: {
       nodeCount: Number(graphExport.summary?.node_count || graphNodes.length || nodes.length),
       edgeCount: Number(graphExport.summary?.edge_count || graphEdges.length || Math.max(nodes.length - 1, 0)),
@@ -1479,7 +1590,7 @@ function DynamicSandboxWorkspace({ auth }) {
               <div className="skill-metric-card"><span className="skill-summary-label">内存峰值</span><strong>{result.resourceUsage?.memory_peak_human || "--"}</strong></div>
             </div>
 
-            <div className="dynamic-result-grid">
+            <div className="dynamic-result-stack">
               <div className="skill-insight-card">
                 <div className="skill-insight-head">
                   <div className="skill-insight-icon"><GitBranch size={18} strokeWidth={1.8} /></div>
@@ -1490,11 +1601,15 @@ function DynamicSandboxWorkspace({ auth }) {
                 </div>
                 {chainGraph.nodes.length ? (
                   <div className="dynamic-chain-visual">
+                    <DynamicChainGraphChart chainGraph={chainGraph} />
                     <div className="dynamic-chain-visual-header">
                       <span className="dynamic-chain-visual-stat">链路节点 {chainGraph.nodes.length}</span>
                       <span className="dynamic-chain-visual-stat">图谱节点 {chainGraph.summary.nodeCount}</span>
                       <span className="dynamic-chain-visual-stat">图谱边 {chainGraph.summary.edgeCount}</span>
                     </div>
+                    {!chainGraph.hasRecoveredChain ? (
+                      <div className="skill-inline-empty dynamic-graph-hint">本次没有恢复出闭合链路，当前图谱展示的是动态执行中的关键节点关系。</div>
+                    ) : null}
                     <div className="dynamic-chain-flow">
                       {chainGraph.nodes.map((node, index) => (
                         <Fragment key={node.id}>
