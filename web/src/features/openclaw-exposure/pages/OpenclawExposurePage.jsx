@@ -276,11 +276,11 @@ export default function OpenclawExposurePage({ auth, product }) {
           <div className="oc-page-header-kpi">
             <div className="oc-kpi">
               <span className="oc-kpi-val">{stats.currentExposed.toLocaleString("zh-CN")}</span>
-              <span className="oc-kpi-label">当前暴露</span>
+              <span className="oc-kpi-label">褰撳墠鏆撮湶</span>
             </div>
             <div className="oc-kpi">
               <span className="oc-kpi-val">{stats.countryCoverage}</span>
-              <span className="oc-kpi-label">覆盖国家 / 地区</span>
+              <span className="oc-kpi-label">瑕嗙洊鍥藉 / 鍦板尯</span>
             </div>
             <div className="oc-kpi">
               <span className="oc-kpi-val">{stats.highRiskCount.toLocaleString("zh-CN")}</span>
@@ -290,27 +290,29 @@ export default function OpenclawExposurePage({ auth, product }) {
         ) : null}
       </div>
 
-      <CollapsePanel title="情况分析">
+      <CollapsePanel title="鎯呭喌鍒嗘瀽">
         <StatsSection stats={stats} loading={statsLoading} />
       </CollapsePanel>
 
-      <CollapsePanel title="全球暴露实例分布" defaultOpen={true} onOpenChange={(open) => markPanelDemand("world", open)}>
+      <CollapsePanel title="鍏ㄧ悆鏆撮湶瀹炰緥鍒嗗竷" defaultOpen={true} onOpenChange={(open) => markPanelDemand("world", open)}>
         <WorldMapChart data={worldDist} loading={worldLoading} />
       </CollapsePanel>
 
-      <CollapsePanel title="中国境内实例分布" defaultOpen={false} onOpenChange={(open) => markPanelDemand("china", open)}>
+      <CollapsePanel title="涓浗澧冨唴瀹炰緥鍒嗗竷" defaultOpen={false} onOpenChange={(open) => markPanelDemand("china", open)}>
         <ChinaMapChart data={chinaDist} loading={chinaLoading} />
       </CollapsePanel>
 
-      <CollapsePanel title="暴露实例演化趋势" defaultOpen={false} onOpenChange={(open) => markPanelDemand("trend", open)}>
+      <CollapsePanel title="鏆撮湶瀹炰緥婕斿寲瓒嬪娍" defaultOpen={false} onOpenChange={(open) => markPanelDemand("trend", open)}>
         <ExposureTrendChart data={exposureTrend} loading={trendLoading} />
       </CollapsePanel>
 
-      <CollapsePanel title="版本实例演化趋势" defaultOpen={false} onOpenChange={(open) => markPanelDemand("version", open)}>
-        <VersionTrendChartWithControl data={versionTrend} loading={versionLoading} />
-      </CollapsePanel>
+      {productKey === "openclaw" ? (
+        <CollapsePanel title="鐗堟湰瀹炰緥婕斿寲瓒嬪娍" defaultOpen={false} onOpenChange={(open) => markPanelDemand("version", open)}>
+          <VersionTrendChartWithControl data={versionTrend} loading={versionLoading} />
+        </CollapsePanel>
+      ) : null}
 
-      <CollapsePanel title="暴露服务详情" defaultOpen={false} onOpenChange={(open) => markPanelDemand("detail", open)}>
+      <CollapsePanel title="鏆撮湶鏈嶅姟璇︽儏" defaultOpen={false} onOpenChange={(open) => markPanelDemand("detail", open)}>
         <ExposureDetailTable
           rows={listData?.rows ?? []}
           total={listData?.total ?? 0}

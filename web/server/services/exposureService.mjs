@@ -32,6 +32,40 @@ const DOMESTIC_IP_PREFIXES = new Set([
 ]);
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const projectRoot = path.resolve(__dirname, "../..");
+const OPENCLAW_VERSION_TREND_CSV = process.env.OPENCLAW_VERSION_TREND_CSV || "/root/clawguard/data/C2_daily_version_alive.csv";
+
+function normalizeCsvDateLabel(value) {
+  const raw = String(value || "").trim();
+  const match = raw.match(/^(\d{4})[./-](\d{1,2})[./-](\d{1,2})$/);
+  if (!match) return raw;
+  const [, y, m, d] = match;
+  return `${y}-${m.padStart(2, "0")}-${d.padStart(2, "0")}`;
+}
+
+function parseOpenclawVersionTrendCsv(csvText) {
+  const lines = String(csvText || "")
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(Boolean);
+  if (lines.length < 2) return { dates: [], versions: {} };
+
+  const headers = lines[0].split(",").map((cell) => cell.trim());
+  const versionNames = headers.slice(1).map(normalizeCsvDateLabel);
+  const dates = [];
+  const versions = Object.fromEntries(versionNames.map((name) => [name, []]));
+
+  for (let rowIndex = 1; rowIndex < lines.length; rowIndex += 1) {
+    const cells = lines[rowIndex].split(",").map((cell) => cell.trim());
+    if (cells.length < 2) continue;
+    dates.push(normalizeCsvDateLabel(cells[0]));
+    versionNames.forEach((version, idx) => {
+      const value = Number(cells[idx + 1] || 0);
+      versions[version].push(Number.isFinite(value) ? value : 0);
+    });
+  }
+
+  return { dates, versions };
+}
 
 function normalizeChinaDivisionName(name) {
   const raw = String(name || "").trim();
@@ -852,6 +886,17 @@ async function buildVersionTrendFromRaw(snapshots, productKey) {
 
 export async function getVersionTrend(query = {}) {
   const productKey = normalizeExposureProductKey(query);
+  if (productKey === DEFAULT_CLAW_EXPOSURE_PRODUCT_KEY) {
+    try {
+      if (fs.existsSync(OPENCLAW_VERSION_TREND_CSV)) {
+        const csvText = await fs.promises.readFile(OPENCLAW_VERSION_TREND_CSV, "utf8");
+        return parseOpenclawVersionTrendCsv(csvText);
+      }
+    } catch {
+      // Fall through to DB-backed trend if CSV is unavailable or invalid.
+    }
+  }
+
   const latest = await findLatestSnapshot(productKey);
   if (!latest) {
     if (!isDefaultExposureProduct(productKey)) {
