@@ -1587,7 +1587,6 @@ function DynamicSandboxWorkspace({ auth }) {
               <div className="skill-metric-card"><span className="skill-summary-label">进程事件</span><strong>{processEvents.length}</strong></div>
               <div className="skill-metric-card"><span className="skill-summary-label">工具调用</span><strong>{toolCalls.length}</strong></div>
               <div className="skill-metric-card"><span className="skill-summary-label">LLM 调用</span><strong>{llmEvents.length}</strong><span className="skill-metric-hint">API 消耗参考</span></div>
-              <div className="skill-metric-card"><span className="skill-summary-label">内存峰值</span><strong>{result.resourceUsage?.memory_peak_human || "--"}</strong></div>
             </div>
 
             <div className="dynamic-result-stack">

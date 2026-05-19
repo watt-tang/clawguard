@@ -3,27 +3,28 @@ import { useEChart } from "../../../hooks/useEChart.js";
 
 const ROLE_STYLE_MAP = {
   source: {
-    color: "#0f766e",
-    bg: "rgba(15, 118, 110, 0.14)",
-    border: "rgba(15, 118, 110, 0.28)",
-    shadow: "rgba(15, 118, 110, 0.24)",
+    color: "#8b5cf6",
+    bg: "rgba(139, 92, 246, 0.12)",
+    border: "rgba(139, 92, 246, 0.28)",
+    shadow: "rgba(139, 92, 246, 0.22)",
   },
   relay: {
-    color: "#7e0c6e",
-    bg: "rgba(126, 12, 110, 0.14)",
-    border: "rgba(126, 12, 110, 0.24)",
-    shadow: "rgba(126, 12, 110, 0.2)",
+    color: "#7e22ce",
+    bg: "rgba(126, 34, 206, 0.14)",
+    border: "rgba(126, 34, 206, 0.24)",
+    shadow: "rgba(126, 34, 206, 0.2)",
   },
   sink: {
-    color: "#c2410c",
-    bg: "rgba(194, 65, 12, 0.16)",
-    border: "rgba(194, 65, 12, 0.28)",
-    shadow: "rgba(194, 65, 12, 0.22)",
+    color: "#db2777",
+    bg: "rgba(219, 39, 119, 0.12)",
+    border: "rgba(219, 39, 119, 0.24)",
+    shadow: "rgba(219, 39, 119, 0.2)",
   },
 };
 
 const DEFAULT_STYLE = ROLE_STYLE_MAP.relay;
-const Y_PATTERN = [58, 28, 68, 38, 62, 34, 72, 46];
+const TOP_LINE_Y = 30;
+const BOTTOM_LINE_Y = 70;
 
 function escapeHtml(value) {
   return String(value ?? "")
@@ -42,21 +43,18 @@ function truncateText(value, maxLength = 18) {
 
 function buildChartModel(nodes = []) {
   const count = nodes.length;
-  const step = count > 1 ? 72 / (count - 1) : 0;
+  const chartWidth = Math.max(920, count * 220);
+  const startX = 84;
+  const endX = chartWidth - 84;
+  const step = count > 1 ? (endX - startX) / (count - 1) : 0;
 
   const chartNodes = nodes.map((node, index) => {
     const roleKey = String(node.role || "relay").toLowerCase();
     const style = ROLE_STYLE_MAP[roleKey] || DEFAULT_STYLE;
-    let y = Y_PATTERN[index % Y_PATTERN.length];
-    if (index === 0) y = 58;
-    if (index === count - 1) y = 44;
-    if (roleKey === "sink") y = Math.min(y, 44);
-    if (roleKey === "source") y = Math.max(y, 56);
-
     return {
       ...node,
-      x: count > 1 ? 14 + step * index : 50,
-      y,
+      x: count > 1 ? startX + step * index : chartWidth / 2,
+      y: index % 2 === 0 ? BOTTOM_LINE_Y : TOP_LINE_Y,
       roleKey,
       style,
       symbolSize: roleKey === "sink" ? 32 : roleKey === "source" ? 30 : 28,
@@ -69,6 +67,7 @@ function buildChartModel(nodes = []) {
     const source = chartNodes[index];
     const target = node;
     const targetStyle = target.style || DEFAULT_STYLE;
+    const curveDirection = source.y > target.y ? -0.28 : 0.28;
     return {
       source: source.id,
       target: target.id,
@@ -78,7 +77,7 @@ function buildChartModel(nodes = []) {
       lineStyle: {
         width: 3,
         color: targetStyle.color,
-        curveness: index % 2 === 0 ? 0.16 : -0.12,
+        curveness: curveDirection,
         opacity: 0.82,
         shadowBlur: 8,
         shadowColor: targetStyle.shadow,
@@ -90,7 +89,7 @@ function buildChartModel(nodes = []) {
     };
   });
 
-  return { chartNodes, chartLinks };
+  return { chartNodes, chartLinks, chartWidth };
 }
 
 function buildTooltip(node) {
@@ -118,7 +117,7 @@ function buildTooltip(node) {
 }
 
 export default function DynamicChainGraphChart({ chainGraph }) {
-  const { chartNodes, chartLinks } = useMemo(
+  const { chartNodes, chartLinks, chartWidth } = useMemo(
     () => buildChartModel(chainGraph?.nodes || []),
     [chainGraph?.nodes],
   );
@@ -131,8 +130,8 @@ export default function DynamicChainGraphChart({ chainGraph }) {
         trigger: "item",
         enterable: true,
         borderWidth: 0,
-        backgroundColor: "rgba(18, 24, 38, 0.94)",
-        extraCssText: "box-shadow: 0 18px 48px rgba(15, 23, 42, 0.28); border-radius: 18px; padding: 0;",
+        backgroundColor: "rgba(38, 20, 53, 0.96)",
+        extraCssText: "box-shadow: 0 18px 48px rgba(66, 32, 96, 0.28); border-radius: 18px; padding: 0;",
         formatter: (params) => {
           if (params.dataType === "edge") {
             const source = escapeHtml(params.data?.sourceTitle || params.data?.source || "");
@@ -192,16 +191,16 @@ export default function DynamicChainGraphChart({ chainGraph }) {
           edgeSymbolSize: [0, 8],
           lineStyle: {
             width: 3,
-            color: "rgba(126, 12, 110, 0.35)",
+            color: "rgba(126, 34, 206, 0.35)",
             curveness: 0.12,
             opacity: 0.78,
           },
           edgeLabel: {
             show: true,
             fontSize: 11,
-            color: "#475569",
-            backgroundColor: "rgba(255, 255, 255, 0.92)",
-            borderColor: "rgba(126, 12, 110, 0.12)",
+            color: "#6b21a8",
+            backgroundColor: "rgba(255, 255, 255, 0.96)",
+            borderColor: "rgba(126, 34, 206, 0.12)",
             borderWidth: 1,
             borderRadius: 999,
             padding: [4, 8],
@@ -263,7 +262,9 @@ export default function DynamicChainGraphChart({ chainGraph }) {
         </div>
       ) : null}
       <div className="dynamic-chain-chart-shell">
-        <div ref={chartRef} className="dynamic-chain-chart" />
+        <div className="dynamic-chain-chart-scroll">
+          <div ref={chartRef} className="dynamic-chain-chart" style={{ width: `${chartWidth}px` }} />
+        </div>
       </div>
       <div className="dynamic-chain-chart-hint">悬浮或轻触节点可查看详细信息，边上的标签表示节点间的关键关系。</div>
       <div className="dynamic-chain-node-rail">
