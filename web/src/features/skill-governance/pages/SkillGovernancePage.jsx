@@ -1,4 +1,4 @@
-import { Fragment, useEffect, useMemo, useRef, useState } from "react";
+import { Fragment, startTransition, useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import {
@@ -229,16 +229,31 @@ function formatDynamicEdge(edgeType) {
 
 function buildDynamicChainGraph(result) {
   const primaryChain = Array.isArray(result?.primaryChain) ? result.primaryChain.slice(0, 8) : [];
+  const primaryChainMap = new Map(primaryChain.map((node) => [node.node_id, node]));
   const graphExport = result && typeof result.graphExport === "object" ? result.graphExport : {};
   const graphNodes = Array.isArray(graphExport.nodes) ? graphExport.nodes : [];
   const graphEdges = Array.isArray(graphExport.edges) ? graphExport.edges : [];
   const graphNodeMap = new Map(graphNodes.map((node) => [node.node_id, node]));
   const keyNodeTypes = new Set(["file", "tool_call", "network_endpoint", "llm_step", "process", "data"]);
   const nodeDegree = new Map();
+  const outgoingMap = new Map();
+  const incomingMap = new Map();
+  const pairEdgeMap = new Map();
+
+  const makePairKey = (sourceId, targetId) => `${sourceId}=>${targetId}`;
 
   graphEdges.forEach((edge) => {
     nodeDegree.set(edge.source_node_id, (nodeDegree.get(edge.source_node_id) || 0) + 1);
     nodeDegree.set(edge.target_node_id, (nodeDegree.get(edge.target_node_id) || 0) + 1);
+
+    if (!outgoingMap.has(edge.source_node_id)) outgoingMap.set(edge.source_node_id, []);
+    outgoingMap.get(edge.source_node_id).push(edge);
+
+    if (!incomingMap.has(edge.target_node_id)) incomingMap.set(edge.target_node_id, []);
+    incomingMap.get(edge.target_node_id).push(edge);
+
+    const forwardKey = makePairKey(edge.source_node_id, edge.target_node_id);
+    if (!pairEdgeMap.has(forwardKey)) pairEdgeMap.set(forwardKey, edge);
   });
 
   const typeWeight = {
@@ -296,12 +311,6 @@ function buildDynamicChainGraph(result) {
   const visibleLimit = 12;
   const limitedSelectedIds = selectedIds.slice(0, visibleLimit);
   const limitedSelectedSet = new Set(limitedSelectedIds);
-  const outgoingMap = new Map();
-
-  graphEdges.forEach((edge) => {
-    if (!outgoingMap.has(edge.source_node_id)) outgoingMap.set(edge.source_node_id, []);
-    outgoingMap.get(edge.source_node_id).push(edge);
-  });
 
   let orderedIds = limitedSelectedIds;
   if (!primaryChain.length && limitedSelectedIds.length > 1) {
@@ -330,29 +339,27 @@ function buildDynamicChainGraph(result) {
   for (let index = 0; index < orderedIds.length - 1; index += 1) {
     const sourceId = orderedIds[index];
     const targetId = orderedIds[index + 1];
-    const edge = graphEdges.find((item) => item.source_node_id === sourceId && item.target_node_id === targetId)
-      || graphEdges.find((item) => item.source_node_id === targetId && item.target_node_id === sourceId);
+    const edge = pairEdgeMap.get(makePairKey(sourceId, targetId))
+      || pairEdgeMap.get(makePairKey(targetId, sourceId));
 
     if (edge) sequentialEdgeMap.set(targetId, edge);
   }
 
   const nodes = orderedIds.map((nodeId, index) => {
-    const chainNode = primaryChain.find((node) => node.node_id === nodeId);
+    const chainNode = primaryChainMap.get(nodeId);
     const graphNode = graphNodeMap.get(nodeId);
     const nodeType = String(chainNode?.node_type || graphNode?.node_type || "").toLowerCase();
-    const related = graphEdges
-      .flatMap((edge) => {
-        if (edge.source_node_id === nodeId && !orderedIdSet.has(edge.target_node_id)) {
-          const target = graphNodeMap.get(edge.target_node_id);
-          return target ? [{ id: edge.edge_id, label: `${formatDynamicEdge(edge.edge_type)} -> ${sanitizeExecutionText(target.label || edge.target_node_id)}` }] : [];
-        }
-        if (edge.target_node_id === nodeId && !orderedIdSet.has(edge.source_node_id)) {
-          const source = graphNodeMap.get(edge.source_node_id);
-          return source ? [{ id: edge.edge_id, label: `${sanitizeExecutionText(source.label || edge.source_node_id)} -> ${formatDynamicEdge(edge.edge_type)}` }] : [];
-        }
-        return [];
-      })
-      .slice(0, 2);
+    const outgoingRelated = (outgoingMap.get(nodeId) || []).flatMap((edge) => {
+      if (orderedIdSet.has(edge.target_node_id)) return [];
+      const target = graphNodeMap.get(edge.target_node_id);
+      return target ? [{ id: edge.edge_id, label: `${formatDynamicEdge(edge.edge_type)} -> ${sanitizeExecutionText(target.label || edge.target_node_id)}` }] : [];
+    });
+    const incomingRelated = (incomingMap.get(nodeId) || []).flatMap((edge) => {
+      if (orderedIdSet.has(edge.source_node_id)) return [];
+      const source = graphNodeMap.get(edge.source_node_id);
+      return source ? [{ id: edge.edge_id, label: `${sanitizeExecutionText(source.label || edge.source_node_id)} -> ${formatDynamicEdge(edge.edge_type)}` }] : [];
+    });
+    const related = [...outgoingRelated, ...incomingRelated].slice(0, 2);
 
     const fallbackRole = index === 0 ? "source" : index === orderedIds.length - 1 ? "sink" : "relay";
     const inferredRole = nodeType === "network_endpoint"
@@ -1283,7 +1290,8 @@ function DynamicSandboxWorkspace({ auth }) {
   const processEvents = Array.isArray(result?.processEvents) ? result.processEvents : [];
   const toolCalls = Array.isArray(result?.toolCalls) ? result.toolCalls : [];
   const llmEvents = Array.isArray(result?.llmEvents) ? result.llmEvents : [];
-  const chainGraph = useMemo(() => buildDynamicChainGraph(result), [result]);
+  const deferredResult = useDeferredValue(result);
+  const chainGraph = useMemo(() => buildDynamicChainGraph(deferredResult), [deferredResult]);
   const riskKey = String(result?.riskLevel || "unknown").toLowerCase();
   const riskMeta = DYNAMIC_RISK_META[riskKey] || DYNAMIC_RISK_META.unknown;
 
@@ -1348,7 +1356,10 @@ function DynamicSandboxWorkspace({ auth }) {
           },
         },
       });
-      setResult(response.result || null);
+      // Keep UI responsive: mark completion first, then schedule heavy graph render as a transition.
+      startTransition(() => {
+        setResult(response.result || null);
+      });
       if (response.capacity) setCapacity(response.capacity);
     } catch (runError) {
       if (runError?.capacity) setCapacity(runError.capacity);

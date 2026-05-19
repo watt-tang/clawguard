@@ -182,7 +182,8 @@ export default function DynamicChainGraphChart({ chainGraph }) {
               <div
                 key={`${link.id}-label`}
                 className="dynamic-chain-edge-label"
-                style={{ left: `${link.labelX}px`, top: `${CENTER_Y - 18}px` }}
+                // Put relation chips below the line to keep the upper area visually clean.
+                style={{ left: `${link.labelX}px`, top: `${CENTER_Y + 18}px` }}
               >
                 {link.label}
               </div>
