@@ -1,253 +1,113 @@
-import { useMemo } from "react";
-import { useEChart } from "../../../hooks/useEChart.js";
+import { useMemo, useState } from "react";
 
 const ROLE_STYLE_MAP = {
   source: {
-    color: "#8b5cf6",
-    bg: "rgba(139, 92, 246, 0.12)",
-    border: "rgba(139, 92, 246, 0.28)",
-    shadow: "rgba(139, 92, 246, 0.22)",
+    dot: "#8b5cf6",
+    glow: "rgba(139, 92, 246, 0.24)",
+    line: "#9f67ff",
+    chipBg: "rgba(139, 92, 246, 0.08)",
+    chipBorder: "rgba(139, 92, 246, 0.16)",
   },
   relay: {
-    color: "#7e22ce",
-    bg: "rgba(126, 34, 206, 0.14)",
-    border: "rgba(126, 34, 206, 0.24)",
-    shadow: "rgba(126, 34, 206, 0.2)",
+    dot: "#7e22ce",
+    glow: "rgba(126, 34, 206, 0.24)",
+    line: "#8b3df0",
+    chipBg: "rgba(126, 34, 206, 0.08)",
+    chipBorder: "rgba(126, 34, 206, 0.16)",
   },
   sink: {
-    color: "#db2777",
-    bg: "rgba(219, 39, 119, 0.12)",
-    border: "rgba(219, 39, 119, 0.24)",
-    shadow: "rgba(219, 39, 119, 0.2)",
+    dot: "#db2777",
+    glow: "rgba(219, 39, 119, 0.22)",
+    line: "#ec4899",
+    chipBg: "rgba(219, 39, 119, 0.08)",
+    chipBorder: "rgba(219, 39, 119, 0.16)",
   },
 };
 
 const DEFAULT_STYLE = ROLE_STYLE_MAP.relay;
-const TOP_LINE_Y = 30;
-const BOTTOM_LINE_Y = 70;
+const GRAPH_HEIGHT = 320;
+const NODE_RADIUS = 7;
+const TOP_Y = 82;
+const BOTTOM_Y = 236;
 
-function escapeHtml(value) {
-  return String(value ?? "")
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll("\"", "&quot;")
-    .replaceAll("'", "&#39;");
-}
-
-function truncateText(value, maxLength = 18) {
+function truncateText(value, maxLength = 22) {
   const text = String(value ?? "").trim();
   if (text.length <= maxLength) return text;
   return `${text.slice(0, Math.max(0, maxLength - 1))}…`;
 }
 
+function buildTooltipLines(node) {
+  const lines = [];
+  if (node.detail) lines.push(node.detail);
+  const related = Array.isArray(node.related) ? node.related.slice(0, 2) : [];
+  related.forEach((item) => {
+    if (item?.label) lines.push(item.label);
+  });
+  return lines;
+}
+
+function buildCurvePath(source, target) {
+  const deltaX = target.x - source.x;
+  const controlOffset = Math.max(60, deltaX * 0.36);
+  return [
+    `M ${source.x} ${source.y}`,
+    `C ${source.x + controlOffset} ${source.y},`,
+    `${target.x - controlOffset} ${target.y},`,
+    `${target.x} ${target.y}`,
+  ].join(" ");
+}
+
 function buildChartModel(nodes = []) {
   const count = nodes.length;
   const chartWidth = Math.max(920, count * 220);
-  const startX = 84;
-  const endX = chartWidth - 84;
+  const startX = 78;
+  const endX = chartWidth - 78;
   const step = count > 1 ? (endX - startX) / (count - 1) : 0;
 
   const chartNodes = nodes.map((node, index) => {
     const roleKey = String(node.role || "relay").toLowerCase();
     const style = ROLE_STYLE_MAP[roleKey] || DEFAULT_STYLE;
+    const isTop = index % 2 === 1;
     return {
       ...node,
       x: count > 1 ? startX + step * index : chartWidth / 2,
-      y: index % 2 === 0 ? BOTTOM_LINE_Y : TOP_LINE_Y,
+      y: isTop ? TOP_Y : BOTTOM_Y,
+      isTop,
       roleKey,
       style,
-      symbolSize: roleKey === "sink" ? 32 : roleKey === "source" ? 30 : 28,
-      labelPosition: index % 2 === 0 ? "top" : "bottom",
-      shortTitle: truncateText(node.title, 16),
+      titleShort: truncateText(node.title, 22),
+      metaShort: truncateText(node.nodeTypeLabel || node.roleLabel || "", 10),
+      tooltipLines: buildTooltipLines(node),
     };
   });
 
   const chartLinks = chartNodes.slice(1).map((node, index) => {
     const source = chartNodes[index];
     const target = node;
-    const targetStyle = target.style || DEFAULT_STYLE;
-    const curveDirection = source.y > target.y ? -0.28 : 0.28;
+    const relationLabel = truncateText(target.edgeLabel || "关联", 8);
     return {
-      source: source.id,
-      target: target.id,
-      edgeLabel: target.edgeLabel || "关联",
-      sourceTitle: source.title,
-      targetTitle: target.title,
-      lineStyle: {
-        width: 3,
-        color: targetStyle.color,
-        curveness: curveDirection,
-        opacity: 0.82,
-        shadowBlur: 8,
-        shadowColor: targetStyle.shadow,
-      },
-      label: {
-        show: true,
-        formatter: () => `{edge|${truncateText(target.edgeLabel || "关联", 10)}}`,
-      },
+      id: `${source.id}-${target.id}`,
+      sourceId: source.id,
+      targetId: target.id,
+      label: relationLabel,
+      style: target.style || DEFAULT_STYLE,
+      path: buildCurvePath(source, target),
+      labelX: (source.x + target.x) / 2,
+      labelY: Math.min(source.y, target.y) + Math.abs(target.y - source.y) / 2,
     };
   });
 
   return { chartNodes, chartLinks, chartWidth };
 }
 
-function buildTooltip(node) {
-  const relations = Array.isArray(node.related) ? node.related : [];
-  const relatedHtml = relations.length
-    ? `<div class="cg-dynamic-tooltip-related">${relations
-      .map((item) => `<span>${escapeHtml(item.label)}</span>`)
-      .join("")}</div>`
-    : '<div class="cg-dynamic-tooltip-empty">无额外关联边</div>';
-
-  const completeness = node.completeness ? escapeHtml(node.completeness) : "normal";
-
-  return `
-    <div class="cg-dynamic-tooltip">
-      <div class="cg-dynamic-tooltip-top">
-        <span class="cg-dynamic-tooltip-role is-${escapeHtml(node.roleKey)}">${escapeHtml(node.roleLabel || "节点")}</span>
-        <span class="cg-dynamic-tooltip-kind">${escapeHtml(node.nodeTypeLabel || "行为节点")}</span>
-      </div>
-      <div class="cg-dynamic-tooltip-title">${escapeHtml(node.title || "未命名节点")}</div>
-      <div class="cg-dynamic-tooltip-detail">${escapeHtml(node.detail || "暂无节点说明。")}</div>
-      <div class="cg-dynamic-tooltip-meta">完整度: ${completeness}</div>
-      ${relatedHtml}
-    </div>
-  `;
-}
-
 export default function DynamicChainGraphChart({ chainGraph }) {
+  const [hoveredNodeId, setHoveredNodeId] = useState("");
   const { chartNodes, chartLinks, chartWidth } = useMemo(
     () => buildChartModel(chainGraph?.nodes || []),
     [chainGraph?.nodes],
   );
 
-  const { chartRef } = useEChart(
-    () => ({
-      animationDuration: 520,
-      animationDurationUpdate: 300,
-      tooltip: {
-        trigger: "item",
-        enterable: true,
-        borderWidth: 0,
-        backgroundColor: "rgba(38, 20, 53, 0.96)",
-        extraCssText: "box-shadow: 0 18px 48px rgba(66, 32, 96, 0.28); border-radius: 18px; padding: 0;",
-        formatter: (params) => {
-          if (params.dataType === "edge") {
-            const source = escapeHtml(params.data?.sourceTitle || params.data?.source || "");
-            const target = escapeHtml(params.data?.targetTitle || params.data?.target || "");
-            const edgeLabel = escapeHtml(params.data?.edgeLabel || "关联");
-            return `
-              <div class="cg-dynamic-tooltip cg-dynamic-tooltip-edge">
-                <div class="cg-dynamic-tooltip-top">
-                  <span class="cg-dynamic-tooltip-kind">链路关系</span>
-                </div>
-                <div class="cg-dynamic-tooltip-title">${edgeLabel}</div>
-                <div class="cg-dynamic-tooltip-detail">${source} -> ${target}</div>
-              </div>
-            `;
-          }
-          return buildTooltip(params.data || {});
-        },
-      },
-      series: [
-        {
-          type: "graph",
-          layout: "none",
-          roam: false,
-          left: 8,
-          right: 8,
-          top: 18,
-          bottom: 18,
-          data: chartNodes.map((node) => ({
-            id: node.id,
-            name: node.title,
-            x: node.x,
-            y: node.y,
-            title: node.title,
-            detail: node.detail,
-            roleLabel: node.roleLabel,
-            roleKey: node.roleKey,
-            nodeTypeLabel: node.nodeTypeLabel,
-            related: node.related,
-            completeness: node.completeness,
-            symbolSize: node.symbolSize,
-            itemStyle: {
-              color: node.style.bg,
-              borderColor: node.style.border,
-              borderWidth: 2,
-              shadowBlur: 18,
-              shadowColor: node.style.shadow,
-            },
-            label: {
-              show: true,
-              position: node.labelPosition,
-              distance: 12,
-              formatter: () => `{title|${node.shortTitle}}\n{meta|${truncateText(node.nodeTypeLabel, 8)}}`,
-            },
-          })),
-          links: chartLinks,
-          edgeSymbol: ["none", "arrow"],
-          edgeSymbolSize: [0, 8],
-          lineStyle: {
-            width: 3,
-            color: "rgba(126, 34, 206, 0.35)",
-            curveness: 0.12,
-            opacity: 0.78,
-          },
-          edgeLabel: {
-            show: true,
-            fontSize: 11,
-            color: "#6b21a8",
-            backgroundColor: "rgba(255, 255, 255, 0.96)",
-            borderColor: "rgba(126, 34, 206, 0.12)",
-            borderWidth: 1,
-            borderRadius: 999,
-            padding: [4, 8],
-            rich: {
-              edge: {
-                color: "#6b21a8",
-                fontSize: 11,
-                fontWeight: 700,
-              },
-            },
-          },
-          label: {
-            color: "#1f1726",
-            fontSize: 12,
-            fontWeight: 700,
-            lineHeight: 18,
-            rich: {
-              title: {
-                color: "#201826",
-                fontSize: 12,
-                fontWeight: 800,
-                align: "center",
-              },
-              meta: {
-                color: "#756a80",
-                fontSize: 10,
-                fontWeight: 600,
-                align: "center",
-              },
-            },
-          },
-          emphasis: {
-            focus: "adjacency",
-            scale: 1.12,
-            lineStyle: {
-              width: 4,
-              opacity: 1,
-            },
-            label: {
-              color: "#0f172a",
-            },
-          },
-        },
-      ],
-    }),
-    [JSON.stringify(chartNodes), JSON.stringify(chartLinks)],
-  );
+  const hoveredNode = chartNodes.find((node) => node.id === hoveredNodeId) || null;
 
   return (
     <div className="dynamic-chain-graph-shell">
@@ -263,10 +123,93 @@ export default function DynamicChainGraphChart({ chainGraph }) {
       ) : null}
       <div className="dynamic-chain-chart-shell">
         <div className="dynamic-chain-chart-scroll">
-          <div ref={chartRef} className="dynamic-chain-chart" style={{ width: `${chartWidth}px` }} />
+          <div className="dynamic-chain-custom-chart" style={{ width: `${chartWidth}px`, height: `${GRAPH_HEIGHT}px` }}>
+            <svg
+              className="dynamic-chain-svg"
+              viewBox={`0 0 ${chartWidth} ${GRAPH_HEIGHT}`}
+              width={chartWidth}
+              height={GRAPH_HEIGHT}
+              aria-hidden="true"
+            >
+              {chartLinks.map((link) => (
+                <path
+                  key={link.id}
+                  d={link.path}
+                  fill="none"
+                  stroke={link.style.line}
+                  strokeWidth="3"
+                  strokeLinecap="round"
+                  opacity="0.92"
+                />
+              ))}
+            </svg>
+
+            {chartLinks.map((link) => (
+              <div
+                key={`${link.id}-label`}
+                className="dynamic-chain-edge-label"
+                style={{
+                  left: `${link.labelX}px`,
+                  top: `${link.labelY}px`,
+                  backgroundColor: link.style.chipBg,
+                  borderColor: link.style.chipBorder,
+                  color: link.style.dot,
+                }}
+              >
+                {link.label}
+              </div>
+            ))}
+
+            {chartNodes.map((node) => (
+              <div key={node.id}>
+                <div
+                  className={`dynamic-chain-node-copy is-${node.isTop ? "top" : "bottom"}`}
+                  style={{ left: `${node.x}px`, top: `${node.y}px` }}
+                >
+                  <strong>{node.titleShort}</strong>
+                  <span>{node.metaShort}</span>
+                </div>
+                <button
+                  type="button"
+                  className="dynamic-chain-node-dot"
+                  style={{
+                    left: `${node.x}px`,
+                    top: `${node.y}px`,
+                    "--dot-color": node.style.dot,
+                    "--dot-glow": node.style.glow,
+                  }}
+                  onMouseEnter={() => setHoveredNodeId(node.id)}
+                  onMouseLeave={() => setHoveredNodeId((current) => (current === node.id ? "" : current))}
+                  onFocus={() => setHoveredNodeId(node.id)}
+                  onBlur={() => setHoveredNodeId((current) => (current === node.id ? "" : current))}
+                  aria-label={node.title || "节点"}
+                />
+              </div>
+            ))}
+
+            {hoveredNode ? (
+              <div
+                className={`dynamic-chain-hover-card is-${hoveredNode.isTop ? "bottom" : "top"}`}
+                style={{
+                  left: `${hoveredNode.x}px`,
+                  top: `${hoveredNode.y}px`,
+                  "--hover-accent": hoveredNode.style.dot,
+                }}
+              >
+                <div className="dynamic-chain-hover-role">
+                  <span>{hoveredNode.roleLabel || "节点"}</span>
+                  <span>{hoveredNode.nodeTypeLabel || "行为节点"}</span>
+                </div>
+                <strong>{hoveredNode.title}</strong>
+                {hoveredNode.tooltipLines.map((line, index) => (
+                  <p key={`${hoveredNode.id}-line-${index}`}>{line}</p>
+                ))}
+              </div>
+            ) : null}
+          </div>
         </div>
       </div>
-      <div className="dynamic-chain-chart-hint">悬浮或轻触节点可查看详细信息，边上的标签表示节点间的关键关系。</div>
+      <div className="dynamic-chain-chart-hint">鼠标悬浮或轻触圆点可查看详细信息，上下文案用于快速识别关键节点。</div>
       <div className="dynamic-chain-node-rail">
         {chainGraph.nodes.map((node) => (
           <div key={node.id} className={`dynamic-chain-node-pill is-${node.role || "relay"}`}>
