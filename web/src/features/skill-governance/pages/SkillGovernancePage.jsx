@@ -283,10 +283,17 @@ function buildDynamicChainGraph(result) {
       .filter(Boolean)
       .forEach((node) => pushSelected(node.node_id));
 
-    rankedGraphNodes.slice(0, 6).forEach((node) => pushSelected(node.node_id));
+    rankedGraphNodes.slice(0, 10).forEach((node) => pushSelected(node.node_id));
+  } else {
+    // Keep chain-first behavior, but append several high-value nodes that are not in the chain.
+    rankedGraphNodes
+      .filter((node) => !selectedIdSet.has(node.node_id))
+      .slice(0, 6)
+      .forEach((node) => pushSelected(node.node_id));
   }
 
-  const visibleLimit = 6;
+  // Show more key nodes by default so important relays are less likely to be dropped.
+  const visibleLimit = 12;
   const limitedSelectedIds = selectedIds.slice(0, visibleLimit);
   const limitedSelectedSet = new Set(limitedSelectedIds);
   const outgoingMap = new Map();
