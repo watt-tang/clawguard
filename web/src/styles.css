@@ -6570,6 +6570,14 @@ select {
   min-width: 0;
 }
 
+.dynamic-scheduler-panel {
+  min-width: 0;
+}
+
+.dynamic-queue-panel {
+  margin-top: 16px;
+}
+
 .dynamic-field {
   display: flex;
   flex-direction: column;
@@ -6643,6 +6651,14 @@ select {
   display: inline-flex;
   align-items: center;
   gap: 8px;
+}
+
+.dynamic-queue-footer {
+  justify-content: flex-end;
+}
+
+.dynamic-queue-footer .dynamic-capacity {
+  margin-right: auto;
 }
 
 .dynamic-capacity {
@@ -6946,6 +6962,14 @@ select {
   box-shadow: 0 8px 18px rgba(38, 24, 45, 0.06);
   z-index: 3;
   pointer-events: none;
+}
+
+.dynamic-chain-edge-label.is-top {
+  box-shadow: 0 6px 14px rgba(38, 24, 45, 0.05);
+}
+
+.dynamic-chain-edge-label.is-bottom {
+  box-shadow: 0 10px 18px rgba(38, 24, 45, 0.08);
 }
 
 .dynamic-chain-hover-card {

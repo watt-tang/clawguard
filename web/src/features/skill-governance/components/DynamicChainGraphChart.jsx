@@ -110,6 +110,9 @@ function buildChartModel(nodes = []) {
       y2: CENTER_Y,
       label: truncateText(target.edgeLabel, 8),
       labelX: (source.x + target.x) / 2,
+      // Alternate relation chips above/below the center line.
+      labelY: index % 2 === 0 ? CENTER_Y - 18 : CENTER_Y + 18,
+      labelPlacement: index % 2 === 0 ? "top" : "bottom",
     };
   });
 
@@ -181,9 +184,8 @@ export default function DynamicChainGraphChart({ chainGraph }) {
             {chartLinks.map((link) => (
               <div
                 key={`${link.id}-label`}
-                className="dynamic-chain-edge-label"
-                // Put relation chips below the line to keep the upper area visually clean.
-                style={{ left: `${link.labelX}px`, top: `${CENTER_Y + 18}px` }}
+                className={`dynamic-chain-edge-label is-${link.labelPlacement}`}
+                style={{ left: `${link.labelX}px`, top: `${link.labelY}px` }}
               >
                 {link.label}
               </div>

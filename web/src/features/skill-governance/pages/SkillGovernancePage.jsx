@@ -1,4 +1,4 @@
-import { Fragment, startTransition, useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
+﻿import { Fragment, startTransition, useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import {
@@ -938,7 +938,6 @@ function SkillDetectWorkspace({ auth }) {
             <div className="skill-tip-chip">支持数据库检索</div>
             <div className="skill-tip-chip">支持远程 slug 拉取</div>
             <div className="skill-tip-chip">支持仓库地址复扫</div>
-            <div className="skill-tip-chip">返回统一扫描报告</div>
           </div>
         </div>
       </div>
@@ -1454,6 +1453,16 @@ function DynamicSandboxWorkspace({ auth }) {
             <textarea className="dynamic-textarea" value={inputJson} onChange={(event) => setInputJson(event.target.value)} spellCheck={false} />
           </label>
 
+        </div>
+
+        <div className="skill-upload-card dynamic-scheduler-panel">
+          <div className="skill-card-head">
+            <div>
+              <div className="skill-card-title">统一调度设置</div>
+              <div className="skill-card-desc">配置动态检测的网络、超时和 LLM 运行参数。</div>
+            </div>
+          </div>
+
           <div className="dynamic-control-grid">
             <label className="dynamic-field">
               <span>网络策略</span>
@@ -1500,17 +1509,6 @@ function DynamicSandboxWorkspace({ auth }) {
             ) : null}
           </div>
 
-          <div className="dynamic-submit-row">
-            <div className="dynamic-capacity">
-              <Cpu size={16} strokeWidth={1.8} />
-              <span>并发 {capacity.active}/{capacity.limit}</span>
-            </div>
-            <button className="oc-primary-btn" type="button" onClick={handleRunSandbox} disabled={!isAuthenticated || isRunning}>
-              {isRunning ? <LoaderCircle size={16} className="skill-spin" /> : <PlayCircle size={16} />}
-              <span>{isRunning ? `沙箱运行中 ${formatDurationMs(elapsedSeconds * 1000)}` : "启动动态检测"}</span>
-            </button>
-          </div>
-
           {error ? (
             <div className="skill-empty-state skill-error-state">
               <AlertCircle size={18} strokeWidth={1.8} />
@@ -1518,8 +1516,9 @@ function DynamicSandboxWorkspace({ auth }) {
             </div>
           ) : null}
         </div>
+      </div>
 
-        <div className="skill-upload-list dynamic-upload-list">
+      <div className="skill-upload-list dynamic-upload-list dynamic-queue-panel">
           <div className="skill-card-head">
             <div>
               <div className="skill-card-title">样本队列</div>
@@ -1548,7 +1547,16 @@ function DynamicSandboxWorkspace({ auth }) {
             </div>
           )}
           {uploads.length > 12 ? <div className="skill-inline-empty">还有 {uploads.length - 12} 个文件将在提交时一并上传。</div> : null}
-        </div>
+          <div className="dynamic-submit-row dynamic-queue-footer">
+            <div className="dynamic-capacity">
+              <Cpu size={16} strokeWidth={1.8} />
+              <span>并发 {capacity.active}/{capacity.limit}</span>
+            </div>
+            <button className="oc-primary-btn" type="button" onClick={handleRunSandbox} disabled={!isAuthenticated || isRunning}>
+              {isRunning ? <LoaderCircle size={16} className="skill-spin" /> : <PlayCircle size={16} />}
+              <span>{isRunning ? `沙箱运行中 ${formatDurationMs(elapsedSeconds * 1000)}` : "启动动态检测"}</span>
+            </button>
+          </div>
       </div>
 
       <div className="skill-upload-list dynamic-result-panel">
@@ -2538,3 +2546,4 @@ export default function SkillGovernancePage({ auth }) {
     </div>
   );
 }
+
