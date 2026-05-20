@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import json
 import re
+import shlex
+import uuid
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
@@ -47,7 +49,7 @@ def resolve_skill_target(skill_path: str) -> tuple[Path, str]:
     if direct.exists():
         return source, "SKILL.md"
 
-    candidates = sorted(source.rglob("SKILL.md"))
+    candidates = sorted(path for path in source.rglob("*") if path.is_file() and path.name == "SKILL.md")
     if not candidates:
         raise ValueError(f"No SKILL.md found under directory: {source}")
     if len(candidates) > 1:
@@ -134,6 +136,13 @@ def _extract_first_paragraph(text: str) -> str:
 
 
 def _parse_actions(text: str) -> list[SkillAction]:
+    explicit_actions = _parse_explicit_actions(text)
+    if explicit_actions:
+        return explicit_actions
+    return _parse_example_actions(text)
+
+
+def _parse_explicit_actions(text: str) -> list[SkillAction]:
     for match in FENCE_RE.finditer(text):
         info = match.group("info").strip().lower()
         if info not in {"skill-actions", "json skill-actions", "skill-actions json"}:
@@ -162,3 +171,186 @@ def _parse_actions(text: str) -> list[SkillAction]:
             )
         return actions
     return []
+
+
+def _parse_example_actions(text: str) -> list[SkillAction]:
+    supported_shells = {"bash", "sh", "shell", "zsh"}
+    candidates: list[tuple[int, SkillAction]] = []
+    for match in FENCE_RE.finditer(text):
+        info = match.group("info").strip().lower()
+        if info not in supported_shells:
+            continue
+        for command in _extract_curl_commands(match.group("body")):
+            action = _curl_command_to_action(command)
+            if action is not None:
+                candidates.append((_score_example_action(action), action))
+    if not candidates:
+        return []
+    candidates.sort(key=lambda item: item[0], reverse=True)
+    return [candidates[0][1]]
+
+
+def _extract_curl_commands(body: str) -> list[str]:
+    commands: list[str] = []
+    current: list[str] = []
+
+    for raw_line in body.splitlines():
+        line = raw_line.strip()
+        if not line or line.startswith("#"):
+            continue
+        if line.startswith("curl "):
+            if current:
+                commands.append(" ".join(current).replace("\\", "").strip())
+                current = []
+            current.append(line)
+            if not line.endswith("\\"):
+                commands.append(" ".join(current).replace("\\", "").strip())
+                current = []
+            continue
+        if current:
+            current.append(line)
+            if not line.endswith("\\"):
+                commands.append(" ".join(current).replace("\\", "").strip())
+                current = []
+
+    if current:
+        commands.append(" ".join(current).replace("\\", "").strip())
+
+    return [item for item in commands if item.startswith("curl ")]
+
+
+def _curl_command_to_action(command: str) -> SkillAction | None:
+    try:
+        tokens = shlex.split(command, posix=True)
+    except ValueError:
+        return None
+    if not tokens or tokens[0] != "curl":
+        return None
+
+    method = "GET"
+    url = ""
+    headers: dict[str, str] = {}
+    body: str | None = None
+    unsupported = False
+    options_with_value = {
+        "-X", "--request",
+        "-H", "--header",
+        "-d", "--data", "--data-raw", "--data-binary",
+        "-F", "--form",
+        "-A", "--user-agent",
+        "-u", "--user",
+    }
+
+    index = 1
+    while index < len(tokens):
+        token = tokens[index]
+        if token in {"-X", "--request"} and index + 1 < len(tokens):
+            method = tokens[index + 1].upper()
+            index += 2
+            continue
+        if token in {"-H", "--header"} and index + 1 < len(tokens):
+            header = tokens[index + 1]
+            if ":" in header:
+                key, value = header.split(":", 1)
+                headers[key.strip()] = value.strip()
+            index += 2
+            continue
+        if token in {"-d", "--data", "--data-raw", "--data-binary"} and index + 1 < len(tokens):
+            body = tokens[index + 1]
+            if method == "GET":
+                method = "POST"
+            index += 2
+            continue
+        if token in {"-F", "--form"}:
+            unsupported = True
+            break
+        if token in {"-s", "--silent", "-L", "--location", "--compressed"}:
+            index += 1
+            continue
+        if token.startswith("http://") or token.startswith("https://"):
+            url = token
+            index += 1
+            continue
+        if token in options_with_value and index + 1 < len(tokens):
+            index += 2
+            continue
+        index += 1
+
+    if unsupported or not url:
+        return None
+    if _contains_unresolved_placeholder(url) or _contains_unresolved_placeholder(body or ""):
+        return None
+    if any(_contains_unresolved_placeholder(value) for value in headers.values()):
+        return None
+
+    normalized_body = _normalize_example_body(body, headers)
+    description = f"Synthesized from documented curl example: {method} {url}"
+    return SkillAction(
+        id="example_http_request",
+        type="http_request",
+        name="Execute documented API example",
+        description=description,
+        config={
+            "url": url,
+            "method": method,
+            "headers": headers,
+            **({"body": normalized_body} if normalized_body is not None else {}),
+            "timeout_seconds": 20,
+        },
+        continue_on_error=True,
+    )
+
+
+def _contains_unresolved_placeholder(value: str) -> bool:
+    placeholders = {
+        "YOUR_API_KEY",
+        "POST_ID",
+        "HANDLE",
+        "SLUG",
+        "IMAGE_URL_FROM_STEP_1",
+        "AUDIO_URL_FROM_STEP_1",
+        "YOUR_CLAIM_CODE",
+        "/path/to/",
+    }
+    return any(token in value for token in placeholders)
+
+
+def _normalize_example_body(body: str | None, headers: dict[str, str]) -> str | None:
+    if body is None:
+        return None
+    content_type = headers.get("Content-Type", headers.get("content-type", "")).lower()
+    if "application/json" not in content_type:
+        return body
+    try:
+        payload = json.loads(body)
+    except json.JSONDecodeError:
+        return body
+    if isinstance(payload, dict):
+        if str(payload.get("handle", "")).strip().lower() in {"youragent", "your-agent"}:
+            payload["handle"] = f"sandbox-agent-{uuid.uuid4().hex[:8]}"
+        if str(payload.get("display_name", "")).strip() == "Your Agent":
+            payload["display_name"] = "Sandbox Agent"
+        if str(payload.get("bio", "")).strip() == "What you do":
+            payload["bio"] = "ProvLoom sandbox bootstrap probe"
+        return json.dumps(payload, ensure_ascii=False)
+    return body
+
+
+def _score_example_action(action: SkillAction) -> int:
+    url = str(action.config.get("url", ""))
+    method = str(action.config.get("method", "GET")).upper()
+    body = action.config.get("body")
+    score = 0
+
+    if "api." in url or "/api/" in url:
+        score += 40
+    if method != "GET":
+        score += 25
+    if body:
+        score += 10
+    if "register" in url:
+        score += 15
+    if url.endswith((".md", ".json", ".yaml", ".yml")):
+        score -= 40
+
+    return score

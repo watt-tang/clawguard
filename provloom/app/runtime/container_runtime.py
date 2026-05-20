@@ -276,10 +276,11 @@ class ProvLoomSkillRuntime:
         self.input_payload = input_payload
         self.events_path = events_path
         self.llm_config = llm_config or {}
+        self.llm_active = bool(self.llm_config.get("enabled") and self.llm_config.get("api_key"))
         self.definition = load_skill_definition(
             skill_root,
             skill_file,
-            allow_empty_actions=bool(self.llm_config.get("enabled")),
+            allow_empty_actions=self.llm_active,
         )
         self.context: dict[str, Any] = {
             "input_payload": input_payload,
@@ -298,10 +299,10 @@ class ProvLoomSkillRuntime:
             "skill_file": self.definition.skill_file,
             "action_count": len(self.definition.actions),
             "runtime": self.definition.runtime,
-            "llm_enabled": bool(self.llm_config.get("enabled")),
+            "llm_enabled": self.llm_active,
         })
 
-        if self.llm_config.get("enabled") or self.definition.runtime in {"deepseek-agent", "llm-agent", "llm-native"}:
+        if self.llm_active or self.definition.runtime in {"deepseek-agent", "llm-agent", "llm-native"}:
             exit_code = LLMAgentSkillRuntime(
                 definition=self.definition,
                 input_payload=self.input_payload,

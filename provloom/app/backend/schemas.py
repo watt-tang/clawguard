@@ -68,8 +68,6 @@ class LLMConfig:
         model = str(payload.get("model") or default_llm_model(provider)).strip()
         temperature = float(payload.get("temperature", 0.0))
         max_steps = int(payload.get("max_steps", 8))
-        if enabled and not api_key:
-            raise ValueError("`llm_config.api_key` is required when llm_config.enabled=true.")
         return cls(
             enabled=enabled,
             provider=provider,

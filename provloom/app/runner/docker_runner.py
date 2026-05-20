@@ -44,6 +44,7 @@ class DockerRunner:
         # Docker bind mounts require absolute host paths for reproducible benchmark runs.
         self.artifacts_root = Path(artifacts_root).resolve()
         self.artifacts_root.mkdir(parents=True, exist_ok=True)
+        self.docker_bin: str | None = None
 
     def run(
         self,
@@ -64,10 +65,11 @@ class DockerRunner:
         trigger_prompt_used: list[str] | None = None,
     ) -> SandboxExecution:
         source_dir, skill_file = resolve_skill_target(skill_path)
+        llm_active = bool(llm_config.enabled and llm_config.api_key)
         skill_definition = load_skill_definition(
             source_dir,
             skill_file,
-            allow_empty_actions=llm_config.enabled,
+            allow_empty_actions=llm_active,
         )
         self._ensure_docker_available()
         self._build_image()
@@ -144,8 +146,7 @@ class DockerRunner:
             runner_script = self._build_runner_script(skill_file=skill_file, timeout_seconds=timeout_seconds)
             container_name = f"skill-sandbox-{uuid.uuid4().hex[:10]}"
 
-            docker_cmd = [
-                "docker",
+            docker_cmd = self._docker_cmd(
                 "run",
                 "--name",
                 container_name,
@@ -165,7 +166,7 @@ class DockerRunner:
                 f"type=bind,src={artifacts_dir},dst=/artifacts",
                 "--add-host",
                 "host.docker.internal:host-gateway",
-            ]
+            )
             if network_policy == "disabled":
                 docker_cmd.extend(["--network", "none"])
 
@@ -294,18 +295,84 @@ class DockerRunner:
                 self._force_cleanup(container_name)
 
     def _ensure_docker_available(self) -> None:
-        if shutil.which("docker") is None:
+        if self.docker_bin:
+            return
+        docker_bin = self._resolve_docker_cli()
+        if docker_bin is None:
             raise DockerUnavailableError(
-                "Docker CLI is not available. Please install Docker and ensure `docker` is on PATH."
+                "Docker CLI is not available. Please install Docker and ensure `docker` is on PATH, "
+                "or set PROVLOOM_DOCKER_BIN / SKILL_DYNAMIC_DOCKER_BIN to the Docker CLI path."
             )
+        self.docker_bin = docker_bin
+
+    def _resolve_docker_cli(self) -> str | None:
+        env_candidates = [
+            os.environ.get("PROVLOOM_DOCKER_BIN", ""),
+            os.environ.get("SKILL_DYNAMIC_DOCKER_BIN", ""),
+            os.environ.get("DOCKER_BIN", ""),
+        ]
+        for candidate in env_candidates:
+            resolved = self._resolve_executable_candidate(candidate)
+            if resolved:
+                return resolved
+
+        for candidate in ("docker", "docker.exe", "com.docker.cli.exe"):
+            resolved = shutil.which(candidate)
+            if resolved:
+                return resolved
+
+        if os.name == "nt":
+            local_app_data = os.environ.get("LOCALAPPDATA", "")
+            program_files = os.environ.get("ProgramFiles", r"C:\Program Files")
+            common_paths = [
+                Path(program_files) / "Docker" / "Docker" / "resources" / "bin" / "docker.exe",
+                Path(program_files) / "Docker" / "Docker" / "resources" / "bin" / "com.docker.cli.exe",
+                Path(r"C:\ProgramData\DockerDesktop\version-bin\docker.exe"),
+                Path(r"C:\ProgramData\DockerDesktop\version-bin\com.docker.cli.exe"),
+            ]
+            if local_app_data:
+                common_paths.extend([
+                    Path(local_app_data) / "Programs" / "Docker" / "Docker" / "resources" / "bin" / "docker.exe",
+                    Path(local_app_data) / "Programs" / "Docker" / "Docker" / "resources" / "bin" / "com.docker.cli.exe",
+                ])
+        else:
+            common_paths = [
+                Path("/usr/bin/docker"),
+                Path("/usr/local/bin/docker"),
+            ]
+
+        for candidate in common_paths:
+            resolved = self._resolve_executable_candidate(candidate)
+            if resolved:
+                return resolved
+        return None
+
+    @staticmethod
+    def _resolve_executable_candidate(candidate: str | Path | None) -> str | None:
+        raw = str(candidate or "").strip()
+        if not raw:
+            return None
+        expanded = Path(raw).expanduser()
+        if expanded.is_file():
+            return str(expanded)
+        resolved = shutil.which(raw)
+        if resolved:
+            return resolved
+        return None
+
+    def _docker_cmd(self, *args: str) -> list[str]:
+        self._ensure_docker_available()
+        assert self.docker_bin is not None
+        return [self.docker_bin, *args]
 
     def _build_image(self) -> None:
+        docker_inspect_cmd = self._docker_cmd("image", "inspect", self.image_name)
         with self._build_lock:
             if self._image_built:
                 return
             # Reuse an existing local image to keep benchmark reruns stable.
             inspect_result = subprocess.run(
-                ["docker", "image", "inspect", self.image_name],
+                docker_inspect_cmd,
                 text=True,
                 capture_output=True,
                 check=False,
@@ -313,8 +380,7 @@ class DockerRunner:
             if inspect_result.returncode == 0:
                 self._image_built = True
                 return
-            cmd = [
-                "docker",
+            cmd = self._docker_cmd(
                 "build",
                 "-t",
                 self.image_name,
@@ -329,7 +395,7 @@ class DockerRunner:
                 "-f",
                 str(self.dockerfile_dir / "Dockerfile"),
                 ".",
-            ]
+            )
             result = subprocess.run(cmd, text=True, capture_output=True, check=False)
             if result.returncode != 0:
                 raise SandboxRunError(f"Failed to build sandbox image: {result.stderr.strip()}")
@@ -356,7 +422,7 @@ exit 0
 
     def _force_cleanup(self, container_name: str) -> None:
         subprocess.run(
-            ["docker", "rm", "-f", container_name],
+            self._docker_cmd("rm", "-f", container_name),
             text=True,
             capture_output=True,
             check=False,
@@ -413,7 +479,7 @@ exit 0
 
     def _inspect_container(self, container_name: str) -> dict:
         result = subprocess.run(
-            ["docker", "inspect", "--size", container_name],
+            self._docker_cmd("inspect", "--size", container_name),
             text=True,
             capture_output=True,
             check=False,
@@ -434,7 +500,7 @@ exit 0
         while not stop_event.is_set():
             try:
                 result = subprocess.run(
-                    ["docker", "stats", "--no-stream", "--format", "{{.MemUsage}}", container_name],
+                    self._docker_cmd("stats", "--no-stream", "--format", "{{.MemUsage}}", container_name),
                     text=True,
                     capture_output=True,
                     check=False,
