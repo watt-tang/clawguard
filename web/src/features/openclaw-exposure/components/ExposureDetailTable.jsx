@@ -11,7 +11,6 @@ function formatRow(row, isLoggedIn) {
 
   return {
     ip: isLoggedIn ? (row.ip ?? "-") : maskIp(row.ip ?? ""),
-    host: row.host ?? "-",
     service: row.service ?? row.serviceDesc ?? "-",
     location: region,
     city: isLoggedIn ? (row.city ?? "-") : maskField(row.city),
@@ -210,7 +209,6 @@ function LoginModal({ onLogin, onRegister, onClose }) {
 
 const COLS = [
   { key: "ip", label: "IP地址", width: "140px", mono: true },
-  { key: "host", label: "主机名", width: "100px" },
   { key: "service", label: "端口/服务", width: "150px" },
   { key: "location", label: "地区", width: "120px" },
   { key: "city", label: "城市", width: "100px" },

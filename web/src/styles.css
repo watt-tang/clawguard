@@ -6572,6 +6572,10 @@ select {
 
 .dynamic-scheduler-panel {
   min-width: 0;
+  align-self: stretch;
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
 }
 
 /* Keep "upload sample" and "unified scheduling" cards visually equal-height on desktop. */
@@ -6625,16 +6629,23 @@ select {
 
 .dynamic-control-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 14px;
+}
+
+.dynamic-control-grid .oc-input,
+.dynamic-control-grid select {
+  width: 100%;
+  min-width: 0;
 }
 
 .dynamic-llm-panel {
-  margin-top: 14px;
+  margin-top: 18px;
   padding: 14px;
   border: 1px solid rgba(126, 12, 110, 0.1);
   border-radius: 14px;
   background: rgba(126, 12, 110, 0.035);
+  flex: 1;
 }
 
 .dynamic-check-row {

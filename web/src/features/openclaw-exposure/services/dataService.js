@@ -143,7 +143,6 @@ export async function fetchExposureList({
 export function buildCsvContent(rows, isLoggedIn) {
   const headers = [
     "IP地址",
-    "主机名",
     "端口/服务",
     "地区",
     "城市",
@@ -171,7 +170,6 @@ export function buildCsvContent(rows, isLoggedIn) {
     lines.push(
       [
         maskIpFn(r.ip),
-        r.host ?? "-",
         r.service ?? r.serviceDesc ?? "-",
         r.region ?? r.location ?? "-",
         maskFn(r.city),
