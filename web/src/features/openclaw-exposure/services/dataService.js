@@ -151,7 +151,6 @@ export function buildCsvContent(rows, isLoggedIn) {
     "运行状态",
     "境内实例",
     "版本号",
-    "历史漏洞关联",
     "最后发现时间",
   ];
 
@@ -178,7 +177,6 @@ export function buildCsvContent(rows, isLoggedIn) {
         r.status ?? "-",
         r.scope ?? "-",
         r.version ?? "-",
-        r.risk ?? "-",
         r.lastSeen ?? r.lastSnapshot ?? "-",
       ]
         .map((v) => `"${String(v).replace(/"/g, '""')}"`)

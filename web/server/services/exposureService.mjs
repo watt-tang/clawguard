@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import readline from "node:readline";
 import maxmind from "maxmind";
 import { prisma } from "../lib/prisma.mjs";
 import { formatDate, formatDateTime } from "../lib/date.mjs";
@@ -33,6 +34,8 @@ const DOMESTIC_IP_PREFIXES = new Set([
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const projectRoot = path.resolve(__dirname, "../..");
 const OPENCLAW_VERSION_TREND_CSV = process.env.OPENCLAW_VERSION_TREND_CSV || "/root/clawguard/data/C2_daily_version_alive.csv";
+const OPENCLAW_VERSION_DETAIL_CSV = process.env.EXPOSURE_VERSION_CSV || "/root/clawguard/data/ip_day_version.csv";
+let openclawVersionDetailCache = null;
 
 function normalizeCsvDateLabel(value) {
   const raw = String(value || "").trim();
@@ -65,6 +68,108 @@ function parseOpenclawVersionTrendCsv(csvText) {
   }
 
   return { dates, versions };
+}
+
+function parseSimpleCsvLine(line) {
+  const values = [];
+  let current = "";
+  let inQuotes = false;
+
+  for (let index = 0; index < line.length; index += 1) {
+    const char = line[index];
+    if (char === "\"") {
+      if (inQuotes && line[index + 1] === "\"") {
+        current += "\"";
+        index += 1;
+      } else {
+        inQuotes = !inQuotes;
+      }
+      continue;
+    }
+
+    if (char === "," && !inQuotes) {
+      values.push(current);
+      current = "";
+      continue;
+    }
+
+    current += char;
+  }
+
+  values.push(current);
+  return values.map((value) => String(value || "").trim());
+}
+
+function normalizeCompactDate(value) {
+  const digits = String(value || "").replace(/\D/g, "");
+  return digits.length === 8 ? digits : "";
+}
+
+async function loadOpenclawLatestVersionMap() {
+  const csvPath = path.resolve(OPENCLAW_VERSION_DETAIL_CSV);
+  if (!fs.existsSync(csvPath)) {
+    return { latestDateKey: "", versionByIp: new Map() };
+  }
+
+  const stat = await fs.promises.stat(csvPath);
+  if (
+    openclawVersionDetailCache &&
+    openclawVersionDetailCache.path === csvPath &&
+    openclawVersionDetailCache.mtimeMs === stat.mtimeMs
+  ) {
+    return openclawVersionDetailCache.payload;
+  }
+
+  const versionByIp = new Map();
+  const stream = fs.createReadStream(csvPath, "utf8");
+  const rl = readline.createInterface({ input: stream, crlfDelay: Infinity });
+  let latestDateKey = "";
+  let headerParsed = false;
+  let scanDateIndex = -1;
+  let ipIndex = -1;
+  let versionIndex = -1;
+
+  for await (const rawLine of rl) {
+    const line = String(rawLine || "").trim();
+    if (!line) continue;
+
+    if (!headerParsed) {
+      const headers = parseSimpleCsvLine(line).map((header) => header.toLowerCase());
+      scanDateIndex = headers.indexOf("scan_date");
+      ipIndex = headers.indexOf("ip");
+      versionIndex = headers.indexOf("pkg_date");
+      headerParsed = true;
+      if (scanDateIndex < 0 || ipIndex < 0 || versionIndex < 0) {
+        throw new Error("OpenClaw version CSV missing required headers: scan_date, ip, pkg_date");
+      }
+      continue;
+    }
+
+    const cells = parseSimpleCsvLine(line);
+    const scanDate = normalizeCompactDate(cells[scanDateIndex]);
+    const ip = String(cells[ipIndex] || "").trim();
+    const version = String(cells[versionIndex] || "").trim() || "unknown";
+    if (!scanDate || !ip) continue;
+
+    if (scanDate > latestDateKey) {
+      latestDateKey = scanDate;
+      versionByIp.clear();
+      versionByIp.set(ip, version);
+      continue;
+    }
+
+    if (scanDate === latestDateKey) {
+      versionByIp.set(ip, version);
+    }
+  }
+
+  const payload = { latestDateKey, versionByIp };
+  openclawVersionDetailCache = {
+    path: csvPath,
+    mtimeMs: stat.mtimeMs,
+    payload,
+  };
+  return payload;
 }
 
 function normalizeChinaDivisionName(name) {
@@ -819,40 +924,6 @@ export async function getExposureTrend(query = {}) {
     return writeCache(cacheKey, { dates: [], daily: [], cumulative: [], newAdded: [] });
   }
 
-  const aggRows = await prisma.exposureDailyAgg.findMany({
-    where: { productKey },
-    orderBy: { snapshotDate: "asc" },
-    select: {
-      snapshotDate: true,
-      exposedCount: true,
-      newDistinctIpCount: true,
-      cumulativeDistinctIpCount: true,
-    },
-  });
-
-  if (aggRows.length) {
-    const dates = snapshots.map((item) => formatDate(item.snapshotDate));
-    const aggMap = new Map(aggRows.map((item) => [formatDate(item.snapshotDate), item]));
-    const daily = [];
-    const newAdded = [];
-    const cumulative = [];
-    let running = 0;
-
-    for (const date of dates) {
-      const row = aggMap.get(date);
-      const dailyCount = row?.exposedCount ?? 0;
-      const newCount = row?.newDistinctIpCount ?? 0;
-      const cumulativeCount = row?.cumulativeDistinctIpCount;
-
-      running = Number.isFinite(cumulativeCount) ? cumulativeCount : running + newCount;
-      daily.push(dailyCount);
-      newAdded.push(newCount);
-      cumulative.push(running);
-    }
-
-    return writeCache(cacheKey, { dates, daily, cumulative, newAdded });
-  }
-
   const fallback = await buildExposureTrendFromRaw(snapshots, productKey);
   return writeCache(cacheKey, fallback);
 }
@@ -1034,7 +1105,19 @@ export async function getExposureList(query = {}) {
   }
 
   const rawRows = await prisma.exposureRecord.findMany(queryOptions);
-  const rows = await Promise.all(rawRows.map((row) => toResponseRow(row, latest.dateKey, isLoggedIn)));
+  let latestVersionLookup = null;
+  if (productKey === DEFAULT_CLAW_EXPOSURE_PRODUCT_KEY) {
+    latestVersionLookup = await loadOpenclawLatestVersionMap();
+  }
+  const rows = await Promise.all(
+    rawRows.map((row) => {
+      const version =
+        latestVersionLookup?.latestDateKey === latest.dateKey
+          ? latestVersionLookup.versionByIp.get(row.ip) || row.version
+          : row.version;
+      return toResponseRow({ ...row, version }, latest.dateKey, isLoggedIn);
+    })
+  );
 
   return {
     total,

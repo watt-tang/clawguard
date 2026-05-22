@@ -20,7 +20,6 @@ function formatRow(row, isLoggedIn) {
     scopeLabel: scope || "-",
     isDomestic,
     version: row.version ?? "-",
-    risk: row.risk ?? "-",
     lastSeen: row.lastSeen ?? row.lastSnapshot ?? "-",
   };
 }
@@ -217,7 +216,6 @@ const COLS = [
   { key: "status", label: "运行状态", width: "100px" },
   { key: "scopeLabel", label: "境内实例", width: "90px" },
   { key: "version", label: "版本号", width: "110px", mono: true },
-  { key: "risk", label: "历史漏洞关联", width: "130px" },
   { key: "lastSeen", label: "最后发现时间", width: "140px", mono: true },
 ];
 
