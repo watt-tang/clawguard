@@ -219,6 +219,11 @@ const COLS = [
   { key: "lastSeen", label: "最后发现时间", width: "140px", mono: true },
 ];
 
+const DETAIL_TABLE_TEMPLATE =
+  "minmax(120px, 1fr) minmax(170px, 1.3fr) minmax(150px, 1.2fr) minmax(90px, 0.8fr) " +
+  "minmax(90px, 0.8fr) minmax(110px, 0.95fr) minmax(120px, 1fr) minmax(110px, 0.95fr) " +
+  "minmax(110px, 0.9fr) minmax(130px, 1fr)";
+
 export default function ExposureDetailTable({
   rows,
   total,
@@ -387,7 +392,7 @@ export default function ExposureDetailTable({
         </div>
       </div>
 
-      <div className="oc-dt-header" style={{ gridTemplateColumns: COLS.map((col) => col.width).join(" ") }}>
+      <div className="oc-dt-header" style={{ gridTemplateColumns: DETAIL_TABLE_TEMPLATE }}>
         {COLS.map((col) => (
           <div key={col.key} className="oc-dt-th">
             {col.label}
@@ -405,7 +410,7 @@ export default function ExposureDetailTable({
           (rows ?? []).map((row) => {
             const formatted = formatRow(row, isLoggedIn);
             return (
-              <div key={row.id ?? row.ip} className="oc-dt-row" style={{ gridTemplateColumns: COLS.map((col) => col.width).join(" ") }}>
+              <div key={row.id ?? row.ip} className="oc-dt-row" style={{ gridTemplateColumns: DETAIL_TABLE_TEMPLATE }}>
                 {COLS.map((col) => (
                   <div
                     key={col.key}

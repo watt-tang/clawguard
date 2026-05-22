@@ -105,17 +105,18 @@ function normalizeCompactDate(value) {
   return digits.length === 8 ? digits : "";
 }
 
-async function loadOpenclawLatestVersionMap() {
+async function loadOpenclawVersionMapForDate(targetDateKey) {
   const csvPath = path.resolve(OPENCLAW_VERSION_DETAIL_CSV);
   if (!fs.existsSync(csvPath)) {
-    return { latestDateKey: "", versionByIp: new Map() };
+    return { matchedDateKey: "", versionByIp: new Map() };
   }
 
   const stat = await fs.promises.stat(csvPath);
   if (
     openclawVersionDetailCache &&
     openclawVersionDetailCache.path === csvPath &&
-    openclawVersionDetailCache.mtimeMs === stat.mtimeMs
+    openclawVersionDetailCache.mtimeMs === stat.mtimeMs &&
+    openclawVersionDetailCache.targetDateKey === targetDateKey
   ) {
     return openclawVersionDetailCache.payload;
   }
@@ -123,7 +124,7 @@ async function loadOpenclawLatestVersionMap() {
   const versionByIp = new Map();
   const stream = fs.createReadStream(csvPath, "utf8");
   const rl = readline.createInterface({ input: stream, crlfDelay: Infinity });
-  let latestDateKey = "";
+  let matchedDateKey = "";
   let headerParsed = false;
   let scanDateIndex = -1;
   let ipIndex = -1;
@@ -150,23 +151,23 @@ async function loadOpenclawLatestVersionMap() {
     const ip = String(cells[ipIndex] || "").trim();
     const version = String(cells[versionIndex] || "").trim() || "unknown";
     if (!scanDate || !ip) continue;
+    if (targetDateKey && scanDate > targetDateKey) continue;
 
-    if (scanDate > latestDateKey) {
-      latestDateKey = scanDate;
-      versionByIp.clear();
-      versionByIp.set(ip, version);
-      continue;
+    const current = versionByIp.get(ip);
+    if (!current || scanDate >= current.scanDate) {
+      versionByIp.set(ip, { version, scanDate });
     }
-
-    if (scanDate === latestDateKey) {
-      versionByIp.set(ip, version);
+    if (scanDate > matchedDateKey) {
+      matchedDateKey = scanDate;
     }
   }
 
-  const payload = { latestDateKey, versionByIp };
+  const flattened = new Map(Array.from(versionByIp.entries()).map(([ip, item]) => [ip, item.version]));
+  const payload = { matchedDateKey, versionByIp: flattened };
   openclawVersionDetailCache = {
     path: csvPath,
     mtimeMs: stat.mtimeMs,
+    targetDateKey,
     payload,
   };
   return payload;
@@ -1107,14 +1108,11 @@ export async function getExposureList(query = {}) {
   const rawRows = await prisma.exposureRecord.findMany(queryOptions);
   let latestVersionLookup = null;
   if (productKey === DEFAULT_CLAW_EXPOSURE_PRODUCT_KEY) {
-    latestVersionLookup = await loadOpenclawLatestVersionMap();
+    latestVersionLookup = await loadOpenclawVersionMapForDate(latest.dateKey);
   }
   const rows = await Promise.all(
     rawRows.map((row) => {
-      const version =
-        latestVersionLookup?.latestDateKey === latest.dateKey
-          ? latestVersionLookup.versionByIp.get(row.ip) || row.version
-          : row.version;
+      const version = latestVersionLookup?.versionByIp.get(row.ip) || row.version;
       return toResponseRow({ ...row, version }, latest.dateKey, isLoggedIn);
     })
   );

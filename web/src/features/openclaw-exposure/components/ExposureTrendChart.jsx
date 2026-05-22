@@ -21,7 +21,7 @@ export default function ExposureTrendChart({ data, loading }) {
       chart.showLoading({
         text: "加载中...",
         color: "rgb(126, 12, 110)",
-        maskColor: "rgba(248,244,248,0.86)",
+        maskColor: "rgba(248, 244, 248, 0.86)",
       });
       return undefined;
     }
@@ -29,18 +29,20 @@ export default function ExposureTrendChart({ data, loading }) {
     chart.hideLoading();
 
     const { dates = [], daily = [], cumulative = [], newAdded = [] } = data;
+    const labelInterval = dates.length > 8 ? Math.ceil(dates.length / 8) - 1 : 0;
 
     chart.setOption(
       {
         backgroundColor: "transparent",
-        grid: { top: 48, right: 24, bottom: 56, left: 64 },
+        grid: { top: 56, right: 24, bottom: 56, left: 64 },
         legend: {
-          top: 8,
-          right: 16,
+          top: 10,
+          right: 72,
           data: SERIES_LABELS,
-          textStyle: { color: "#6b5f70", fontSize: 12 },
+          textStyle: { color: "#6b5f70", fontSize: 11 },
           itemWidth: 20,
           itemHeight: 3,
+          itemGap: 10,
         },
         tooltip: {
           trigger: "axis",
@@ -66,7 +68,7 @@ export default function ExposureTrendChart({ data, loading }) {
           axisLabel: {
             color: "#7f7284",
             fontSize: 11,
-            interval: Math.floor(dates.length / 8),
+            interval: labelInterval,
           },
         },
         yAxis: [
@@ -106,8 +108,8 @@ export default function ExposureTrendChart({ data, loading }) {
                 x2: 0,
                 y2: 1,
                 colorStops: [
-                  { offset: 0, color: "rgba(126,12,110,0.15)" },
-                  { offset: 1, color: "rgba(126,12,110,0)" },
+                  { offset: 0, color: "rgba(126, 12, 110, 0.15)" },
+                  { offset: 1, color: "rgba(126, 12, 110, 0)" },
                 ],
               },
             },
