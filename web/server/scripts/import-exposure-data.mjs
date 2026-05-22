@@ -2,6 +2,7 @@ import "dotenv/config";
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import readline from "node:readline";
 import maxmind from "maxmind";
 import * as geolite2 from "geolite2-redist";
 import { PrismaClient } from "../../generated/prisma/index.js";
@@ -14,6 +15,11 @@ const projectRoot = path.resolve(__dirname, "../..");
 
 const snapshotPattern = /^server_clawdbot_(\d{8})_ip_18789_alive\.txt$/;
 const batchSize = Number(process.env.EXPOSURE_IMPORT_BATCH_SIZE || 1000);
+const VERSION_CSV_HEADER = {
+  scanDate: "scan_date",
+  ip: "ip",
+  version: "pkg_date",
+};
 
 const defaults = {
   productKey: "openclaw",
@@ -31,6 +37,140 @@ function dateToKey(dateValue) {
   const m = String(date.getUTCMonth() + 1).padStart(2, "0");
   const d = String(date.getUTCDate()).padStart(2, "0");
   return `${y}-${m}-${d}`;
+}
+
+function normalizeCompactDate(value) {
+  const digits = String(value || "").replace(/\D/g, "");
+  return digits.length === 8 ? digits : "";
+}
+
+function parseCsvLine(line) {
+  const values = [];
+  let current = "";
+  let inQuotes = false;
+
+  for (let index = 0; index < line.length; index += 1) {
+    const char = line[index];
+    if (char === "\"") {
+      if (inQuotes && line[index + 1] === "\"") {
+        current += "\"";
+        index += 1;
+      } else {
+        inQuotes = !inQuotes;
+      }
+      continue;
+    }
+    if (char === "," && !inQuotes) {
+      values.push(current);
+      current = "";
+      continue;
+    }
+    current += char;
+  }
+
+  values.push(current);
+  return values.map((value) => String(value || "").trim());
+}
+
+async function detectLatestScanDate(versionCsvPath) {
+  const stream = fs.createReadStream(versionCsvPath, "utf8");
+  const rl = readline.createInterface({ input: stream, crlfDelay: Infinity });
+  let latestDate = "";
+  let scanDateIndex = -1;
+
+  for await (const rawLine of rl) {
+    const line = String(rawLine || "").trim();
+    if (!line) continue;
+
+    if (scanDateIndex < 0) {
+      const headers = parseCsvLine(line).map((header) => header.toLowerCase());
+      scanDateIndex = headers.indexOf(VERSION_CSV_HEADER.scanDate);
+      if (scanDateIndex < 0) {
+        throw new Error(`Version CSV missing required header: ${VERSION_CSV_HEADER.scanDate}`);
+      }
+      continue;
+    }
+
+    const cells = parseCsvLine(line);
+    const scanDate = normalizeCompactDate(cells[scanDateIndex]);
+    if (scanDate && scanDate > latestDate) {
+      latestDate = scanDate;
+    }
+  }
+
+  return latestDate;
+}
+
+async function loadVersionData() {
+  const versionCsvPath = readFirstExistingPath([
+    process.env.EXPOSURE_VERSION_CSV,
+    path.join(projectRoot, "..", "data", "ip_day_version.csv", "ip_day_version.csv"),
+    path.join(projectRoot, "..", "data", "ip_day_version.csv"),
+    path.join(projectRoot, "data", "ip_day_version.csv"),
+  ]);
+
+  if (!versionCsvPath) {
+    console.warn("[import] Version CSV not found, versions will fallback to unknown.");
+    return {
+      rowsByDate: new Map(),
+      sourcePath: null,
+    };
+  }
+
+  const targetDate = normalizeCompactDate(process.env.EXPOSURE_IMPORT_DATE) || (await detectLatestScanDate(versionCsvPath));
+  if (!targetDate) {
+    console.warn(`[import] Version CSV is empty: ${path.relative(projectRoot, versionCsvPath)}`);
+    return {
+      rowsByDate: new Map(),
+      sourcePath: versionCsvPath,
+    };
+  }
+
+  const rowsByDate = new Map();
+  const targetRows = new Map();
+  const stream = fs.createReadStream(versionCsvPath, "utf8");
+  const rl = readline.createInterface({ input: stream, crlfDelay: Infinity });
+  let scanDateIndex = -1;
+  let ipIndex = -1;
+  let versionIndex = -1;
+
+  for await (const rawLine of rl) {
+    const line = String(rawLine || "").trim();
+    if (!line) continue;
+
+    if (scanDateIndex < 0) {
+      const headers = parseCsvLine(line).map((header) => header.toLowerCase());
+      scanDateIndex = headers.indexOf(VERSION_CSV_HEADER.scanDate);
+      ipIndex = headers.indexOf(VERSION_CSV_HEADER.ip);
+      versionIndex = headers.indexOf(VERSION_CSV_HEADER.version);
+
+      if (scanDateIndex < 0 || ipIndex < 0 || versionIndex < 0) {
+        throw new Error(
+          `Version CSV missing required headers. Expected: ${VERSION_CSV_HEADER.scanDate}, ${VERSION_CSV_HEADER.ip}, ${VERSION_CSV_HEADER.version}`
+        );
+      }
+      continue;
+    }
+
+    const cells = parseCsvLine(line);
+    const scanDate = normalizeCompactDate(cells[scanDateIndex]);
+    if (scanDate !== targetDate) continue;
+
+    const ip = String(cells[ipIndex] || "").trim();
+    const version = String(cells[versionIndex] || "").trim();
+    if (!ip) continue;
+    targetRows.set(ip, version || defaults.version);
+  }
+
+  rowsByDate.set(targetDate, targetRows);
+
+  console.log(
+    `[import] Loaded version CSV: ${path.relative(projectRoot, versionCsvPath)} (target_date=${targetDate}, rows=${targetRows.size})`
+  );
+  return {
+    rowsByDate,
+    sourcePath: versionCsvPath,
+  };
 }
 
 function readFirstExistingPath(candidates) {
@@ -136,10 +276,6 @@ async function main() {
     ? path.resolve(process.env.EXPOSURE_DATA_DIR)
     : path.join(projectRoot, "clawdbot_alive");
 
-  if (!fs.existsSync(snapshotsDir)) {
-    throw new Error(`Snapshots directory not found: ${snapshotsDir}`);
-  }
-
   const cityDbCandidates = [
     process.env.GEOLITE2_CITY_DB,
     path.join(projectRoot, "geoip", "GeoLite2-City.mmdb"),
@@ -158,22 +294,39 @@ async function main() {
 
   const { reader: cityReader } = await openReader("GeoLite2-City", cityDbCandidates, "GeoLite2-City");
   const { reader: asnReader } = await openReader("GeoLite2-ASN", asnDbCandidates, "GeoLite2-ASN");
+  const { rowsByDate, sourcePath: versionCsvPath } = await loadVersionData();
 
-  const files = fs
-    .readdirSync(snapshotsDir, { withFileTypes: true })
-    .filter((entry) => entry.isFile() && snapshotPattern.test(entry.name))
-    .map((entry) => {
-      const match = entry.name.match(snapshotPattern);
-      return {
-        path: path.join(snapshotsDir, entry.name),
-        name: entry.name,
-        dateKey: match[1],
-      };
-    })
-    .sort((a, b) => a.dateKey.localeCompare(b.dateKey));
+  const files = fs.existsSync(snapshotsDir)
+    ? fs
+        .readdirSync(snapshotsDir, { withFileTypes: true })
+        .filter((entry) => entry.isFile() && snapshotPattern.test(entry.name))
+        .map((entry) => {
+          const match = entry.name.match(snapshotPattern);
+          return {
+            path: path.join(snapshotsDir, entry.name),
+            name: entry.name,
+            dateKey: match[1],
+            ips: null,
+          };
+        })
+        .sort((a, b) => a.dateKey.localeCompare(b.dateKey))
+    : [];
 
-  if (!files.length) {
-    throw new Error(`No snapshot files matched in ${snapshotsDir}`);
+  const snapshotSources = files.length
+    ? files
+    : Array.from(rowsByDate.entries())
+        .sort((a, b) => a[0].localeCompare(b[0]))
+        .map(([dateKey, ipMap]) => ({
+          path: null,
+          name: path.basename(versionCsvPath || "ip_day_version.csv"),
+          dateKey,
+          ips: Array.from(ipMap.keys()).sort((left, right) => left.localeCompare(right)),
+        }));
+
+  if (!snapshotSources.length) {
+    throw new Error(
+      `No exposure source data found. Checked snapshotsDir=${snapshotsDir} and versionCsv=${versionCsvPath || "missing"}`
+    );
   }
 
   await prisma.exposureVersionDailyAgg.deleteMany({ where: { productKey: defaults.productKey } });
@@ -182,44 +335,47 @@ async function main() {
   const seenIps = new Set();
   let totalInserted = 0;
 
-  for (const file of files) {
-    const snapshotDate = parseDateKey(file.dateKey);
+  for (const source of snapshotSources) {
+    const snapshotDate = parseDateKey(source.dateKey);
 
     const snapshot = await prisma.exposureSnapshot.upsert({
       where: {
         productKey_dateKey: {
           productKey: defaults.productKey,
-          dateKey: file.dateKey,
+          dateKey: source.dateKey,
         },
       },
       update: {
         productKey: defaults.productKey,
         snapshotDate,
-        sourceFile: file.name,
+        sourceFile: source.name,
       },
       create: {
         productKey: defaults.productKey,
-        dateKey: file.dateKey,
+        dateKey: source.dateKey,
         snapshotDate,
-        sourceFile: file.name,
+        sourceFile: source.name,
       },
     });
 
     await prisma.exposureRecord.deleteMany({ where: { snapshotId: snapshot.id } });
 
-    const ips = Array.from(
-      new Set(
-        fs
-          .readFileSync(file.path, "utf8")
-          .split(/\r?\n/)
-          .map((line) => line.trim())
-          .filter((line) => /^\d{1,3}(?:\.\d{1,3}){3}$/.test(line))
-      )
-    );
+    const ips = source.ips
+      ? source.ips
+      : Array.from(
+          new Set(
+            fs
+              .readFileSync(source.path, "utf8")
+              .split(/\r?\n/)
+              .map((line) => line.trim())
+              .filter((line) => /^\d{1,3}(?:\.\d{1,3}){3}$/.test(line))
+          )
+        );
 
     const rows = ips.map((ip) => {
       const geo = resolveGeo(ip, cityReader);
       const asn = resolveAsn(ip, asnReader);
+      const version = rowsByDate.get(source.dateKey)?.get(ip) || defaults.version;
 
       return {
         snapshotId: snapshot.id,
@@ -239,7 +395,7 @@ async function main() {
         serviceDesc: defaults.serviceDesc,
         status: defaults.status,
         scope: geo.scope,
-        version: defaults.version,
+        version,
         risk: defaults.risk,
         lastSeen: snapshotDate,
       };
@@ -312,14 +468,14 @@ async function main() {
 
     totalInserted += rows.length;
     console.log(
-      `[import] ${file.name}: rows=${rows.length}, new=${newDistinctIpCount}, cumulative=${cumulativeDistinctIpCount}, date=${dateToKey(snapshotDate)}`
+      `[import] ${source.name}: rows=${rows.length}, new=${newDistinctIpCount}, cumulative=${cumulativeDistinctIpCount}, date=${dateToKey(snapshotDate)}`
     );
   }
 
   cityReader?.close?.();
   asnReader?.close?.();
 
-  console.log(`[import] Done. snapshots=${files.length}, rows=${totalInserted}`);
+  console.log(`[import] Done. snapshots=${snapshotSources.length}, rows=${totalInserted}`);
 }
 
 main()
