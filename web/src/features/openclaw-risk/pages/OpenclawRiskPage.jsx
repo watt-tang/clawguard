@@ -35,6 +35,24 @@ function formatDate(value) {
   return String(value).replace("T", " ").slice(0, 16);
 }
 
+function formatSnapshotStatus(value) {
+  const normalized = String(value || "").toLowerCase();
+  if (normalized === "completed") return "已完成";
+  if (normalized === "running") return "运行中";
+  if (normalized === "failed" || normalized === "error") return "失败";
+  if (normalized === "pending") return "等待中";
+  return normalized || "-";
+}
+
+function formatRefreshStatus(value) {
+  const normalized = String(value || "").toLowerCase();
+  if (normalized === "ok") return "正常";
+  if (normalized === "running") return "运行中";
+  if (normalized === "error") return "异常";
+  if (normalized === "idle") return "空闲";
+  return normalized || "-";
+}
+
 function RiskBadge({ tone = "neutral", children }) {
   return <span className={`risk-badge risk-badge-${tone}`}>{children}</span>;
 }
@@ -385,6 +403,9 @@ export default function OpenclawRiskPage() {
   const sourceMeta = overview?.sourceMeta;
   const scheduler = sourceMeta?.scheduler;
   const storage = sourceMeta?.storage;
+  const snapshotStatus = formatSnapshotStatus(storage?.status);
+  const refreshStatus = formatRefreshStatus(scheduler?.status);
+  const snapshotCompletedAt = storage?.createdAt || scheduler?.lastCompletedAt;
   const breakdowns = useMemo(() => {
     const critical = overview?.breakdowns?.severity?.critical ?? totals?.criticalCount ?? 0;
     const high =
@@ -487,8 +508,8 @@ export default function OpenclawRiskPage() {
               <strong>{overview?.latestStable?.tagName || "-"}</strong>
             </div>
             <div className="risk-signal-card">
-              <span>刷新状态</span>
-              <strong>{scheduler?.status || "idle"}</strong>
+              <span>快照状态</span>
+              <strong>{snapshotStatus}</strong>
             </div>
             <div className="risk-signal-card">
               <span>GitHub</span>
@@ -510,6 +531,9 @@ export default function OpenclawRiskPage() {
             <div className="risk-overview-highlight">{storage?.snapshotKey || "-"}</div>
             <div className="risk-overview-meta is-stack">
               <span>快照 ID：{storage?.snapshotId ?? "-"}</span>
+              <span>快照状态：{snapshotStatus}</span>
+              <span>生成时间：{formatDate(snapshotCompletedAt)}</span>
+              <span>触发来源：{storage?.triggerSource || "-"}</span>
               <span>缓存目录：{storage?.cacheDir || storage?.cacheRoot || "-"}</span>
             </div>
           </div>
@@ -526,9 +550,9 @@ export default function OpenclawRiskPage() {
 
           <div className="risk-overview-card">
             <div className="risk-overview-title">调度器与来源</div>
-            <div className="risk-overview-meta is-stack">
-              <span>调度状态：{scheduler?.status || "idle"}</span>
-              <span>最近完成：{formatDate(scheduler?.lastCompletedAt)}</span>
+            <div className="risk-overview-meta is-stack">              <span>刷新任务：{refreshStatus}</span>
+              <span>最近完成：{formatDate(snapshotCompletedAt)}</span>
+              {scheduler?.lastError ? <span>最近错误：{scheduler.lastError}</span> : null}
               <span>GitHub：{sourceMeta?.github?.ok ? "正常" : sourceMeta?.github?.error || "异常"}</span>
               <span>NVD：{sourceMeta?.nvd?.ok ? "正常" : sourceMeta?.nvd?.error || "异常"}</span>
             </div>

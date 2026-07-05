@@ -956,7 +956,7 @@ async function getStoredOverview() {
         github: { ok: false, error: "", rawCount: 0 },
         nvd: { ok: false, error: "", rawCount: 0 },
         scheduler: { intervalMs: WEEKLY_REFRESH_MS, intervalDays: Number((WEEKLY_REFRESH_MS / 86400000).toFixed(2)), ...latestRefreshState },
-        storage: { cacheRoot, snapshotId: null, snapshotKey: "" },
+        storage: { cacheRoot, snapshotId: null, snapshotKey: "", status: "", createdAt: "", triggerSource: "" },
       },
     };
   }
@@ -1023,7 +1023,15 @@ async function getStoredOverview() {
         lastCompletedAt: latestRefreshState.lastCompletedAt || snapshot.createdAt.toISOString(),
         lastError: latestRefreshState.lastError,
       },
-      storage: { cacheRoot, snapshotId: snapshot.id, snapshotKey: snapshot.snapshotKey, cacheDir: snapshot.cacheDir || "" },
+      storage: {
+        cacheRoot,
+        snapshotId: snapshot.id,
+        snapshotKey: snapshot.snapshotKey,
+        cacheDir: snapshot.cacheDir || "",
+        status: snapshot.status || "",
+        createdAt: snapshot.createdAt?.toISOString() || "",
+        triggerSource: snapshot.triggerSource || "",
+      },
     },
   };
 
@@ -1033,7 +1041,13 @@ async function getStoredOverview() {
 async function getStoredIssues(query = {}) {
   const snapshot = await ensureLatestSnapshotAvailable({ allowRefresh: true });
   if (!snapshot) {
-    return { total: 0, page: 1, page_size: 20, rows: [], sourceMeta: { scheduler: latestRefreshState, storage: { cacheRoot } } };
+    return {
+      total: 0,
+      page: 1,
+      page_size: 20,
+      rows: [],
+      sourceMeta: { scheduler: latestRefreshState, storage: { cacheRoot, status: "", createdAt: "", triggerSource: "" } },
+    };
   }
 
   const page = Math.max(1, Number(query.page || 1));
@@ -1077,7 +1091,15 @@ async function getStoredIssues(query = {}) {
         lastCompletedAt: latestRefreshState.lastCompletedAt || snapshot.createdAt.toISOString(),
         lastError: latestRefreshState.lastError,
       },
-      storage: { cacheRoot, snapshotId: snapshot.id, snapshotKey: snapshot.snapshotKey, cacheDir: snapshot.cacheDir || "" },
+      storage: {
+        cacheRoot,
+        snapshotId: snapshot.id,
+        snapshotKey: snapshot.snapshotKey,
+        cacheDir: snapshot.cacheDir || "",
+        status: snapshot.status || "",
+        createdAt: snapshot.createdAt?.toISOString() || "",
+        triggerSource: snapshot.triggerSource || "",
+      },
     },
   };
 }

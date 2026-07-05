@@ -12,7 +12,7 @@ export const CLAW_EXPOSURE_PRODUCTS = [
     port: "18789",
     service: "18789 / OpenClaw",
     serviceDesc: "OpenClaw service",
-    riskLabel: "待补充",
+    riskLabel: "持续更新",
     riskTone: "review",
     isDefault: true,
   },

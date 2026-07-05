@@ -33,42 +33,8 @@ const DOMESTIC_IP_PREFIXES = new Set([
 ]);
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const projectRoot = path.resolve(__dirname, "../..");
-const OPENCLAW_VERSION_TREND_CSV = process.env.OPENCLAW_VERSION_TREND_CSV || "/root/clawguard/data/C2_daily_version_alive.csv";
 const OPENCLAW_VERSION_DETAIL_CSV = process.env.EXPOSURE_VERSION_CSV || "/root/clawguard/data/ip_day_version.csv";
 let openclawVersionDetailCache = null;
-
-function normalizeCsvDateLabel(value) {
-  const raw = String(value || "").trim();
-  const match = raw.match(/^(\d{4})[./-](\d{1,2})[./-](\d{1,2})$/);
-  if (!match) return raw;
-  const [, y, m, d] = match;
-  return `${y}-${m.padStart(2, "0")}-${d.padStart(2, "0")}`;
-}
-
-function parseOpenclawVersionTrendCsv(csvText) {
-  const lines = String(csvText || "")
-    .split(/\r?\n/)
-    .map((line) => line.trim())
-    .filter(Boolean);
-  if (lines.length < 2) return { dates: [], versions: {} };
-
-  const headers = lines[0].split(",").map((cell) => cell.trim());
-  const versionNames = headers.slice(1).map(normalizeCsvDateLabel);
-  const dates = [];
-  const versions = Object.fromEntries(versionNames.map((name) => [name, []]));
-
-  for (let rowIndex = 1; rowIndex < lines.length; rowIndex += 1) {
-    const cells = lines[rowIndex].split(",").map((cell) => cell.trim());
-    if (cells.length < 2) continue;
-    dates.push(normalizeCsvDateLabel(cells[0]));
-    versionNames.forEach((version, idx) => {
-      const value = Number(cells[idx + 1] || 0);
-      versions[version].push(Number.isFinite(value) ? value : 0);
-    });
-  }
-
-  return { dates, versions };
-}
 
 function parseSimpleCsvLine(line) {
   const values = [];
@@ -171,6 +137,64 @@ async function loadOpenclawVersionMapForDate(targetDateKey) {
     payload,
   };
   return payload;
+}
+
+async function loadOpenclawVersionTrendFromDetailCsv() {
+  const csvPath = path.resolve(OPENCLAW_VERSION_DETAIL_CSV);
+  if (!fs.existsSync(csvPath)) {
+    return { dates: [], versions: {} };
+  }
+
+  const dates = [];
+  const dateIndexMap = new Map();
+  const versions = {};
+  const stream = fs.createReadStream(csvPath, "utf8");
+  const rl = readline.createInterface({ input: stream, crlfDelay: Infinity });
+  let headerParsed = false;
+  let scanDateIndex = -1;
+  let versionIndex = -1;
+
+  for await (const rawLine of rl) {
+    const line = String(rawLine || "").trim();
+    if (!line) continue;
+
+    if (!headerParsed) {
+      const headers = parseSimpleCsvLine(line).map((header) => header.toLowerCase());
+      scanDateIndex = headers.indexOf("scan_date");
+      versionIndex = headers.indexOf("pkg_date");
+      headerParsed = true;
+      if (scanDateIndex < 0 || versionIndex < 0) {
+        throw new Error("OpenClaw version CSV missing required headers: scan_date, pkg_date");
+      }
+      continue;
+    }
+
+    const cells = parseSimpleCsvLine(line);
+    const scanDateKey = normalizeCompactDate(cells[scanDateIndex]);
+    if (!scanDateKey) continue;
+
+    const versionName = String(cells[versionIndex] || "").trim() || "unknown";
+    const formattedDate = `${scanDateKey.slice(0, 4)}-${scanDateKey.slice(4, 6)}-${scanDateKey.slice(6, 8)}`;
+
+    let dateIndex = dateIndexMap.get(formattedDate);
+    if (dateIndex === undefined) {
+      dateIndex = dates.length;
+      dates.push(formattedDate);
+      dateIndexMap.set(formattedDate, dateIndex);
+
+      for (const counts of Object.values(versions)) {
+        counts.push(0);
+      }
+    }
+
+    if (!versions[versionName]) {
+      versions[versionName] = Array.from({ length: dates.length }, () => 0);
+    }
+
+    versions[versionName][dateIndex] += 1;
+  }
+
+  return { dates, versions };
 }
 
 function normalizeChinaDivisionName(name) {
@@ -960,9 +984,9 @@ export async function getVersionTrend(query = {}) {
   const productKey = normalizeExposureProductKey(query);
   if (productKey === DEFAULT_CLAW_EXPOSURE_PRODUCT_KEY) {
     try {
-      if (fs.existsSync(OPENCLAW_VERSION_TREND_CSV)) {
-        const csvText = await fs.promises.readFile(OPENCLAW_VERSION_TREND_CSV, "utf8");
-        return parseOpenclawVersionTrendCsv(csvText);
+      const csvTrend = await loadOpenclawVersionTrendFromDetailCsv();
+      if (csvTrend.dates.length) {
+        return csvTrend;
       }
     } catch {
       // Fall through to DB-backed trend if CSV is unavailable or invalid.
