@@ -1,5 +1,7 @@
 # ClawGuard
 
+[English](./README.md) | [简体中文](./README-zh-CN.md)
+
 ClawGuard is a full-stack security governance platform for the Claw, OpenClaw, and Skill ecosystem. It combines internet exposure monitoring, vulnerability tracking, security research aggregation, Skill static analysis, and dynamic sandbox assessment in one repository.
 
 ## What It Does
@@ -211,10 +213,4 @@ Commit only source code, configuration, documentation, and required scripts or m
 - Database dumps unless explicitly required
 - Build output, dependency directories, temporary files, scanner output, exported CSV files, or logs
 
-## Related Docs
 
-- `DEPLOYMENT.md`: Docker deployment details
-- `Doc/???????.md`: Architecture and technology overview
-- `Doc/??????.md`: Exposure monitoring API notes
-- `Doc/????.md`: Frontend data requirements
-- `db/README.md`: Database bootstrap notes
